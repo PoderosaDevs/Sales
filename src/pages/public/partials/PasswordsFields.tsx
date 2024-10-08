@@ -1,3 +1,4 @@
+// PasswordFields.js
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -60,8 +61,7 @@ const PasswordFields = ({ register, errors }) => {
         <div className="mt-2">
           <div className="h-2 bg-gray-300 rounded">
             <div
-              className={`h-full ${
-                passwordStrength === 1 ? 'bg-red-500' :
+              className={`h-full ${passwordStrength === 1 ? 'bg-red-500' :
                 passwordStrength === 2 ? 'bg-yellow-500' :
                 passwordStrength === 3 ? 'bg-blue-500' : 'bg-green-500'
               } rounded`}

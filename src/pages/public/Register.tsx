@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MutationSetUsuario } from "../../graphql/Usuario/Mutation";
 import PasswordFields from "./partials/PasswordsFields";
@@ -16,7 +16,20 @@ const SetUsuarioFieldsFormSchema = z.object({
 
 function Register() {
   const { register, FormSetUsuario, loading, handleSubmit, errors } = MutationSetUsuario();
-  console.log(errors)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 450);
+    };
+    
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const onSubmit = async (data: any) => {
     try {
       const result = await FormSetUsuario(data);
@@ -39,7 +52,7 @@ function Register() {
   };
 
   return (
-    <div className="bg-white max-w-[500px] rounded-lg mx-auto px-14 py-6 shadow-md w-full">
+    <div className={`bg-white ${isMobile ? 'w-4/5 px-5 py-6' : 'max-w-[500px] px-14 py-6'} rounded-lg mx-auto shadow-md w-full`}>
       <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-2xl text-center font-bold my-6 text-gray-800">
           Criar Conta
@@ -101,7 +114,7 @@ function Register() {
           {errors.cpf && <span className="text-red-500 text-sm">{errors.cpf.message}</span>}
         </div>
 
-        <PasswordFields errors={errors} register={{...register}} />
+        <PasswordFields errors={errors} register={register} />
 
         <button
           type="submit"
