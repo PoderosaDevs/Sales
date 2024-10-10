@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { MutationLogin } from "../../graphql/Usuario/Mutation";
 import { BounceLoader } from "react-spinners";
 
-function LoginComponent() {
+function ForgotPasswordComponent() {
   const { FormLogin, errors, handleSubmit, register, loading, DataLogin } =
     MutationLogin();
 
@@ -44,12 +44,12 @@ function LoginComponent() {
 
   return (
     <div
-      className={`bg-white ${isMobile ? "w-[80%] px-5 py-7" : "max-w-[450px] px-10 py-14"} rounded-lg mx-auto shadow-md w-full`}
+      className={`bg-white ${isMobile ? "w-[80%] px-5 py-0" : "max-w-[450px] px-10 py-8"} rounded-lg mx-auto shadow-md w-full`}
     >
       <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
         <img
           src="https://media.graphassets.com/rCIs5vtxQPueHiCYLZDL"
-          className="max-w-60 m-auto"
+          className="max-w-48 m-auto mb-4"
           alt="Logo"
         />
         <div className="mb-4">
@@ -57,7 +57,7 @@ function LoginComponent() {
             htmlFor="email"
             className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
           >
-            Email
+            Digite seu email
           </label>
           <input
             type="email"
@@ -67,37 +67,17 @@ function LoginComponent() {
             {...register("email")}
           />
         </div>
-        <div className="mb-6">
-          <label
-            htmlFor="password"
-            className="flex justify-between items-center font-bold text-xl text-gray-700 tracking-wide mb-2"
-          >
-            Senha
-            <Link
-              to="/forgot-password"
-              className="text-blue-500 text-sm hover:underline"
-            >
-              Esqueceu sua senha?
-            </Link>
-          </label>
-          <input
-            type="password"
-            id="password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Digite sua senha"
-            {...register("senha")}
-          />
-        </div>
+      
         <button
           type="submit"
-          className="w-full outline-none bg-custom-gradient text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full outline-none bg-custom-gradient text-base font-semibold tracking-wide text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {loading ? <BounceLoader color="#ffffff" size={36} /> : "Entrar"}
+          {loading ? <BounceLoader color="#ffffff" size={36} /> : "Enviar Código"}
         </button>
         <span className="block text-center font-semibold mt-7 text-gray-600 text-md">
-          Novo aqui?{" "}
-          <Link to="/register" className="text-blue-500 font-bold hover:underline">
-            Criar uma Conta
+          Possui uma conta?{" "}
+          <Link to="/" className="text-blue-500 font-bold hover:underline">
+            Faça Login
           </Link>
         </span>
       </form>
@@ -105,4 +85,4 @@ function LoginComponent() {
   );
 }
 
-export default LoginComponent;
+export default ForgotPasswordComponent;

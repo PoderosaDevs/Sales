@@ -52,7 +52,7 @@ function Register() {
   };
 
   return (
-    <div className={`bg-white ${isMobile ? 'w-4/5 px-5 py-6' : 'max-w-[500px] px-14 py-6'} rounded-lg mx-auto shadow-md w-full`}>
+    <div className={`bg-white ${isMobile ? 'w-[80%] px-5 py-3' : 'max-w-[500px] px-14 py-6'} rounded-lg mx-auto shadow-md w-full`}>
       <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-2xl text-center font-bold my-6 text-gray-800">
           Criar Conta
