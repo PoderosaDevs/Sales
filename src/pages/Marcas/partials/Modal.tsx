@@ -8,8 +8,9 @@ import {
 } from "phosphor-react";
 import { SetMarcaFieldsFormInputs } from "../../../graphql/Marca/Validations";
 import { FiPlusSquare } from "react-icons/fi";
-import {QueryGetProdutos} from "../../../graphql/Produto/Query"
-import { MutationSetMeta } from "../../../graphql/Marca/Mutation";
+import { QueryGetProdutos } from "../../../graphql/Produto/Query"
+import { MutationSetMeta, SetMarcaType } from "../../../graphql/Marca/Mutation";
+import SelectProdutos from "../../../components/selects/SelectProdutos";
 export function MarcaModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1); // Controle da etapa
@@ -24,7 +25,7 @@ export function MarcaModal() {
   } = MutationSetMeta();
 
   const paginacao = { pagina: 1, quantidade: 10 };
-  const { data, loading: loadingProdutos , error } = QueryGetProdutos({
+  const { data, loading: loadingProdutos, error } = QueryGetProdutos({
     variables: {
       pagination: {
         pagina: paginacao.pagina,
@@ -42,7 +43,7 @@ export function MarcaModal() {
     setStep((prevStep) => prevStep - 1);
   };
 
-  const handleProductSubmit = async (data: SetMarcaFieldsFormInputs) => {
+  const handleProductSubmit = async (data: SetMarcaType) => {
     try {
       Swal.fire({
         title: "Enviando...",
@@ -54,8 +55,7 @@ export function MarcaModal() {
           Swal.showLoading();
         },
       });
-
-      await FormSetMarca(data);
+      await FormSetMarca(data.nome);
       reset();
       setIsOpen(false);
       Swal.fire({
@@ -107,87 +107,29 @@ export function MarcaModal() {
               onSubmit={handleSubmit(handleProductSubmit)}
               className="space-y-6"
             >
-              {step === 1 && (
-                <>
-                  <div className="flex items-center space-x-4">
-                    <PencilSimpleIcon size={24} className="text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Nome da Marca"
-                      {...register("stepOne.nome")}
-                      className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
-                    />
-                    {errors.stepOne?.nome && (
-                      <p className="text-red-500 text-sm">
-                        {errors.stepOne.nome.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <ImageIcon size={24} className="text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="URL da Imagem da Marca"
-                      {...register("stepOne.imagem")}
-                      className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
-                    />
-                    {errors.stepOne?.imagem && (
-                      <p className="text-red-500 text-sm">
-                        {errors.stepOne.imagem.message}
-                      </p>
-                    )}
-                  </div>
+              <>
+                <div className="flex items-center ">
+                  <input
+                    type="text"
+                    placeholder="Nome da Marca"
+                    {...register("nome")}
+                    className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
+                  />
+                  <p className="text-red-500 text-sm">
+                    {errors.nome?.message}
+                  </p>
+                </div>
 
-                  <div className="w-full flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleNextStep}
-                      className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-200"
-                    >
-                      Próximo
-                    </button>
-                  </div>
-                </>
-              )}
+                <div className="w-full flex justify-end">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-200"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </>
 
-              {step === 2 && (
-                <>
-                  <h2 className="text-lg font-semibold mb-4">
-                    Produtos Associados
-                  </h2>
-                  <div className="flex items-center space-x-4">
-                    <PencilSimpleIcon size={24} className="text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Nome do Produto"
-                      {...register("stepOne.nome")}
-                      className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
-                    />
-                    {errors.stepOne?.nome && (
-                      <p className="text-red-500 text-sm">
-                        {errors.stepOne.nome.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="w-full flex justify-between">
-                    <button
-                      type="button"
-                      onClick={handlePreviousStep}
-                      className="px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition duration-200"
-                    >
-                      Voltar
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-4 py-2 bg-green-500 text-white font-bold rounded-lg disabled:opacity-60 disabled:cursor-not-allowed hover:bg-green-600 transition duration-200"
-                    >
-                      Salvar
-                    </button>
-                  </div>
-                </>
-              )}
             </form>
           </Dialog.Content>
         </div>

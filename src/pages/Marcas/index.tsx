@@ -58,8 +58,8 @@ export default function Marcas() {
               {loading
                 ? "Carregando marcas..."
                 : error
-                ? "Erro ao carregar marcas"
-                : `${data?.GetMarcas.length} marcas disponíveis.`}
+                  ? "Erro ao carregar marcas"
+                  : `${data?.GetMarcas.length} marcas disponíveis.`}
             </span>
           </h3>
 
@@ -76,7 +76,7 @@ export default function Marcas() {
                       <th className="p-0 min-w-36 text-left text-gray-700 py-3">
                         Nome da Marca
                       </th>
-                      <th className="p-0 min-w-36 text-gray-700 text-center py-3">
+                      <th className="p-0 min-w-36 text-gray-700 text-left py-3">
                         Produtos
                       </th>
                       <th className="p-0 min-w-28 justify-end flex py-3">
@@ -108,18 +108,17 @@ export default function Marcas() {
                             </td>
                             <td className="text-center py-2">
                               <button
-                                className="bg-blue-100 text-blue-600 p-4 rounded-xl hover:bg-blue-200"
+                                className={`bg-blue-100 text-blue-600 px-3 text-sm py-2 flex items-center justify-center space-x-2 rounded-xl hover:bg-blue-200 `}
                                 onClick={() => toggleExpand(marca.id)}
                               >
                                 {expandedMarca === marca.id ? (
-                                  <>
-                                    <FaCaretUp size={18} /> Ocultar Produtos
-                                  </>
+                                  <FaCaretUp size={18} />
                                 ) : (
-                                  <>
-                                    <FaCaretDown size={18} /> Exibir Produtos
-                                  </>
+                                  <FaCaretDown size={18} />
                                 )}
+                                <span>
+                                  {expandedMarca === marca.id ? "Ocultar Produtos" : "Exibir Produtos"}
+                                </span>
                               </button>
                             </td>
                             <td className="text-right py-2">
@@ -139,17 +138,22 @@ export default function Marcas() {
                           {expandedMarca === marca.id && (
                             <tr>
                               <td colSpan={3} className="bg-gray-50 p-4">
-                                <h4 className="font-bold text-lg mb-2">
-                                  Produtos Associados
-                                </h4>
-                                <div className="mb-4">
-                                  <input
-                                    type="text"
-                                    value={filterText}
-                                    onChange={handleFilterChange}
-                                    placeholder="Filtrar produtos..."
-                                    className="p-2 border border-gray-300 rounded"
-                                  />
+                                <div className="w-full flex border-b-2 justify-between items-center">
+                                  <h4 className="font-bold text-lg mb-2">
+                                    Produtos Associados
+                                  </h4>
+                                  <div className="mb-4 flex space-x-3">
+                                    <input
+                                      type="text"
+                                      value={filterText}
+                                      onChange={handleFilterChange}
+                                      placeholder="Filtrar produtos..."
+                                      className="p-2 border border-gray-300 rounded"
+                                    />
+                                    <button className="bg-gray-900 text-white py-3 px-2 rounded-xl text-sm">
+                                      Associar novos produtos
+                                    </button>
+                                  </div>
                                 </div>
                                 <table className="min-w-full divide-y divide-gray-200">
                                   <thead>
@@ -160,29 +164,37 @@ export default function Marcas() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {marca.produtos
-                                      .filter((produto) =>
-                                        produto.nome
-                                          .toLowerCase()
-                                          .includes(filterText.toLowerCase())
-                                      )
-                                      .map((produto) => (
-                                        <tr key={produto.id}>
-                                          <td className="p-2">
-                                            {produto.nome}
-                                          </td>
-                                          <td className="p-2">
-                                            {produto.codigo}
-                                          </td>
-                                          <td className="p-2">
-                                            <img
-                                              src={produto.imagem}
-                                              alt={produto.nome}
-                                              className="w-12 h-12 rounded"
-                                            />
-                                          </td>
-                                        </tr>
-                                      ))}
+                                    {marca.produtos && marca.produtos.length > 0 ? (
+                                      marca.produtos
+                                        .filter((produto) =>
+                                          produto.nome
+                                            .toLowerCase()
+                                            .includes(filterText.toLowerCase())
+                                        )
+                                        .map((produto) => (
+                                          <tr key={produto.id}>
+                                            <td className="p-2">
+                                              {produto.nome}
+                                            </td>
+                                            <td className="p-2">
+                                              {produto.codigo}
+                                            </td>
+                                            <td className="p-2">
+                                              <img
+                                                src={produto.imagem}
+                                                alt={produto.nome}
+                                                className="w-12 h-12 rounded"
+                                              />
+                                            </td>
+                                          </tr>
+                                        ))
+                                    ) : (
+                                      <tr>
+                                        <td colSpan={3} className="text-center py-2 text-gray-500">
+                                          Nenhum produto associado.
+                                        </td>
+                                      </tr>
+                                    )}
                                   </tbody>
                                 </table>
                               </td>

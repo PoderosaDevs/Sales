@@ -19,6 +19,15 @@ interface Usuario {
   token_api: string;
   tipo_usuario: string;
   tipo_sistemas: string[];
+  data_nascimento?: Date;
+  funcao?: string;
+  complemento?: string;
+  cpf?: string;
+  endereco?: string;
+  is_whatsapp?: boolean;
+  numero?: string;
+  telefone?: string;
+  cep?: string;
 }
 
 interface AuthContextData {
@@ -44,25 +53,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { decodedToken, isExpired } = useJwt<Usuario>(token || "");
 
   useEffect(() => {
-    if (token && !isExpired) {
-      client.setLink(client.link.concat(authMiddleware)); // Certifique-se de usar o middleware para autenticação
+    // Se não houver token, não faça nada
+    if (!token) {
+      setAuthenticated(false);
+      setUsuarioData(null);
+      return; // Saia do useEffect
+    }
+
+    // Token existe, agora verifique se ele está expirado
+    if (!isExpired) {
+      client.setLink(client.link.concat(authMiddleware)); // Middleware de autenticação
       setAuthenticated(true);
 
       // Definir usuarioData com base nos dados do decodedToken
       if (decodedToken) {
-        const userData = {
+        const userData: Usuario = {
           id: decodedToken.id,
           email: decodedToken.email,
           nome: decodedToken.nome,
           token_api: token,
           tipo_usuario: decodedToken.tipo_usuario,
           tipo_sistemas: decodedToken.tipo_sistemas,
+          funcao: decodedToken.funcao,
+          complemento: decodedToken.complemento,
+          cpf: decodedToken.cpf,
+          endereco: decodedToken.endereco,
+          data_nascimento: decodedToken.data_nascimento,
+          is_whatsapp: decodedToken.is_whatsapp,
+          numero: decodedToken.numero,
+          telefone: decodedToken.telefone,
+          cep: decodedToken.cep,
         };
         setUsuarioData(userData);
       }
-    } else if (token && isExpired) {
-      setAuthenticated(false);
-
+    } else {
       // Exibir Swal quando o token expirar
       Swal.fire({
         icon: "warning",
@@ -75,6 +99,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
     }
   }, [token, isExpired, decodedToken, navigate]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const currentToken = localStorage.getItem("token");
+      const { isExpired } = useJwt<Usuario>(currentToken || "");
+      
+      if (isExpired) {
+        // Exibir Swal quando o token expirar
+        Swal.fire({
+          icon: "warning",
+          title: "Sessão Expirada",
+          text: "Sua sessão expirou. Por favor, faça login novamente.",
+          confirmButtonText: "OK",
+        }).then(() => {
+          localStorage.removeItem("token"); // Remover o token do localStorage
+          navigate("/logout"); // Redirecionar para a página de logout
+        });
+      }
+    }, 1000); // Verifica a expiração a cada segundo
+
+    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ authenticated, usuarioData }}>

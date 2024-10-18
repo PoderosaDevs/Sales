@@ -56,15 +56,17 @@ export function MutationSetUsuario() {
     try {
       return await MutationBody({
         variables: {
-          usuario: {
             data,
-          },
         },
       });
+      
 
     } catch (e) {
-      console.error('Erro na requisição:', e.message);
-      return e.message
+      console.error('Erro na requisição:', e);
+      console.error('Erro na requisição:', e);
+      console.error('Erro na requisição:', e.name);
+
+      return e
     }
   }
 

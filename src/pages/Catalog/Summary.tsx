@@ -118,12 +118,30 @@ export function Summary() {
     };
 
     try {
-      await FormSetVenda(vendaData);
+      const result = await FormSetVenda(vendaData);
+      console.log(result);
+      // Verifica se há erros no result
+      if (result?.errors && result.errors.length > 0) {
+        let errorMessage = result.errors[0]?.message || 'Erro desconhecido.';
+
+        // Verifica se o erro está relacionado ao email já cadastrado
+        if (result.errors[0]?.message === 'Email já cadastrado no sistema!') {
+          errorMessage = 'Esse email já está cadastrado. Tente outro.';
+        }
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro!',
+          text: errorMessage,
+        });
+        return; // Para a execução em caso de erro
+      }
       Swal.fire("Sucesso", "Venda concluída com sucesso!", "success").then(
         () => {
           clearCart(); // Limpar o carrinho quando o Swal é fechado
         }
       );
+
     } catch (error) {
       Swal.fire("Erro", "Ocorreu um erro ao finalizar a venda.", "error").then(
         () => {
@@ -178,16 +196,16 @@ export function Summary() {
         {cartItems.length > 0 ? (
           <div
             className={`${viewMode === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-                : "flex flex-col gap-4 max-h-80"
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+              : "flex flex-col gap-4 max-h-80"
               }`}
           >
             {cartItems.map((item: CartItem) => (
               <div
                 key={item.id}
                 className={`bg-gray-100 rounded-lg shadow-md flex ${viewMode === "grid"
-                    ? "flex-col p-4 max-w-xs mx-auto"
-                    : "items-center p-4"
+                  ? "flex-col p-4 max-w-xs mx-auto"
+                  : "items-center p-4"
                   } ${viewMode === "list" ? "border border-gray-200" : ""}`}
               >
                 {viewMode === "list" ? (

@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MutationSetUsuario } from "../../graphql/Usuario/Mutation";
 import PasswordFields from "./partials/PasswordsFields";
 import Swal from "sweetalert2";
-import { z } from "zod";
-
-// Definição do esquema de validação com Zod
-const SetUsuarioFieldsFormSchema = z.object({
-  nome: z.string().nonempty("Por favor, preencha seu nome completo."),
-  cpf: z.string().length(11, "O CPF deve ter 11 dígitos."),
-  email: z.string().email("Por favor, insira um email válido."),
-  telefone: z.string().nonempty("O telefone deve seguir o formato esperado."),
-  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
-});
 
 function Register() {
   const { register, FormSetUsuario, loading, handleSubmit, errors } = MutationSetUsuario();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 450);
     };
-    
+
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -30,19 +21,67 @@ function Register() {
     };
   }, []);
 
+  if (loading) {
+    Swal.fire("Enviando Informações...", "");
+    Swal.showLoading();
+  }
+
+
   const onSubmit = async (data: any) => {
     try {
       const result = await FormSetUsuario(data);
+      console.log(result);
+
+      // Verifica se o result tem um networkError ou response status 400
+      if (result?.networkError?.response?.status === 400) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro!',
+          text: 'Ocorreu um erro, tente novamente mais tarde.',
+        });
+        return; // Para a execução em caso de erro
+      }
+
+      // Verifica se há erros no result
+      if (result?.errors && result.errors.length > 0) {
+        let errorMessage = result.errors[0]?.message || 'Erro desconhecido.';
+
+        // Verifica se o erro está relacionado ao email já cadastrado
+        if (result.errors[0]?.message === 'Email já cadastrado no sistema!') {
+          errorMessage = 'Esse email já está cadastrado. Tente outro.';
+        }
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro!',
+          text: errorMessage,
+        });
+        return; // Para a execução em caso de erro
+      }
+
+      // Se não houver erros, exibe o Swal de sucesso
       Swal.fire({
         icon: 'success',
         title: 'Conta criada com sucesso!',
         text: 'Você pode agora fazer login.',
+      }).then(() => {
+        navigate("/");
       });
-    } catch (error) {
+
+
+    } catch (error: any) {
+      console.error(error);
+
+      // Captura os erros de requisição HTTP
       let errorMessage = 'Houve um erro ao salvar os dados do usuário.';
-      if (error.response && error.response.data && error.response.data.message) {
-        errorMessage = error.response.data.message;
+
+      // Verifica se o erro tem uma resposta HTTP válida
+      if (error?.response) {
+        errorMessage = `Erro: ${error.response.status} - ${error.response.statusText}`;
+      } else if (error?.message) {
+        errorMessage = error.message;
       }
+
       Swal.fire({
         icon: 'error',
         title: 'Erro!',
@@ -57,7 +96,7 @@ function Register() {
         <h1 className="text-2xl text-center font-bold my-6 text-gray-800">
           Criar Conta
         </h1>
-        
+
         <div className="mb-4">
           <label htmlFor="name" className="block font-bold text-xl text-gray-700 tracking-wide mb-2">
             Nome
@@ -68,7 +107,14 @@ function Register() {
             className={`w-full px-3 py-2 bg-[#f5f5f5] border ${errors.nome ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Seu nome completo"
             {...register("nome")}
+            onKeyPress={(event) => {
+              const regex = /^[A-Za-z\s]+$/; // Permite letras maiúsculas, minúsculas e espaços
+              if (!regex.test(event.key)) {
+                event.preventDefault(); // Impede a entrada de caracteres inválidos
+              }
+            }}
           />
+
           {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
         </div>
 
@@ -91,8 +137,7 @@ function Register() {
             Telefone
           </label>
           <input
-            type="tel"
-            id="phone"
+            type="text"
             className={`w-full px-3 py-2 bg-[#f5f5f5] border ${errors.telefone ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Ex: (11) 98765-4321"
             {...register("telefone")}

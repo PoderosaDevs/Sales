@@ -1,26 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaCamera } from "react-icons/fa"; // Importando ícone de câmera
+import Swal from "sweetalert2"; // Importando SweetAlert
+import InputMask from "react-input-mask"; // Importando a biblioteca de máscaras
+import { useAuth } from "../../context/AuthContext";
 
 export function Perfil() {
+  const { usuarioData } = useAuth();
   const [formData, setFormData] = useState({
-    nome: "João Silva", // Nome fixo
+    nome: usuarioData?.nome || "", // Nome fixo
     cpf: "123.456.789-00", // CPF fixo
     foto: "", // Foto a ser carregada
-    endereco: "",
-    cep: "",
-    numero: "",
-    complemento: "",
-    telefone: "",
-    tipoPessoa: "",
-    funcao: "",
-    dataNascimento: "",
+    endereco: usuarioData?.endereco || "",
+    cep: usuarioData?.cep || "",
+    numero: usuarioData?.numero || "",
+    complemento: usuarioData?.complemento || "",
+    telefone: usuarioData?.telefone || "",
+    tipoPessoa: usuarioData?.tipo_usuario || "",
+    funcao: usuarioData?.funcao || "",
+    dataNascimento: usuarioData?.data_nascimento || "",
     isWhatsApp: false,
   });
+
+  const [progress, setProgress] = useState(0);
+  const [isFormComplete, setIsFormComplete] = useState(false);
+
+  // Função para verificar o preenchimento dos campos e calcular o progresso
+  useEffect(() => {
+    const totalFields = 9; // Total de campos obrigatórios
+    const filledFields = Object.values(formData).filter(value => value).length;
+    const progressPercentage = Math.floor((filledFields / totalFields) * 100);
+
+    setProgress(progressPercentage);
+    setIsFormComplete(progressPercentage === 100);
+  }, [formData]);
 
   // Atualizando a função para lidar com eventos de input e select
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined; // Type guard para acessar 'checked'
+    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
     setFormData((prev) => ({
       ...prev,
@@ -41,10 +58,32 @@ export function Perfil() {
     }
   };
 
+  // Função para lidar com o clique no botão de salvar
+  const handleSave = () => {
+    if (!isFormComplete) {
+      Swal.fire({
+        icon: "warning",
+        title: "Preencha todas as informações",
+        text: "Para salvar o perfil, todos os campos devem estar preenchidos.",
+      });
+      return;
+    }
+    // Ação de salvar aqui...
+  };
+
   return (
     <div className="max-w-[1500px] pt-10 m-auto">
       <div className="bg-white px-10 py-6 rounded-xl flex flex-col mb-5 lg:mb-8">
         <h3 className="font-bold text-3xl text-gray-800 mb-6">Perfil</h3>
+
+        {/* Barra de Progresso */}
+        <div className="w-full bg-gray-300 rounded-full h-4 mb-6">
+          <div
+            className="bg-blue-600 h-4 rounded-full"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        <p className="text-right mb-6">{progress}% completo</p>
 
         <div className="flex items-center justify-between mb-6">
           <label className="relative inline-block ml-4">
@@ -64,7 +103,7 @@ export function Perfil() {
               <FaCamera />
             </button>
           </label>
-          <div className="ml-6"> {/* Espaço aumentado entre imagem e informações */}
+          <div className="ml-6">
             <div className="flex items-center">
               <label className="text-xl font-semibold mr-2">Nome:</label>
               <span className="text-xl font-normal">{formData.nome}</span>
@@ -78,13 +117,12 @@ export function Perfil() {
 
         <hr className="my-6" />
         <div className="flex flex-col space-y-4">
-          <div className="flex space-x-2"> {/* Flexbox para manter na mesma linha */}
+          <div className="flex space-x-2">
             <div className="w-full">
               <label className="block mb-1">Data de Nascimento</label>
               <input
                 type="date"
                 name="dataNascimento"
-                value={formData.dataNascimento}
                 onChange={handleInputChange}
                 className="border rounded-lg p-2 w-full"
               />
@@ -92,8 +130,8 @@ export function Perfil() {
 
             <div className="w-full">
               <label className="block mb-1">Telefone</label>
-              <input
-                type="text"
+              <InputMask
+                mask="(99) 99999-9999"
                 name="telefone"
                 value={formData.telefone}
                 onChange={handleInputChange}
@@ -102,16 +140,16 @@ export function Perfil() {
               />
             </div>
 
-            <div className="flex flex-col justify-center"> {/* Alinhando o switch */}
+            <div className="flex flex-col justify-center">
               <label className="block mb-1">Receber WhatsApp:</label>
               <input
                 type="checkbox"
                 checked={formData.isWhatsApp}
-                onChange={handleWhatsAppChange} // Chamando a nova função
+                onChange={handleWhatsAppChange}
                 className="toggle-checkbox hidden"
               />
               <div
-                onClick={handleWhatsAppChange} // Chamando a nova função
+                onClick={handleWhatsAppChange}
                 className={`toggle-label flex items-center cursor-pointer relative w-12 h-6 rounded-full bg-gray-400 transition-colors duration-300 ${formData.isWhatsApp ? 'bg-blue-600' : ''}`}
               >
                 <span
@@ -136,8 +174,8 @@ export function Perfil() {
               </div>
               <div className="w-full">
                 <label className="block mb-1">CEP</label>
-                <input
-                  type="text"
+                <InputMask
+                  mask="99999-999"
                   name="cep"
                   value={formData.cep}
                   onChange={handleInputChange}
@@ -176,37 +214,44 @@ export function Perfil() {
               <div className="w-full">
                 <label className="block mb-1">Tipo de Pessoa</label>
                 <select
+                  disabled
                   name="tipoPessoa"
                   value={formData.tipoPessoa}
-                  onChange={handleInputChange} // Usando a mesma função
+                  onChange={handleInputChange}
                   className="border rounded-lg p-2 w-full"
                 >
-                  <option value="">Selecione</option>
-                  <option value="fisica">Física</option>
-                  <option value="juridica">Jurídica</option>
+                  <option value="">{formData.tipoPessoa}</option>
                 </select>
               </div>
+
               <div className="w-full">
                 <label className="block mb-1">Função</label>
-                <input
-                  type="text"
+                <select
                   name="funcao"
                   value={formData.funcao}
                   onChange={handleInputChange}
                   className="border rounded-lg p-2 w-full"
-                  placeholder="Sua função"
-                />
+                >
+                  <option value="">{formData.funcao}</option>
+                  <option value="gerente">Gerente</option>
+                  <option value="funcionario">Funcionário</option>
+                  <option value="cliente">Cliente</option>
+                  <option value="convidado">Convidado</option>
+                </select>
               </div>
             </div>
+          </div>
 
-            <div className="w-full flex justify-end space-x-4">
-              <button className="bg-gray-900 text-white rounded-md px-4 py-2">
-                Voltar
-              </button>
-              <button className="bg-custom-bg-start text-white rounded-md px-4 py-2">
-                Salvar
-              </button>
-            </div>
+          <div className="flex justify-end">
+            <button
+              disabled={!isFormComplete}
+              onClick={handleSave}
+              className={`px-6 py-3 rounded-lg text-white font-semibold ${
+                isFormComplete ? "bg-blue-600" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Salvar
+            </button>
           </div>
         </div>
       </div>
