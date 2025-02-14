@@ -15,12 +15,9 @@ export const routeTitles: RouteConfig = {
   '/lojas': 'Lojas',
   '/linhas': 'Linhas',
 
-
-
   '/': 'Dashboard',
   '/configuracoes': 'Configurações',
 
-
-  '/error404': ' ',
-
+  // Ajuste na rota de erro 404 para garantir que tenha um título informativo
+  '/error404': 'Página não encontrada',
 };

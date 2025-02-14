@@ -1,20 +1,28 @@
 export interface TypesGetLojasFields {
   GetLojas: {
-    id: number
-    nome_fantasia: string
-    razao_social: string
-  }[]
+    pageInfo: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+    result: {
+      id: number;
+      nome_fantasia: string;
+      razao_social: string;
+    }[];
+  };
 }
-
 
 export interface TypesSetLojaFields {
   SetLoja: {
-    id: number
-  }
+    id: number;
+  };
 }
 
 export interface TypesDeleteLojaFields {
   DeleteLoja: {
-    id: number
-  }
+    id: number;
+  };
 }

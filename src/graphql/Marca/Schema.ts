@@ -5,6 +5,7 @@ query GetMarcas {
   GetMarcas {
     id
     nome
+    cor
     produtos {
       id
       nome
@@ -16,8 +17,8 @@ query GetMarcas {
 `
 
 export const SET_META = gql`
-mutation SetMarca($nome: String!) {
-  SetMarca(nome: $nome) {
+mutation SetMarca($nome: String!, $cor: String!) {
+  SetMarca(nome: $nome, cor: $cor) {
     id
     nome
   }

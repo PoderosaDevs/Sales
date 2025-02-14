@@ -22,10 +22,9 @@ import { Ajuda } from "../pages/Ajuda";
 export function PrivateRoutes() {
   const { usuarioData } = useAuth();
   const location = useLocation(); // Hook para obter a rota atual
-
   const currentPath = location.pathname; // Obtendo a rota atual
 
-  // Verifique se a rota atual está nas rotas definidas
+  // Verifique se a rota atual está nas rotas definidas no arquivo de configuração
   const isRouteValid = Object.keys(routeTitles).includes(currentPath);
 
   return (
@@ -42,7 +41,6 @@ export function PrivateRoutes() {
             </CartProvider>
           }
         />
-
         <Route
           path="/ajuda"
           element={

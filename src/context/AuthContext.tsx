@@ -95,7 +95,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         confirmButtonText: "OK",
       }).then(() => {
         localStorage.removeItem("token"); // Remover o token do localStorage
-        navigate("/logout"); // Redirecionar para a página de logout
+        location.reload();
+        navigate("/"); // Redirecionar para a página de logout
       });
     }
   }, [token, isExpired, decodedToken, navigate]);
@@ -114,7 +115,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           confirmButtonText: "OK",
         }).then(() => {
           localStorage.removeItem("token"); // Remover o token do localStorage
-          navigate("/logout"); // Redirecionar para a página de logout
+          location.reload();
+          navigate("/"); // Redirecionar para a página de logout
         });
       }
     }, 1000); // Verifica a expiração a cada segundo

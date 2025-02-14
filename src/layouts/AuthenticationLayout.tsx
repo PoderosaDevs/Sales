@@ -44,37 +44,50 @@ export function AuthenticationLayout() {
   }, []);
 
   return (
-    <div className="bg-custom-gradient h-screen w-full flex justify-center items-center">
-      {/* Verifica se a tela é grande para renderizar o conteúdo */}
-      {isLargeScreen && (
-        <div className="w-3/6 flex justify-center">
-          <div className="max-w-[800px]">
-            <h2
-              className={`${
-                isMediumScreen ? "text-3xl" : "text-5xl"
-              } font-semibold font-thin text-white italic`}
-            >
-              Você escolheu entrar na{" "}
-              <span className="font-semibold ">Paraiso</span>
-              <br />
-              e se tornar uma pessoa
-              <br />
-              <span className="font-bold text-6xl not-italic">
-                <Typewriter
-                  words={adjetivos}
-                  loop={150}
-                  cursor
-                  cursorStyle="_"
-                  typeSpeed={70}
-                  deleteSpeed={50}
-                  delaySpeed={1000}
-                />
-              </span>
-            </h2>
-          </div>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      <div className="h-full lg:flex bg-slate-100 flex-col items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <h1 className="font-bold text-3xl text-[#2E2A47]">
+            Bem vindo de volta!
+          </h1>
+          <p className="text-base font-semibold text-[#7E8CA0]">
+            Entre ou crie uma conta para acessar seu painel!
+          </p>
         </div>
-      )}
-      <Outlet />
+        <div className="flex items-center justify-center mt-8">
+          <Outlet />
+        </div>
+      </div>
+      <div className="h-full bg-custom-gradient hidden lg:flex items-center justify-center">
+        {isLargeScreen && (
+          <div className="w-5/6 flex justify-center">
+            <div className="max-w-[800px]">
+              <img
+                src="/logo.svg"
+                className="max-w-40 mb-10 m-auto"
+                alt="Logo"
+              />
+              <h2
+                className={`${
+                  isMediumScreen ? "text-3xl" : "text-7xl"
+                } font-semibold font-thin text-white italic`}
+              >
+                <span className="font-bold text-6xl not-italic">
+                  <Typewriter
+                    words={adjetivos}
+                    loop={150}
+                    cursor
+                    cursorStyle="_"
+                    typeSpeed={70}
+                    deleteSpeed={50}
+                    delaySpeed={1000}
+                  />
+                </span>
+              </h2>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

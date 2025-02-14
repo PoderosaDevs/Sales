@@ -7,10 +7,16 @@ import { LinhaModal } from './partials/Modal';
 import { MutationDeleteLoja } from '../../graphql/Loja/Mutation';
 
 export default function Lojas(){
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 10 });
 
-  const { data, loading, error } = QueryGetLojas();
+  const { data, loading, error } = QueryGetLojas({
+    variables: {
+      pagination: {
+        pagina: paginacao.pagina,
+        quantidade: paginacao.quantidade,
+      }
+    },
+  });
 
   const { HandleDeleteLoja, loading: loadingDelete } = MutationDeleteLoja();
   if (loadingDelete) {
@@ -50,7 +56,7 @@ export default function Lojas(){
                 ? "Carregando lojas..."
                 : error
                 ? "Erro ao carregar lojas"
-                : `${data?.GetLojas.length} lojas disponíveis.`}
+                : `${data?.GetLojas.pageInfo.totalItems} lojas disponíveis.`}
             </span>
           </h3>
 
@@ -96,7 +102,7 @@ export default function Lojas(){
                         </td>
                       </tr>
                     ) : (
-                      data?.GetLojas.map((loja) => (
+                      data?.GetLojas.result.map((loja) => (
                         <tr
                           key={loja.id}
                           className="border-b border-gray-200"
@@ -132,16 +138,16 @@ export default function Lojas(){
                   </tbody>
                 </table>
               </div>
-              {/* {data ? (
+              {data ? (
                 <PaginationComponent
-                  pagesInfo={data.GetProdutos.pageInfo}
+                  pagesInfo={data.GetLojas.pageInfo}
                   setPagesInfo={(pagina: number, quantidade: number) => {
                     setPaginacao({ pagina: pagina, quantidade: quantidade });
                   }}
                 ></PaginationComponent>
               ) : (
                 <></>
-              )} */}
+              )}
             </div>
           </div>
         </div>

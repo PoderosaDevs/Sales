@@ -6,12 +6,18 @@ export const SetProdutoFieldsFormData = z.object({
   descricao: z.string().min(1, "Descrição é obrigatória"),
   pontos: z.number().min(0, "Preço deve ser maior ou igual a 0"),
   imagem: z.string().url("URL da imagem é inválida"),
-  tipo_sistemas_nomes: z.string().default("SALES"),
-  estoque: z.number().default(99151),
-  is_frete_gratis: z.boolean().default(true),
+  id_marca: z.number(),
   situacao: z.boolean().default(true)
 });
 
-export type SetProdutoFieldsFormInputs = z.infer<
-  typeof SetProdutoFieldsFormData
->;
+export const formSchema = SetProdutoFieldsFormData.pick({
+  nome: true,
+  codigo: true,
+  descricao: true,
+  pontos: true,
+  imagem: true,
+  id_marca: true,
+  situacao: true
+})
+
+export type FormValues = z.input<typeof formSchema>;

@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { FaPencilAlt, FaTrashAlt, FaCaretDown, FaCaretUp } from "react-icons/fa";
+import {
+  FaPencilAlt,
+  FaTrashAlt,
+  FaCaretDown,
+  FaCaretUp,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
 import { QueryGetMarcas } from "../../graphql/Marca/Query";
 import { MutationDeleteProduto } from "../../graphql/Produto/Mutation";
@@ -58,8 +63,8 @@ export default function Marcas() {
               {loading
                 ? "Carregando marcas..."
                 : error
-                  ? "Erro ao carregar marcas"
-                  : `${data?.GetMarcas.length} marcas disponíveis.`}
+                ? "Erro ao carregar marcas"
+                : `${data?.GetMarcas.length} marcas disponíveis.`}
             </span>
           </h3>
 
@@ -68,11 +73,17 @@ export default function Marcas() {
 
         <div className="py-3">
           <div className="tab-content">
-            <div className="tab-pane fade show active" id="kt_table_widget_5_tab_1">
+            <div
+              className="tab-pane fade show active"
+              id="kt_table_widget_5_tab_1"
+            >
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y border-t-2 divide-gray-200">
                   <thead>
                     <tr className="border-0">
+                      <th className="p-0 max-w-4 text-left text-gray-700 py-3">
+                        Cor
+                      </th>
                       <th className="p-0 min-w-36 text-left text-gray-700 py-3">
                         Nome da Marca
                       </th>
@@ -93,14 +104,26 @@ export default function Marcas() {
                       </tr>
                     ) : error ? (
                       <tr>
-                        <td colSpan={7} className="text-center py-10 text-red-500">
+                        <td
+                          colSpan={7}
+                          className="text-center py-10 text-red-500"
+                        >
                           Erro ao carregar as marcas: {error.message}
                         </td>
                       </tr>
                     ) : (
                       data?.GetMarcas.map((marca) => (
                         <>
-                          <tr key={marca.id} className="border-b border-gray-200">
+                          <tr
+                            key={marca.id}
+                            className="border-b border-gray-200"
+                          >
+                            <td className="text-left py-2">
+                              <div
+                                style={{ backgroundColor: marca.cor }}
+                                className="w-6 h-6 rounded-md"
+                              />
+                            </td>
                             <td className="text-left py-2">
                               <span className="text-gray-900 font-bold hover:text-primary mb-1 text-lg">
                                 {marca.nome}
@@ -117,7 +140,9 @@ export default function Marcas() {
                                   <FaCaretDown size={18} />
                                 )}
                                 <span>
-                                  {expandedMarca === marca.id ? "Ocultar Produtos" : "Exibir Produtos"}
+                                  {expandedMarca === marca.id
+                                    ? "Ocultar Produtos"
+                                    : "Exibir Produtos"}
                                 </span>
                               </button>
                             </td>
@@ -137,7 +162,7 @@ export default function Marcas() {
                           {/* Subtabela de produtos */}
                           {expandedMarca === marca.id && (
                             <tr>
-                              <td colSpan={3} className="bg-gray-50 p-4">
+                              <td colSpan={4} className="bg-gray-50 p-4">
                                 <div className="w-full flex border-b-2 justify-between items-center">
                                   <h4 className="font-bold text-lg mb-2">
                                     Produtos Associados
@@ -164,7 +189,8 @@ export default function Marcas() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {marca.produtos && marca.produtos.length > 0 ? (
+                                    {marca.produtos &&
+                                    marca.produtos.length > 0 ? (
                                       marca.produtos
                                         .filter((produto) =>
                                           produto.nome
@@ -190,7 +216,10 @@ export default function Marcas() {
                                         ))
                                     ) : (
                                       <tr>
-                                        <td colSpan={3} className="text-center py-2 text-gray-500">
+                                        <td
+                                          colSpan={3}
+                                          className="text-center py-2 text-gray-500"
+                                        >
                                           Nenhum produto associado.
                                         </td>
                                       </tr>

@@ -35,8 +35,8 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
   
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-      {data?.GetProdutos.result.map((produto) => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      {data?.GetProdutos.result.map((produto: any) => (
         <div
           key={produto.id}
           className="bg-white shadow-custom rounded-lg overflow-hidden flex flex-col"
@@ -47,11 +47,13 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
               alt={produto.nome}
               className="w-full h-auto object-cover"
             />
-            <div className="absolute top-2 left-2 bg-green-700 text-white text-xs font-medium px-2 py-1 rounded">
-              {produto.nome || "Produto"}
+            <div className={`absolute top-2 left-2 text-white text-xs font-medium px-2 py-1 rounded`}
+            style={{ backgroundColor: produto.marca.cor }}
+            >
+              {produto.marca.nome || "Produto"}
             </div>
           </div>
-          <div className="p-4 flex-1 flex flex-col">
+          <div className="p-4 flex-1 flex flex-col justify-end">
             <h2 className="text-lg font-semibold mb-2">{produto.nome}</h2>
             <div className="flex items-center justify-between">
               {isProductInCart(produto.id) ? (
@@ -73,7 +75,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
                     <span className="ml-2">Pontos</span>
                   </span>
                   <button
-                    className="bg-green-600 text-sm text-white px-3 py-2 rounded hover:bg-green-700 transition"
+                    className="bg-custom-bg-start text-sm text-white px-3 py-2 rounded hover:bg-green-700 transition"
                     onClick={() => handleAddProduct(produto)}
                   >
                     <FaPlus size={18} />

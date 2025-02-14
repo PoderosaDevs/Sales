@@ -2,8 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client"; // Certifique-se de que a importação do useMutation esteja correta
 import {
-  SetProdutoFieldsFormData,
-  SetProdutoFieldsFormInputs,
+  formSchema,
+  FormValues,
 } from "./Validations"; // Certifique-se de que o schema está sendo importado corretamente
 import { DELETE_PRODUTO_SCHEMA, GET_PRODUTO_SCHEMA, SET_PRODUTO_SCHEMA } from "./Schema";
 import { TypesDeleteProdutosFields, TypesSetProdutosFields } from "./Types";
@@ -19,11 +19,8 @@ export function MutationSetProduto() {
     handleSubmit,
     formState: { isSubmitting, errors },
     reset,
-  } = useForm<SetProdutoFieldsFormInputs>({
-    resolver: zodResolver(SetProdutoFieldsFormData),
-    defaultValues: {
-      tipo_sistemas_nomes: "SALES", // Definido por padrão
-    },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
   });
 
   const [setProdutoBody, { error, loading, data: DataSetProduto }] =
@@ -31,7 +28,7 @@ export function MutationSetProduto() {
       refetchQueries: [GET_PRODUTO_SCHEMA],
     });
 
-  const FormProduto = async (data: SetProdutoFieldsFormInputs) => {
+  const FormProduto = async (data: FormValues) => {
     await setProdutoBody({
       variables: {
         data,

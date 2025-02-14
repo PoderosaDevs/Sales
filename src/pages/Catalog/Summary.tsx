@@ -8,7 +8,8 @@ import { MutationSetVenda } from "../../graphql/Venda/Mutation";
 import { QueryGetLojas } from "../../graphql/Loja/Query";
 import { TbShoppingBagExclamation } from "react-icons/tb";
 export function Summary() {
-  const { cartItems, updateItemQuantity, removeProduct, clearCart } = useShoppingCart();
+  const { cartItems, updateItemQuantity, removeProduct, clearCart } =
+    useShoppingCart();
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [minDate, setMinDate] = useState<string>("");
@@ -18,7 +19,14 @@ export function Summary() {
   const [selectedLoja, setSelectedLoja] = useState<string>(""); // Estado para a loja selecionada
   const { usuarioData } = useAuth();
 
-  const { data: dataLojas, loading: loadingLojas } = QueryGetLojas();
+  const { data: dataLojas, loading: loadingLojas } = QueryGetLojas({
+    variables: {
+      pagination: {
+        pagina: 0,
+        quantidade: 30,
+      },
+    },
+  });
 
   // Calcular o total de pontos
   const calculateTotalPoints = () => {
@@ -122,16 +130,16 @@ export function Summary() {
       console.log(result);
       // Verifica se há erros no result
       if (result?.errors && result.errors.length > 0) {
-        let errorMessage = result.errors[0]?.message || 'Erro desconhecido.';
+        let errorMessage = result.errors[0]?.message || "Erro desconhecido.";
 
         // Verifica se o erro está relacionado ao email já cadastrado
-        if (result.errors[0]?.message === 'Email já cadastrado no sistema!') {
-          errorMessage = 'Esse email já está cadastrado. Tente outro.';
+        if (result.errors[0]?.message === "Email já cadastrado no sistema!") {
+          errorMessage = "Esse email já está cadastrado. Tente outro.";
         }
 
         Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
+          icon: "error",
+          title: "Erro!",
           text: errorMessage,
         });
         return; // Para a execução em caso de erro
@@ -141,7 +149,6 @@ export function Summary() {
           clearCart(); // Limpar o carrinho quando o Swal é fechado
         }
       );
-
     } catch (error) {
       Swal.fire("Erro", "Ocorreu um erro ao finalizar a venda.", "error").then(
         () => {
@@ -152,7 +159,8 @@ export function Summary() {
     }
   };
 
-  const isFinalizeButtonDisabled = !selectedDate || !selectedLoja || cartItems.length === 0;
+  const isFinalizeButtonDisabled =
+    !selectedDate || !selectedLoja || cartItems.length === 0;
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-lg">
@@ -173,19 +181,21 @@ export function Summary() {
         </div>
         <div className="flex space-x-2">
           <button
-            className={`p-2 ${viewMode === "grid"
-              ? "bg-gray-200 text-custom-bg-start"
-              : "bg-white"
-              } rounded`}
+            className={`p-2 ${
+              viewMode === "grid"
+                ? "bg-gray-200 text-custom-bg-start"
+                : "bg-white"
+            } rounded`}
             onClick={() => setViewMode("grid")}
           >
             <FaTh className="text-lg" />
           </button>
           <button
-            className={`p-2 ${viewMode === "list"
-              ? "bg-gray-200 text-custom-bg-start"
-              : "bg-white"
-              } rounded`}
+            className={`p-2 ${
+              viewMode === "list"
+                ? "bg-gray-200 text-custom-bg-start"
+                : "bg-white"
+            } rounded`}
             onClick={() => setViewMode("list")}
           >
             <FaListUl className="text-lg" />
@@ -195,18 +205,20 @@ export function Summary() {
       <div className="overflow-y-auto">
         {cartItems.length > 0 ? (
           <div
-            className={`${viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-              : "flex flex-col gap-4 max-h-80"
-              }`}
+            className={`${
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                : "flex flex-col gap-4 max-h-80"
+            }`}
           >
             {cartItems.map((item: CartItem) => (
               <div
                 key={item.id}
-                className={`bg-gray-100 rounded-lg shadow-md flex ${viewMode === "grid"
-                  ? "flex-col p-4 max-w-xs mx-auto"
-                  : "items-center p-4"
-                  } ${viewMode === "list" ? "border border-gray-200" : ""}`}
+                className={`bg-gray-100 rounded-lg shadow-md flex ${
+                  viewMode === "grid"
+                    ? "flex-col p-4 max-w-xs mx-auto"
+                    : "items-center p-4"
+                } ${viewMode === "list" ? "border border-gray-200" : ""}`}
               >
                 {viewMode === "list" ? (
                   <>
@@ -329,15 +341,17 @@ export function Summary() {
               Loja:
             </label>
             <select
-              className="border w-60 px-2 text-center outline-none text-xl rounded-lg p-2 mt-1"
+              className="border border-gray-300 bg-white shadow-md w-60 px-3 py-2 text-start text-lg outline-none rounded-lg mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition ease-in-out"
               id="loja"
               name="loja"
               value={selectedLoja}
               onChange={(e) => setSelectedLoja(e.target.value)} // Atualiza o estado da loja selecionada
             >
-              <option value="">Selecione</option>
-              {dataLojas?.GetLojas.map((loja) => (
-                <option key={loja.id} value={loja.id}>
+              <option value="" className="text-gray-500">
+                Selecione uma loja
+              </option>
+              {dataLojas?.GetLojas.result.map((loja) => (
+                <option key={loja.id} value={loja.id} className="text-gray-800">
                   {loja.nome_fantasia}
                 </option>
               ))}
@@ -363,10 +377,11 @@ export function Summary() {
         <button
           onClick={handleFinalize}
           disabled={isFinalizeButtonDisabled}
-          className={`mt-4 px-4 py-2 rounded-lg text-2xl text-white ${isFinalizeButtonDisabled
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-500 hover:bg-green-600"
-            }`}
+          className={`mt-4 px-4 py-2 rounded-lg text-2xl text-white ${
+            isFinalizeButtonDisabled
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
         >
           Finalizar
         </button>

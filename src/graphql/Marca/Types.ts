@@ -3,6 +3,7 @@ export interface TypesGetMarcasFields {
   GetMarcas: {
     id: number
     nome: string
+    cor: string
     produtos: {
       id: number
       nome: string

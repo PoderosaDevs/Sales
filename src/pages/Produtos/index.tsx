@@ -39,7 +39,7 @@ export default function Produtos() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const result = await HandleDeleteProduto({
-          variables: { deleteProdutoId: id },
+          variables: { deleteProdutoId: parseInt(String(id)) },
         });
         if (!result) {
           Swal.fire("ERRO!", "Ocorreu um erro durante a execução.", "warning");
@@ -88,9 +88,6 @@ export default function Produtos() {
                         Pontos
                       </th>
                       <th className="p-0 min-w-36 text-gray-700 text-center py-3">
-                        Vendas
-                      </th>
-                      <th className="p-0 min-w-36 text-gray-700 text-center py-3">
                         Situação
                       </th>
                       <th className="p-0 min-w-28 justify-end flex py-3">
@@ -111,7 +108,7 @@ export default function Produtos() {
                           colSpan={7}
                           className="text-center py-10 text-red-500"
                         >
-                          Erro ao carregar os produtos: {error.message}
+                           {error.message}
                         </td>
                       </tr>
                     ) : (
@@ -141,9 +138,6 @@ export default function Produtos() {
                           </td>
                           <td className="text-center text-gray-500 font-semibold py-2">
                             {produto.pontos}
-                          </td>
-                          <td className="text-center text-gray-500 font-semibold py-2">
-                            {produto.itens_por_caixa} UND
                           </td>
                           <td className="text-center py-2">
                             <span

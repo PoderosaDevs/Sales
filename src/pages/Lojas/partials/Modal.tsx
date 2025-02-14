@@ -9,8 +9,6 @@ import {
   CurrencyDollar as DollarSignIcon,
   X,
 } from "phosphor-react";
-import { MutationSetProduto } from "../../../graphql/Produto/Mutation";
-import { SetProdutoFieldsFormInputs } from "../../../graphql/Produto/Validations";
 import { FiPlusSquare } from "react-icons/fi";
 import { FaStore } from "react-icons/fa"
 import { MutationSetLoja } from "../../../graphql/Loja/Mutation";

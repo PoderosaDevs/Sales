@@ -16,8 +16,7 @@ export default function Funcionarios() {
       pagination: {
         pagina: paginacao.pagina,
         quantidade: paginacao.quantidade,
-      },
-      tipoSistema: "SALES",
+      }
     },
   });
 
@@ -42,7 +41,7 @@ export default function Funcionarios() {
         if (!result) {
           Swal.fire("ERRO!", "Ocorreu um erro durante a execução.", "warning");
         } else {
-          Swal.fire("Sucesso!", "Produto deletado com sucesso.", "success");
+          Swal.fire("Sucesso!", "Funcionario deletado com sucesso.", "success");
         }
       }
     });
@@ -60,7 +59,7 @@ export default function Funcionarios() {
               {loading
                 ? "Carregando produtos..."
                 : error
-                ? "Erro ao carregar produtos"
+                ? "Erro ao carregar funcionarios"
                 : `${data?.GetUsuarios.length} usuário disponíveis.`}
             </span>
           </h3>
@@ -78,15 +77,11 @@ export default function Funcionarios() {
                 <table className="min-w-full divide-y border-t-2 divide-gray-200">
                   <thead>
                     <tr className="border-0">
-                      <th className="p-0 max-w-8 text-left">Foto</th>
                       <th className="p-0 min-w-36 text-left text-gray-700 py-3">
                         Nome
                       </th>
                       <th className="p-0 min-w-36 text-left text-gray-700 py-3">
                         CPF
-                      </th>
-                      <th className="p-0 min-w-36 text-gray-700 text-left py-3">
-                        Telefone
                       </th>
                       <th className="p-0 min-w-36 text-left text-gray-700  py-3">
                         Email
@@ -118,16 +113,6 @@ export default function Funcionarios() {
                           key={usuario.id}
                           className="border-b border-gray-200"
                         >
-                          <td className="flex justify-start py-2">
-                            <img
-                              className="w-20 h-20 rounded-lg object-cover cursor-pointer"
-                              src={usuario.usuario_foto}
-                              alt={usuario.nome}
-                              onClick={() =>
-                                setSelectedImage(usuario.usuario_foto)
-                              }
-                            />
-                          </td>
                           <td className="text-left py-2">
                             <a
                               href="#"
@@ -141,12 +126,7 @@ export default function Funcionarios() {
                           </td>
                           <td className="text-left">
                             <span className="text-gray-500 font-semibold block">
-                              {formatCPF(usuario.cpf)}
-                            </span>
-                          </td>
-                          <td className="text-left">
-                            <span className="text-gray-500 font-semibold block">
-                              {formatPhoneNumber(usuario.telefone)}
+                              {usuario.cpf ? formatCPF(usuario.cpf) : "Não Informado"}
                             </span>
                           </td>
                           <td className="text-left">

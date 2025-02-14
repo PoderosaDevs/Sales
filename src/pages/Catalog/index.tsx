@@ -1,4 +1,3 @@
-// pages/Catalog.tsx
 import React, { useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import { FaArrowLeft, FaFilter, FaShoppingBag } from "react-icons/fa";
@@ -8,23 +7,37 @@ import { Products } from "./Products";
 import { Summary } from "./Summary";
 import { BarNavigation } from "./BarNavigation";
 import { useAuth } from "../../context/AuthContext";
+import { QueryGetMarcas } from "../../graphql/Marca/Query";
 
 export function Catalog() {
   const [showFilters, setShowFilters] = useState(false);
-  const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 10 });
+  const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 25 });
   const [showBarNavigation, setShowBarNavigation] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [productsView, setProductsView] = useState(false);
+  const [filters, setFilters] = useState({
+    nome: "",
+    pontos_min: 0,
+    pontos_max: 0,
+    marca: "",
+  });
+
   const { cartItems } = useShoppingCart();
+
   const { data, loading, error } = QueryGetProdutos({
     variables: {
       pagination: {
         pagina: paginacao.pagina,
         quantidade: paginacao.quantidade,
       },
-      tipoSistema: "SALES",
+      nome: filters.nome,
+      pontos_min: filters.pontos_min,
+      pontos_max: filters.pontos_max,
+      marca: filters.marca,
     },
   });
+
+  const { data: DataMarca } = QueryGetMarcas();
 
   const handleAdvance = () => {
     setShowSummary(true);
@@ -36,13 +49,20 @@ export function Catalog() {
     setProductsView(false);
   };
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <div className="p-6 max-w-[1500px] m-auto">
       {showSummary ? (
         <>
           <div className="mb-6 w-full flex justify-between items-center">
             <h1 className="text-3xl font-bold">Resumo da venda</h1>
-
             <div className="flex gap-4">
               <button
                 onClick={handleBack}
@@ -58,8 +78,7 @@ export function Catalog() {
       ) : (
         <>
           <div className="mb-6 w-full flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Catálogo</h1>
-
+            <h1 className="text-3xl font-bold">Selecione os produtos</h1>
             <div className="flex gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -95,43 +114,51 @@ export function Catalog() {
             unmountOnExit
           >
             <div className="bg-white shadow-custom rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Filtros</h2>
               <form>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 items-center gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-6">
                   {/* Filter by Name */}
                   <div className="mb-4">
                     <label
-                      htmlFor="name"
+                      htmlFor="nome"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
                       Nome
                     </label>
                     <input
-                      id="name"
+                      id="nome"
+                      name="nome"
                       type="text"
                       className="border border-gray-300 rounded-lg w-full p-2"
                       placeholder="Digite o nome do produto"
+                      value={filters.nome}
+                      onChange={handleFilterChange}
                     />
                   </div>
 
-                  {/* Filter by Price */}
+                  {/* Filter by Points */}
                   <div className="mb-4">
                     <label
-                      htmlFor="price"
+                      htmlFor="pontos"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Preço
+                      Pontos
                     </label>
                     <div className="relative flex justify-between items-center gap-2">
                       <input
-                        type="text"
-                        placeholder="Preço Min."
+                        name="pontos_min"
+                        type="number"
                         className="border border-gray-300 rounded-lg w-full p-2"
+                        placeholder="Pontos Mínimos"
+                        value={filters.pontos_min}
+                        onChange={handleFilterChange}
                       />
                       <input
-                        type="text"
-                        placeholder="Preço Max"
+                        name="pontos_max"
+                        type="number"
                         className="border border-gray-300 rounded-lg w-full p-2"
+                        placeholder="Pontos Máximos"
+                        value={filters.pontos_max}
+                        onChange={handleFilterChange}
                       />
                     </div>
                   </div>
@@ -139,43 +166,31 @@ export function Catalog() {
                   {/* Filter by Brand */}
                   <div className="mb-4">
                     <label
-                      htmlFor="brand"
+                      htmlFor="marca"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
                       Marca
                     </label>
                     <select
-                      id="brand"
+                      id="marca"
+                      name="marca"
                       className="border border-gray-300 rounded-lg w-full p-2"
+                      value={filters.marca}
+                      onChange={handleFilterChange}
                     >
                       <option value="">Filtrar por marca</option>
-                      <option value="brand1">Brand 1</option>
-                      <option value="brand2">Brand 2</option>
-                      <option value="brand3">Brand 3</option>
-                    </select>
-                  </div>
-
-                  {/* Filter by Type */}
-                  <div className="mb-4">
-                    <label
-                      htmlFor="type"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Tipo
-                    </label>
-                    <select
-                      id="type"
-                      className="border border-gray-300 rounded-lg w-full p-2"
-                    >
-                      <option value="">Filtrar por tipo</option>
-                      <option value="single">Single</option>
-                      <option value="kit">Kit</option>
+                      {DataMarca?.GetMarcas?.map((response) => (
+                        <option key={response.id} value={response.id}>
+                          {response.nome}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
               </form>
             </div>
           </CSSTransition>
+
           <Products
             data={data}
             loading={loading}

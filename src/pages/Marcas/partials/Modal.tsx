@@ -1,47 +1,18 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  Image as ImageIcon,
-  PencilSimple as PencilSimpleIcon,
-  X,
-} from "phosphor-react";
-import { SetMarcaFieldsFormInputs } from "../../../graphql/Marca/Validations";
+import { X } from "phosphor-react";
 import { FiPlusSquare } from "react-icons/fi";
-import { QueryGetProdutos } from "../../../graphql/Produto/Query"
+import { SliderPicker } from "react-color";
+import { useForm } from "react-hook-form";
 import { MutationSetMeta, SetMarcaType } from "../../../graphql/Marca/Mutation";
-import SelectProdutos from "../../../components/selects/SelectProdutos";
+
 export function MarcaModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState(1); // Controle da etapa
-  const {
-    errors,
-    handleSubmit,
-    loading,
-    register,
-    reset,
-    FormSetMarca,
-    isSubmitting
-  } = MutationSetMeta();
-
-  const paginacao = { pagina: 1, quantidade: 10 };
-  const { data, loading: loadingProdutos, error } = QueryGetProdutos({
-    variables: {
-      pagination: {
-        pagina: paginacao.pagina,
-        quantidade: paginacao.quantidade,
-      },
-      tipoSistema: "SALES",
-    },
-  });
-
-  const handleNextStep = () => {
-    setStep((prevStep) => prevStep + 1);
-  };
-
-  const handlePreviousStep = () => {
-    setStep((prevStep) => prevStep - 1);
-  };
+  const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<SetMarcaType>();
+  const [selectedColor, setSelectedColor] = useState("#000000");
+  
+  const { FormSetMarca } = MutationSetMeta();
 
   const handleProductSubmit = async (data: SetMarcaType) => {
     try {
@@ -55,7 +26,7 @@ export function MarcaModal() {
           Swal.showLoading();
         },
       });
-      await FormSetMarca(data.nome);
+      await FormSetMarca(data);
       reset();
       setIsOpen(false);
       Swal.fire({
@@ -72,6 +43,11 @@ export function MarcaModal() {
         confirmButtonText: "Ok",
       });
     }
+  };
+
+  const handleColorChange = (color: { hex: string }) => {
+    setSelectedColor(color.hex);
+    setValue("cor", color.hex); // Atualiza o valor do campo "cor"
   };
 
   return (
@@ -103,33 +79,42 @@ export function MarcaModal() {
             </Dialog.Title>
             <div className="border w-full mb-6" />
 
-            <form
-              onSubmit={handleSubmit(handleProductSubmit)}
-              className="space-y-6"
-            >
-              <>
-                <div className="flex items-center ">
-                  <input
-                    type="text"
-                    placeholder="Nome da Marca"
-                    {...register("nome")}
-                    className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
-                  />
-                  <p className="text-red-500 text-sm">
-                    {errors.nome?.message}
-                  </p>
-                </div>
+            <form onSubmit={handleSubmit(handleProductSubmit)} className="space-y-6">
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  placeholder="Nome da Marca"
+                  {...register("nome", { required: "Nome é obrigatório" })}
+                  className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
+                />
+                <p className="text-red-500 text-sm">
+                  {errors.nome?.message}
+                </p>
+              </div>
 
-                <div className="w-full flex justify-end">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-200"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </>
+              <div className="flex flex-col space-y-4">
+                <label className="font-semibold text-gray-700">Cor da Marca</label>
+                <SliderPicker
+                  color={selectedColor}
+                  onChange={handleColorChange}
+                />
+                <input
+                  type="text"
+                  {...register("cor")}
+                  value={selectedColor}
+                  readOnly
+                  className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
+                />
+              </div>
 
+              <div className="w-full flex justify-end">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-200"
+                >
+                  Salvar
+                </button>
+              </div>
             </form>
           </Dialog.Content>
         </div>

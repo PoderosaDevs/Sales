@@ -27,7 +27,9 @@ export function Perfil() {
   // Função para verificar o preenchimento dos campos e calcular o progresso
   useEffect(() => {
     const totalFields = 9; // Total de campos obrigatórios
-    const filledFields = Object.values(formData).filter(value => value).length;
+    const filledFields = Object.values(formData).filter(
+      (value) => value
+    ).length;
     const progressPercentage = Math.floor((filledFields / totalFields) * 100);
 
     setProgress(progressPercentage);
@@ -35,9 +37,12 @@ export function Perfil() {
   }, [formData]);
 
   // Atualizando a função para lidar com eventos de input e select
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
-    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
+    const checked =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
     setFormData((prev) => ({
       ...prev,
@@ -54,7 +59,10 @@ export function Perfil() {
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFormData({ ...formData, foto: URL.createObjectURL(e.target.files[0]) });
+      setFormData({
+        ...formData,
+        foto: URL.createObjectURL(e.target.files[0]),
+      });
     }
   };
 
@@ -117,48 +125,6 @@ export function Perfil() {
 
         <hr className="my-6" />
         <div className="flex flex-col space-y-4">
-          <div className="flex space-x-2">
-            <div className="w-full">
-              <label className="block mb-1">Data de Nascimento</label>
-              <input
-                type="date"
-                name="dataNascimento"
-                onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full"
-              />
-            </div>
-
-            <div className="w-full">
-              <label className="block mb-1">Telefone</label>
-              <InputMask
-                mask="(99) 99999-9999"
-                name="telefone"
-                value={formData.telefone}
-                onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full"
-                placeholder="(00) 0 0000-0000"
-              />
-            </div>
-
-            <div className="flex flex-col justify-center">
-              <label className="block mb-1">Receber WhatsApp:</label>
-              <input
-                type="checkbox"
-                checked={formData.isWhatsApp}
-                onChange={handleWhatsAppChange}
-                className="toggle-checkbox hidden"
-              />
-              <div
-                onClick={handleWhatsAppChange}
-                className={`toggle-label flex items-center cursor-pointer relative w-12 h-6 rounded-full bg-gray-400 transition-colors duration-300 ${formData.isWhatsApp ? 'bg-blue-600' : ''}`}
-              >
-                <span
-                  className={`absolute w-6 h-6 rounded-full bg-white transition-transform duration-300 transform ${formData.isWhatsApp ? 'translate-x-6' : 'translate-x-0'}`}
-                />
-              </div>
-            </div>
-          </div>
-
           <div className="flex flex-col space-y-4">
             <div className="flex space-x-2">
               <div className="w-full">
@@ -247,7 +213,9 @@ export function Perfil() {
               disabled={!isFormComplete}
               onClick={handleSave}
               className={`px-6 py-3 rounded-lg text-white font-semibold ${
-                isFormComplete ? "bg-blue-600" : "bg-gray-400 cursor-not-allowed"
+                isFormComplete
+                  ? "bg-blue-600"
+                  : "bg-gray-400 cursor-not-allowed"
               }`}
             >
               Salvar

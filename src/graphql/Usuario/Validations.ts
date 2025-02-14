@@ -53,34 +53,20 @@ export const SetUsuarioFieldsFormSchema = z.object({
     .regex(nomeRegex, "O nome deve conter apenas letras.")
     .nonempty("Por favor, preencha seu nome completo."),
   
-  cpf: z.string()
-    .regex(cpfRegex, "O CPF deve conter apenas números e ter 11 dígitos.")
-    .refine(isValidCPF, { message: "O CPF é inválido." }), // Valida se o CPF é válido
-
   email: z.string().email("Por favor, insira um email válido."),
   
   numero: z.string().optional(), // Campo opcional para número
   
   senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
   
-  telefone: z.string()
-    .regex(telefoneRegex, "O telefone deve seguir o formato (99) 99999-9999 ou (99) 9999-9999."),
-  
   tipo_pessoa: z.enum(["EMPLOYEE", "MANAGER", "CLIENT", "GUEST"]).default("EMPLOYEE"), // Se tiver valores fixos, use enum
-  
-  tipo_sistemas_nomes: z.array(z.string()).default(["SALES", "SITE"]),
-  
-  cep: z.string()
-    .regex(cepRegex, "O CEP deve conter 8 dígitos.")
-    .default("00000000"),
   
   endereco: z.string().optional(), // Campo opcional para endereço
   
   complemento: z.string().optional(), // Campo opcional para complemento
   
   funcao: z.string().default("Vendedor"),
-  
-  isWhatsapp: z.boolean().default(false)
+
 });
 
 export type SetUsuarioFieldsFormData = z.infer<typeof SetUsuarioFieldsFormSchema>;

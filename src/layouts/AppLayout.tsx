@@ -35,9 +35,13 @@ export function AppLayout() {
         <Aside setIsSecondaryOpen={setIsSecondaryOpen} /> // Exibe Aside em telas maiores ou iguais a 1024px
       )}
 
-      <div className={`flex-1 ml-[0px] flex flex-col transition-all duration-300 ease-in-out ${isMobile ? 'pl-0' : 'pl-[120px]'}`}>
-        <Header title={title} />
-        <main className="flex-1 pt-2 bg-[#f5f5f5]">
+      <div
+        className={`flex-1 ml-[0px] flex flex-col transition-all duration-300 ease-in-out ${
+          isMobile ? "pl-0" : "pl-[120px]"
+        }`}
+      >
+        <main className="flex-1 bg-[#f5f5f5]">
+          <Header title={title} />
           <Outlet />
         </main>
       </div>

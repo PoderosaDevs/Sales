@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MutationLogin } from "../../graphql/Usuario/Mutation";
 import { BounceLoader } from "react-spinners";
+import Swal from "sweetalert2";
 
 function LoginComponent() {
   const { FormLogin, errors, handleSubmit, register, loading, DataLogin } =
@@ -27,31 +28,34 @@ function LoginComponent() {
   const onSubmit = async (data: any) => {
     try {
       const result = await FormLogin(data);
-      if (result.data.Login) {
-        if (DataLogin) {
-          localStorage.setItem("token", DataLogin.Login.token_api);
-          window.location.reload();
-        }
+      if (result.data?.Login) {
+        localStorage.setItem("token", result.data.Login.token_api);
+        window.location.replace("/"); // Redireciona imediatamente após o login
+      } else {
+        throw new Error("Login inválido");
       }
-    } catch (error) {
-      let errorMessage = "Houve um erro ao salvar os dados do usuario.";
-      if (error.response && error.response.data && error.response.data.message) {
-        errorMessage = error.response.data.message;
-      }
-      console.log(errorMessage);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || "Usuário ou senha incorretos.";
+      Swal.fire({
+        icon: "error",
+        title: "Erro no Login",
+        text: errorMessage,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Tentar novamente",
+      });
     }
   };
 
   return (
     <div
-      className={`bg-white ${isMobile ? "w-[80%] px-5 py-7" : "max-w-[450px] px-10 py-14"} rounded-lg mx-auto shadow-md w-full`}
+      className={
+        `bg-white ${
+          isMobile ? "w-[80%] px-5 py-7" : "w-[450px] px-10 py-6"
+        } rounded-lg mx-auto shadow-md w-full` + "sm:w-4/5"
+      }
     >
       <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-        <img
-          src="https://media.graphassets.com/rCIs5vtxQPueHiCYLZDL"
-          className="max-w-60 m-auto"
-          alt="Logo"
-        />
         <div className="mb-4">
           <label
             htmlFor="email"
@@ -96,7 +100,10 @@ function LoginComponent() {
         </button>
         <span className="block text-center font-semibold mt-7 text-gray-600 text-md">
           Novo aqui?{" "}
-          <Link to="/register" className="text-blue-500 font-bold hover:underline">
+          <Link
+            to="/register"
+            className="text-blue-500 font-bold hover:underline"
+          >
             Criar uma Conta
           </Link>
         </span>

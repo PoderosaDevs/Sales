@@ -161,7 +161,7 @@ export function Aside({ setIsSecondaryOpen }: AsideProps) {
               </button>
             </Tooltip>
           </li>
-          <li
+          {/* <li
             className="flex items-center space-x-2 text-center"
             onMouseEnter={() => handleIconMouseEnter("user", userButtonRef)}
             onMouseLeave={handleIconMouseLeave}
@@ -180,7 +180,7 @@ export function Aside({ setIsSecondaryOpen }: AsideProps) {
                   }`}
               />
             </button>
-          </li>
+          </li> */}
 
           {usuarioData?.tipo_usuario === 'EMPLOYEE' ? (
             <></>

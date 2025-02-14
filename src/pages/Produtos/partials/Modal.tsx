@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -6,15 +6,35 @@ import {
   Barcode as BarcodeIcon,
   PencilSimple as PencilSimpleIcon,
   Tag as TagIcon,
-  Coins as Coins ,
+  Coins as Coins,
   X,
 } from "phosphor-react";
 import { MutationSetProduto } from "../../../graphql/Produto/Mutation";
-import { SetProdutoFieldsFormInputs } from "../../../graphql/Produto/Validations";
+import { FormValues } from "../../../graphql/Produto/Validations";
 import { FiPlusSquare } from "react-icons/fi";
+import { QueryGetMarcas } from "../../../graphql/Marca/Query";
+interface MarcaOption {
+  value: number;
+  label: string;
+}
 
 export function ProductModal() {
+  const { data } = QueryGetMarcas();
   const [isOpen, setIsOpen] = useState(false);
+
+  const [marcaOptions, setMarcaOptions] = useState<MarcaOption[]>([]);
+
+  useEffect(() => {
+    if (data?.GetMarcas) {
+      setMarcaOptions(
+        data.GetMarcas.map((marca) => ({
+          value: marca.id,
+          label: marca.nome,
+        }))
+      );
+    }
+  }, [data]);
+
   const {
     FormProduto,
     errors,
@@ -25,7 +45,7 @@ export function ProductModal() {
     reset,
   } = MutationSetProduto();
 
-  const handleProductSubmit = async (data: SetProdutoFieldsFormInputs) => {
+  const handleProductSubmit = async (data: FormValues) => {
     try {
       Swal.fire({
         title: "Enviando...",
@@ -46,8 +66,7 @@ export function ProductModal() {
         text: "Produto cadastrado com sucesso.",
         icon: "success",
         confirmButtonText: "Ok",
-      }).then(() => {
-      });
+      }).then(() => {});
     } catch (e) {
       Swal.fire({
         title: "Erro!",
@@ -71,7 +90,7 @@ export function ProductModal() {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-gray-800 bg-opacity-50" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Content 
+          <Dialog.Content
             className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-auto"
             aria-labelledby="dialog-title"
           >
@@ -82,7 +101,10 @@ export function ProductModal() {
             >
               <X size={24} />
             </button>
-            <Dialog.Title id="dialog-title" className="text-xl font-semibold mb-4">
+            <Dialog.Title
+              id="dialog-title"
+              className="text-xl font-semibold mb-4"
+            >
               Cadastrar Produto
             </Dialog.Title>
             <div className="border w-full mb-6" />
@@ -131,7 +153,27 @@ export function ProductModal() {
                 )}
               </div>
               <div className="flex items-center space-x-4">
-                <Coins  size={24} className="text-gray-500" />
+                <TagIcon size={24} className="text-gray-500" />
+                <select
+                  {...register("id_marca", { valueAsNumber: true })}
+                  className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
+                >
+                  <option value="">Selecione uma marca</option>
+                  {marcaOptions.map((marca) => (
+                    <option key={marca.value} value={marca.value}>
+                      {marca.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.id_marca && (
+                  <p className="text-red-500 text-sm">
+                    {errors.id_marca.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <Coins size={24} className="text-gray-500" />
                 <input
                   type="number"
                   placeholder="Pontos"
@@ -139,7 +181,9 @@ export function ProductModal() {
                   className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
                 />
                 {errors.pontos && (
-                  <p className="text-red-500 text-sm">{errors.pontos.message}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.pontos.message}
+                  </p>
                 )}
               </div>
               <div className="flex items-center space-x-4">
