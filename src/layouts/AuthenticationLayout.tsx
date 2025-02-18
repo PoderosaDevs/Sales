@@ -45,8 +45,16 @@ export function AuthenticationLayout() {
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div className="h-full lg:flex bg-slate-100 flex-col items-center justify-center px-4">
-        <div className="text-center space-y-4">
+      <div
+        className="h-full lg:flex bg-slate-100 flex-col items-center justify-center px-4 md:flex md:justify-center sm:flex sm:justify-center"
+        id="responsive-layout"
+      >
+        <div className="text-center space-y-4 flex flex-col items-center">
+          <img
+            src="https://media.graphassets.com/1ueVAwCoS6yTxCUa2mCX"
+            width={80}
+            alt="Logo"
+          />
           <h1 className="font-bold text-3xl text-[#2E2A47]">
             Bem vindo de volta!
           </h1>
@@ -54,7 +62,10 @@ export function AuthenticationLayout() {
             Entre ou crie uma conta para acessar seu painel!
           </p>
         </div>
-        <div className="flex items-center justify-center mt-8">
+        <div
+          className="flex items-center justify-center mt-8"
+          id="isMobileContentForm"
+        >
           <Outlet />
         </div>
       </div>

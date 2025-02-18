@@ -51,7 +51,7 @@ function LoginComponent() {
     <div
       className={
         `bg-white ${
-          isMobile ? "w-[80%] px-5 py-7" : "w-[450px] px-10 py-6"
+          isMobile ? "w-[100%] px-5 py-7" : "w-[450px] px-10 py-6"
         } rounded-lg mx-auto shadow-md w-full` + "sm:w-4/5"
       }
     >

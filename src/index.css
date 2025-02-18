@@ -12,7 +12,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Montserrat'
+  font-family: "Montserrat";
 }
 
 input::placeholder {
@@ -37,10 +37,21 @@ input::placeholder {
   transition: opacity 300ms;
 }
 
-.swal2-modal{
+.swal2-modal {
   z-index: 9999 !important;
 }
 
 .swal2-container {
   z-index: 9999 !important; /* Ajuste o valor conforme necessário */
+}
+
+@media (max-width: 768px) {
+  #responsive-layout {
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  #isMobileContentForm{
+    width: 100%;
+  }
 }
