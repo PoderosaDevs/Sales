@@ -88,9 +88,15 @@ export function Summary() {
   // Definir a data mínima e máxima para o campo de data
   useEffect(() => {
     const now = new Date();
-    const minDate = new Date(now.getTime() - 48 * 60 * 60 * 1000);
-    setMinDate(minDate.toISOString().split("T")[0]); // Formato YYYY-MM-DD
-    setMaxDate(now.toISOString().split("T")[0]); // Formato YYYY-MM-DD
+    
+    // Definindo minDate para 48 horas atrás
+    const minDate = new Date(now.getTime() - 48 * 60 * 60 * 1000); 
+    // Definindo maxDate para a data de hoje
+    const maxDate = now;
+
+    // Definindo minDate e maxDate como strings no formato YYYY-MM-DD
+    setMinDate(minDate.toISOString().split("T")[0]); // Data 48 horas atrás
+    setMaxDate(maxDate.toISOString().split("T")[0]); // Data atual
   }, []);
 
   // Atualizar a data selecionada
