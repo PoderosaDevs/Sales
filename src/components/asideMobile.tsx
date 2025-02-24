@@ -53,7 +53,7 @@ export function AsideMobile() {
       {/* Botão para abrir o menu */}
       <button
         onClick={toggleMenu}
-        className="flex items-center p-2 text-gray-600 hover:text-gray-800 absolute top-4 left-4 z-50"
+        className="flex items-center p-2 text-white hover:text-gray-300 absolute top-4 left-4 z-50"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
