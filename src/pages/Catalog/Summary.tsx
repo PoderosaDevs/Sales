@@ -164,8 +164,8 @@ export function Summary() {
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-lg">
-      <div className="flex justify-between items-center mb-4 pb-4 border-b">
-        <div className="flex items-center">
+      <div className="flex justify-between items-center mb-4 pb-4 border-b flex-col gap-4 md:flex-row md:gap-0">
+        <div className="flex items-center flex-col gap-4 md:flex-row md:gap-0">
           <div className="flex justify-between">
             <span className="font-semibold text-xl">Total de Pontos:</span>
             <span className="text-xl ml-2 text-custom-bg-start font-semibold">

@@ -61,7 +61,7 @@ export function Catalog() {
     <div className="p-6 max-w-[1500px] m-auto">
       {showSummary ? (
         <>
-          <div className="mb-6 w-full flex justify-between items-center">
+          <div className="mb-6 w-full flex justify-between items-center flex-col gap-4 md:flex-row md:gap-0">
             <h1 className="text-3xl font-bold">Resumo da venda</h1>
             <div className="flex gap-4">
               <button
@@ -77,7 +77,7 @@ export function Catalog() {
         </>
       ) : (
         <>
-          <div className="mb-6 w-full flex justify-between items-center">
+          <div className="mb-6 w-full flex flex-col gap-4 md:flex-row md:gap-0 justify-between items-center">
             <h1 className="text-3xl font-bold">Selecione os produtos</h1>
             <div className="flex gap-4">
               <button
