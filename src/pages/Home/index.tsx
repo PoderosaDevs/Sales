@@ -46,19 +46,26 @@ export function Home() {
   return (
     <div className="max-w-[1500px] px-6 m-auto">
       {isVisible && (
-        <h1 className="text-3xl mt-4 flex items-end">
+        <h1 className="text-3xl mt-4 flex items-end none md:flex">
           <span className="font-bold">Olá</span>, seja bem-vindo{" "}
           <span className="font-bold ml-2">{usuarioData.nome}</span>
           <div className="w-2 h-2 bg-custom-bg-start mb-1 ml-1"></div>
         </h1>
       )}
-      <div className="grid mt-4 grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid mt-12 grid-cols-1 md:grid-cols-2 gap-4 md:mt-4">
+        {/* Card 1: Iniciar */}
+        <div className="bg-white rounded-lg flex flex-col gap-4 justify-center shadow-custom p-6 md:hidden">
+          <button className="bg-purple-700 text-lg font-semibold text-white rounded-lg px-8 py-4 hover:bg-purple-800">
+            Iniciar venda
+          </button>
+        </div>
+
         {/* Card 1: Vendas */}
         <div className="bg-white rounded-lg shadow-custom p-6">
           <div className="flex items-center justify-between mb-6 border-b-2 pb-4">
             <div className="flex items-center">
               <span className="text-2xl text-gray-600 mr-2">
-                <FaCoins size={24} className="text-custom-bg-start" />
+                <FaCoins size={24} className="text-purple-700" />
               </span>
               <h2 className="text-xl font-semibold text-gray-800">
                 Últimas vendas do mês
@@ -103,7 +110,7 @@ export function Home() {
             <span className="text-2xl text-gray-600 mr-2">
               <BiSolidBarChartSquare
                 size={24}
-                className="text-custom-bg-start"
+                className="text-purple-700"
               />
             </span>
             <h2 className="text-xl font-semibold text-gray-800">

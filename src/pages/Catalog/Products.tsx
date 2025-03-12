@@ -2,13 +2,11 @@ import React from "react";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { Produto } from "../../context/types/CartContext";
 import { useShoppingCart } from "../../context/CartContext";
-import {
-  BounceLoader
-} from "react-spinners";
+import { BounceLoader } from "react-spinners";
 
 interface ProductsProps {
   data?: any;
-  loading?: boolean;  // Tipo booleano para o loading
+  loading?: boolean; // Tipo booleano para o loading
   onAddProduct: () => void;
 }
 
@@ -32,7 +30,6 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
       </div>
     );
   }
-  
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -47,8 +44,9 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
               alt={produto.nome}
               className="w-full h-auto object-cover"
             />
-            <div className={`absolute top-2 left-2 text-white text-xs font-medium px-2 py-1 rounded`}
-            style={{ backgroundColor: produto.marca.cor }}
+            <div
+              className={`absolute top-2 left-2 text-white text-xs font-medium px-2 py-1 rounded`}
+              style={{ backgroundColor: produto.marca.cor }}
             >
               {produto.marca.nome || "Produto"}
             </div>
@@ -75,7 +73,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
                     <span className="ml-2">Pontos</span>
                   </span>
                   <button
-                    className="bg-custom-bg-start text-sm text-white px-3 py-2 rounded hover:bg-green-700 transition"
+                    className="bg-purple-700 text-sm text-white px-3 py-2 rounded hover:bg-purple-800 transition"
                     onClick={() => handleAddProduct(produto)}
                   >
                     <FaPlus size={18} />

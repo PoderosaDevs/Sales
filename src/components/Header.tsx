@@ -14,7 +14,7 @@ export function Header({ title }: HeaderProps) {
 
   return (
     <header className="bg-custom-gradient text-white relative ">
-      <div className='max-w-[1500px] m-auto py-9 px-6 flex items-center justify-between'>
+      <div className='max-w-[1500px] m-auto py-8 px-6 flex items-center justify-between sm:py-6'>
       <span className="font-outfit text-2xl font-semibold hidden sm:block">{title}</span>
       </div>
     </header>

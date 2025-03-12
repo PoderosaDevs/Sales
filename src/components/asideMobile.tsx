@@ -53,7 +53,7 @@ export function AsideMobile() {
       {/* Botão para abrir o menu */}
       <button
         onClick={toggleMenu}
-        className="flex items-center p-2 text-white hover:text-gray-300 absolute top-4 left-4 z-50"
+        className="flex items-center p-2 text-white hover:text-gray-300 absolute top-2 left-4 z-50"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -129,27 +129,7 @@ export function AsideMobile() {
               </button>
             </Tooltip>
           </li>
-          <li>
-            <Tooltip tooltipText="Perfil">
-              <button
-                onClick={() => {
-                  navigateTo("/perfil");
-                  setActiveIcon("user");
-                }}
-                className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${activeIcon === "user" ? "bg-[#f5f5f5]" : "bg-transparent"
-                  } flex items-center space-x-2`}
-              >
-                <GrUserFemale
-                  size={28}
-                  className={`${activeIcon === "user"
-                    ? "text-custom-bg-start"
-                    : "text-gray-600"
-                    }`}
-                />
-                <span>Perfil</span>
-              </button>
-            </Tooltip>
-          </li>
+        
           {usuarioData?.tipo_usuario !== "EMPLOYEE" && (
             <li>
               <Tooltip tooltipText="Backoffice">

@@ -51,7 +51,7 @@ function LoginComponent() {
     <div
       className={
         `bg-white ${
-          isMobile ? "w-[100%] px-5 py-7" : "w-[450px] px-10 py-6"
+          isMobile ? "w-[100%] px-5 py-7" : "w-[450px] px-16 py-14"
         } rounded-lg mx-auto shadow-md w-full` + "sm:w-4/5"
       }
     >
@@ -59,7 +59,7 @@ function LoginComponent() {
         <div className="mb-4">
           <label
             htmlFor="email"
-            className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
+            className="block font-bold text-md text-gray-700 tracking-wide mb-2"
           >
             Email
           </label>
@@ -74,12 +74,12 @@ function LoginComponent() {
         <div className="mb-6">
           <label
             htmlFor="password"
-            className="flex justify-between items-center font-bold text-xl text-gray-700 tracking-wide mb-2"
+            className="flex justify-between items-center font-bold text-md text-gray-700 tracking-wide mb-2"
           >
             Senha
             <Link
               to="/forgot-password"
-              className="text-blue-500 text-sm hover:underline"
+              className="text-purple-700 text-sm hover:underline"
             >
               Esqueceu sua senha?
             </Link>
@@ -94,15 +94,15 @@ function LoginComponent() {
         </div>
         <button
           type="submit"
-          className="w-full outline-none bg-custom-gradient text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full outline-none bg-purple-700 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {loading ? <BounceLoader color="#ffffff" size={36} /> : "Entrar"}
+          {loading ? <BounceLoader color="#ffffff" size={24} /> : "Entrar"}
         </button>
         <span className="block text-center font-semibold mt-7 text-gray-600 text-md">
           Novo aqui?{" "}
           <Link
             to="/register"
-            className="text-blue-500 font-bold hover:underline"
+            className="text-purple-700 font-bold hover:underline"
           >
             Criar uma Conta
           </Link>
