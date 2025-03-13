@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { MdSell } from "react-icons/md";
 import { DateToVim } from "../../utils/dateUtils";
 import MyCalendar from "../../components/calendar";
+import { Link } from "react-router-dom";
 
 export function Home() {
   const { usuarioData } = useAuth();
@@ -55,9 +56,9 @@ export function Home() {
       <div className="grid mt-12 grid-cols-1 md:grid-cols-2 gap-4 md:mt-4">
         {/* Card 1: Iniciar */}
         <div className="bg-white rounded-lg flex flex-col gap-4 justify-center shadow-custom p-6 md:hidden">
-          <button className="bg-purple-700 text-lg font-semibold text-white rounded-lg px-8 py-4 hover:bg-purple-800">
+          <Link to={'/catalog'} className="bg-purple-700 text-lg font-semibold text-white rounded-lg px-8 py-4 hover:bg-purple-800">
             Iniciar venda
-          </button>
+          </Link>
         </div>
 
         {/* Card 1: Vendas */}
