@@ -4,7 +4,7 @@ import { MenuBackoffice } from './menu-backoffice';
 
 interface AsideSecondaryProps {
   isOpen: boolean;
-  activeIcon: 'home' | 'user' | 'cog' | 'catalog' | 'backoffice' | null;
+  activeIcon: 'home' | 'user' | 'cog' | 'vendas' | 'catalog' | 'backoffice' | null;
   buttonRef: React.RefObject<HTMLButtonElement> | null;
   onMouseEnter: () => void;
   onMouseLeave: () => void;

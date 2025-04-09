@@ -3,21 +3,23 @@ interface RouteConfig {
 }
 
 export const routeTitles: RouteConfig = {
-  '/perfil': 'Perfil',
-  '/vendas': 'Vendas',
-  '/catalog': 'Catálogo',
-  '/ajuda': 'Ajuda',
+  "/perfil": "Perfil",
+  "/vendas": "Vendas",
+  "/catalog": "Catálogo",
 
-  '/marcas': 'Marcas',
-  '/funcionarios': 'Funcionarios',
-  '/produtos': 'Produtos',
-  '/metas': 'Metas',
-  '/lojas': 'Lojas',
-  '/linhas': 'Linhas',
+  "/ajuda": "Ajuda",
 
-  '/': 'Dashboard',
-  '/configuracoes': 'Configurações',
+  "/backoffice": "Backoffice",
+  "/marcas": "Marcas",
+  "/funcionarios": "Funcionarios",
+  "/produtos": "Produtos",
+  "/metas": "Metas",
+  "/lojas": "Lojas",
+  "/linhas": "Linhas",
+
+  "/": "Dashboard",
+  "/configuracoes": "Configurações",
 
   // Ajuste na rota de erro 404 para garantir que tenha um título informativo
-  '/error404': 'Página não encontrada',
+  "/error404": "Página não encontrada",
 };

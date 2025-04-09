@@ -8,13 +8,13 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigation } from "../utils/navigationUtils";
 import { AiOutlineProduct } from "react-icons/ai";
-
+import { IoBagHandleSharp } from "react-icons/io5";
 
 interface AsideProps {
   setIsSecondaryOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-type IconType = "home" | "user" | "cog" | "catalog" | "backoffice";
+type IconType = "home" | "user" | "cog" | "vendas" | "catalog" | "backoffice";
 
 export function Aside({ setIsSecondaryOpen }: AsideProps) {
   const [activeIcon, setActiveIcon] = useState<IconType | null>(null);
@@ -161,27 +161,28 @@ export function Aside({ setIsSecondaryOpen }: AsideProps) {
               </button>
             </Tooltip>
           </li>
-          {/* <li
+          <li
             className="flex items-center space-x-2 text-center"
-            onMouseEnter={() => handleIconMouseEnter("user", userButtonRef)}
+            onMouseEnter={() => handleIconMouseEnter("catalog", null)}
             onMouseLeave={handleIconMouseLeave}
           >
-            <button
-              onClick={() => navigateTo("/perfil")}
-              className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${activeIcon === "user" ? "bg-[#f5f5f5]" : "bg-transparent"
-                }`}
-              ref={userButtonRef}
-            >
-              <GrUserFemale
-                size={28}
-                className={`transition-colors duration-300 ease-in-out ${activeIcon === "user"
-                    ? "text-custom-bg-start"
-                    : "text-gray-600"
+            <Tooltip tooltipText="Vendas">
+              <button
+                onClick={() => navigateTo("/catalog")}
+                className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${activeIcon === "vendas" ? "bg-[#f5f5f5]" : "bg-transparent"
                   }`}
-              />
-            </button>
-          </li> */}
-
+              >
+                <IoBagHandleSharp
+                  size={28}
+                  className={`transition-colors duration-300 ease-in-out ${activeIcon === "vendas"
+                      ? "text-custom-bg-start"
+                      : "text-gray-600"
+                    }`}
+                />
+              </button>
+            </Tooltip>
+          </li>
+ 
           {usuarioData?.tipo_usuario === 'EMPLOYEE' ? (
             <></>
           ) : (

@@ -13,6 +13,23 @@ export interface TypesGetMarcasFields {
   }[]
 }
 
+export interface TypesRankingMarcasFields {
+  getBrandsInsights: {
+    pageInfo: {
+      currentPage: number
+      totalPages: number
+      totalItems: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+    result: {
+      id: number
+      nome: string
+      total_vendas: number
+    }[]
+  }
+}
+
 export interface TypesSetMarcaFields {
   SetMarca: {
     id: number

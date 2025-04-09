@@ -26,3 +26,21 @@ export interface GetFuncionarioFieldsTypes {
     usuario_foto: string
   }[]
 }
+
+export interface GetRankingFuncionariosTypes {
+  GetUsuariosInsights: {
+    pageInfo: {
+      currentPage: number
+      totalPages: number
+      totalItems: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+    result: {
+      id: number
+      nome: string
+      email: string
+      pontos_totais: number
+    }[]
+  }
+}

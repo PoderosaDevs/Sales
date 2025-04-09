@@ -58,8 +58,8 @@ query GetVendaByID($getVendaByIdId: Float!) {
 `
 
 export const GET_VENDA_BY_USUARIO_ID = gql`
-query GetVendaByUsuarioID($getVendaByUsuarioIdId: Float!) {
-  GetVendaByUsuarioID(id: $getVendaByUsuarioIdId) {
+query GetVendaByUsuarioID($getVendaByUsuarioIdId: Float!, $dataMensal: String) {
+  GetVendaByUsuarioID(id: $getVendaByUsuarioIdId, data_mensal: $dataMensal) {
     id
     data_venda
     pontos_totais

@@ -15,6 +15,23 @@ export interface TypesGetLojasFields {
   };
 }
 
+export interface TypesRankingLojasTypes {
+  getStoresInsights: {
+    result: {
+      id: number;
+      nome: string;
+      total_vendas: number;
+    }[]
+    pageInfo: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    }
+  }
+}
+
 export interface TypesSetLojaFields {
   SetLoja: {
     id: number;

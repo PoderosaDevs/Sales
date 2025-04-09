@@ -17,7 +17,25 @@ query GetLojas($pagination: Pagination) {
     }
   }
 }
+`
 
+export const GET_RANKING_LOJAS = gql`
+query GetStoresInsights($filters: StoresInsightsFilterInput) {
+  getStoresInsights(filters: $filters) {
+    result {
+      id
+      nome
+      total_vendas
+    }
+    pageInfo {
+      currentPage
+      totalPages
+      totalItems
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
 `
 
 export const SET_LOJA = gql`

@@ -18,6 +18,8 @@ import ErrorsPage from "../pages/public/ErrorsPage";
 import { ProtectedRoute } from "./partials/ProtectedRoute";
 import { routeTitles } from "./routeConfig";
 import { Ajuda } from "../pages/Ajuda";
+import { Backoffice } from "../pages/Backoffice";
+import { Vendas } from "../pages/Vendas";
 
 export function PrivateRoutes() {
   const { usuarioData } = useAuth();
@@ -42,11 +44,30 @@ export function PrivateRoutes() {
           }
         />
         <Route
+          path="/vendas"
+          element={
+            <CartProvider>
+              <Vendas />
+            </CartProvider>
+          }
+        />
+        <Route
           path="/ajuda"
           element={
             <CartProvider>
               <Ajuda />
             </CartProvider>
+          }
+        />
+
+
+        {/* Backoffice Routes - Protegidas */}
+        <Route
+          path="/backoffice"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+              <Backoffice />
+            </ProtectedRoute>
           }
         />
 

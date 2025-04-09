@@ -31,3 +31,24 @@ query GetUsuarios($tipoPessoa: String) {
   }
 }
 `
+
+export const GET_RANKING_FUNCIONARIOS = gql`
+query GetUsuariosInsights($pagination: Pagination) {
+  GetUsuariosInsights(pagination: $pagination) {
+    pageInfo {
+      currentPage
+      totalPages
+      totalItems
+      hasNextPage
+      hasPreviousPage
+    }
+    result {
+      id
+      nome
+      email
+      pontos_totais
+    }
+  }
+}
+
+`
