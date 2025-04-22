@@ -26,7 +26,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
     return (
       <div className="flex justify-center items-center flex-col h-[50vh]">
         <h2 className="text-3xl text-gray-900 mb-4">Carregando</h2>
-        <BounceLoader color="#d40f7d" size={84} />
+        <BounceLoader color="#7e22ce" size={84} />
       </div>
     );
   }

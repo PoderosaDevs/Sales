@@ -14,6 +14,7 @@ import { IoBagHandleSharp } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import MyCalendar from "../../components/calendar";
 import { QueryGetVendasByUsuarioID } from "../../graphql/Venda/Query";
+import { BounceLoader } from "react-spinners";
 
 export function Vendas() {
   const [showFilters, setShowFilters] = useState(false);
@@ -59,7 +60,7 @@ export function Vendas() {
 
   const dataMensal = `${currentMonth}/${currentYear}`;
 
-  const { data } = QueryGetVendasByUsuarioID({
+  const { data, loading } = QueryGetVendasByUsuarioID({
     variables: {
       getVendaByUsuarioIdId: usuarioData ? parseInt(usuarioData.id) : 0,
       ...(showCalendar ? {} : { dataMensal }), // só envia dataMensal se não for calendário
@@ -72,7 +73,7 @@ export function Vendas() {
   return (
     <div className="p-6 max-w-[1500px] m-auto">
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:mt-4">
           {/* Card 1: Iniciar */}
           <div className="bg-white rounded-lg flex flex-col gap-4 justify-center shadow-custom p-6 md:hidden">
             <Link
@@ -105,7 +106,12 @@ export function Vendas() {
               <MyCalendar controls={true} data={data!} />
             ) : (
               <div className="flex flex-col space-y-4">
-                {data?.GetVendaByUsuarioID.length === 0 ? (
+                {loading ? (
+                  <div className="flex justify-center items-center flex-col h-[50vh]">
+                    <h2 className="text-3xl text-gray-900 mb-4">Carregando</h2>
+                    <BounceLoader color="#7e22ce" size={44} />
+                  </div>
+                ) : data?.GetVendaByUsuarioID.length === 0 ? (
                   <span className="text-gray-500 text-center text-sm">
                     Nenhuma venda registrada neste mês.
                   </span>

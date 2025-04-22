@@ -8,9 +8,6 @@ import { RankingMarcas } from "./TableComponents/RankingMarcas";
 export function Backoffice() {
   const { usuarioData } = useAuth();
   const [filtroData, setFiltroData] = useState("");
-  const [ordemDescMarca, setOrdemDescMarca] = useState(true);
-  const [ordemDescLoja, setOrdemDescLoja] = useState(true);
-  const [ordemDescRanking, setOrdemDescRanking] = useState(true);
 
   const { data } = QueryGetVendasByUsuarioID({
     variables: {
@@ -21,28 +18,6 @@ export function Backoffice() {
 
   if (!usuarioData) return <div>Loading...</div>;
 
-  const vendasPorMarca = [
-    { marca: "Nike", vendas: 120, data: "2024-03-25" },
-    { marca: "Adidas", vendas: 88, data: "2024-03-24" },
-    { marca: "Mahalo", vendas: 58, data: "2024-03-24" },
-    { marca: "Lacoste", vendas: 68, data: "2024-03-24" },
-    { marca: "Puma", vendas: 75, data: "2024-03-23" },
-    { marca: "Reebok", vendas: 90, data: "2024-03-22" },
-    { marca: "New Balance", vendas: 65, data: "2024-03-20" },
-  ];
-
-  const vendasPorLoja = [
-    { loja: "Loja A", vendas: 200, data: "2024-03-25" },
-    { loja: "Loja B", vendas: 150, data: "2024-03-24" },
-    { loja: "Loja C", vendas: 180, data: "2024-03-23" },
-    { loja: "Loja D", vendas: 130, data: "2024-03-22" },
-  ];
-
-  const ranking = [
-    { usuario: "Carlos", pontos: 500 },
-    { usuario: "Ana", pontos: 450 },
-    { usuario: "João", pontos: 400 },
-  ];
 
   const filtrarEOrdenar = (dados, ordemDesc) => {
     let filtrados = filtroData
@@ -72,32 +47,20 @@ export function Backoffice() {
       <div className="grid mt-6 grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4 flex justify-between">
-            Vendas por Marca
-            <button
-              className="text-sm text-blue-500 hover:underline"
-              onClick={() => setOrdemDescMarca(!ordemDescMarca)}
-            >
-              Ordenar {ordemDescMarca ? "Crescente" : "Decrescente"}
-            </button>
+            Vendas por Marcas
           </h2>
           <RankingMarcas />
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4 flex justify-between">
-            Vendas por Loja
-            <button
-              className="text-sm text-blue-500 hover:underline"
-              onClick={() => setOrdemDescLoja(!ordemDescLoja)}
-            >
-              Ordenar {ordemDescLoja ? "Crescente" : "Decrescente"}
-            </button>
+            Vendas por Lojas
           </h2>
           <RankingLojas />
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-md col-span-1">
-          <h2 className="text-xl font-bold mb-4">Ranking de Vendas</h2>
+          <h2 className="text-xl font-bold mb-4">Ranking de Vendedores</h2>
           <RankingFuncionarios />
         </div>
       </div>

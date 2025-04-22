@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import moment from "moment";
-import "moment/locale/pt-br";
+import "moment/locale/pt-br"; // define o locale
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { GetVendaByUsuarioIDTypes } from "../graphql/Venda/Types";
+import { FaTimes } from "react-icons/fa";
+
+// Aplica a localização globalmente
+moment.locale("pt-br");
 
 const localizer = momentLocalizer(moment);
 
@@ -28,7 +32,7 @@ const defaultMessages = {
 
 interface MyCalendarProps {
   data: GetVendaByUsuarioIDTypes;
-  controls?: boolean; // nova prop
+  controls?: boolean;
 }
 
 const MyCalendar: React.FC<MyCalendarProps> = ({ data, controls = false }) => {
@@ -39,7 +43,7 @@ const MyCalendar: React.FC<MyCalendarProps> = ({ data, controls = false }) => {
   }
 
   const events = data.GetVendaByUsuarioID.map((venda) => ({
-    title: `Venda`,
+    title: "Venda",
     start: new Date(venda.data_venda),
     end: new Date(venda.data_venda),
     resource: venda,
@@ -51,7 +55,10 @@ const MyCalendar: React.FC<MyCalendarProps> = ({ data, controls = false }) => {
         messages={defaultMessages}
         formats={{
           agendaDateFormat: "DD/MM ddd",
-          weekdayFormat: "dddd",
+          weekdayFormat: "dddd", // Isso vai usar "segunda", "terça", etc.
+          dayFormat: "dddd", // garante dias da semana no mês também
+          dateFormat: "D", // formatação básica de datas
+          monthHeaderFormat: "MMMM yyyy", // mês em extenso em português
         }}
         localizer={localizer}
         events={events}
@@ -62,15 +69,23 @@ const MyCalendar: React.FC<MyCalendarProps> = ({ data, controls = false }) => {
         views={controls ? undefined : [Views.MONTH]}
         defaultView="month"
         toolbar={controls}
-        date={controls ? undefined : new Date()} // fixa no mês atual
+        date={controls ? undefined : new Date()}
         selectable={false}
       />
 
       {selectedVenda && (
-        <div className="mt-4 p-4 border rounded bg-white shadow">
+        <div className="mt-4 p-4 border rounded bg-white shadow relative">
+          <button
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+            onClick={() => setSelectedVenda(null)}
+            aria-label="Fechar detalhes"
+          >
+            <FaTimes />
+          </button>
           <h2 className="text-lg font-semibold mb-2">Detalhes da Venda</h2>
           <p className="text-sm text-gray-600 mb-1">
-            <strong>Data:</strong> {moment(selectedVenda.data_venda).format("DD/MM/YYYY")}
+            <strong>Data:</strong>{" "}
+            {moment(selectedVenda.data_venda).format("DD/MM/YYYY")}
           </p>
           <p className="text-sm text-gray-600 mb-3">
             <strong>Funcionário:</strong> {selectedVenda.funcionario.nome}
@@ -78,7 +93,8 @@ const MyCalendar: React.FC<MyCalendarProps> = ({ data, controls = false }) => {
           <ul className="list-disc pl-5 space-y-1">
             {selectedVenda.venda_detalhe.map((detail: any, idx: number) => (
               <li key={idx}>
-                <strong>{detail.produto.nome}</strong> (x{detail.quantidade}) — {detail.pontos} pontos
+                <strong>{detail.produto.nome}</strong> (x{detail.quantidade}) —{" "}
+                {detail.pontos} pontos
               </li>
             ))}
           </ul>
