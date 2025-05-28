@@ -1,54 +1,83 @@
 import { gql } from "@apollo/client";
 
 export const LOGIN_SCHEMA = gql`
-mutation Login($usuario: AutenticacaoInput!) {
-  Login(usuario: $usuario) {
-    id
-    email
-    nome
-    token_api
+  mutation Login($usuario: AutenticacaoInput!) {
+    Login(usuario: $usuario) {
+      id
+      email
+      nome
+      token_api
+    }
   }
-}
-`
+`;
 
 export const CREATE_USUARIO_SCHEMA = gql`
-mutation SetVendedor($data: UsuarioInput!) {
-  SetVendedor(data: $data) {
-    id
+  mutation SetVendedor($data: UsuarioInput!) {
+    SetVendedor(data: $data) {
+      id
+    }
   }
-}
-`
+`;
 
 export const GET_FUNCIONARIO_SCHEMA = gql`
-query GetUsuarios($tipoPessoa: String) {
-  GetUsuarios(Tipo_Pessoa: $tipoPessoa) {
-    id
-    email
-    cpf
-    data_nascimento
-    nome
-    funcao
+  query GetUsuarios($tipoPessoa: String) {
+    GetUsuarios(Tipo_Pessoa: $tipoPessoa) {
+      id
+      email
+      cpf
+      data_nascimento
+      nome
+      funcao
+    }
   }
-}
-`
+`;
 
 export const GET_RANKING_FUNCIONARIOS = gql`
-query GetUsuariosInsights($pagination: Pagination) {
-  GetUsuariosInsights(pagination: $pagination) {
-    pageInfo {
-      currentPage
-      totalPages
-      totalItems
-      hasNextPage
-      hasPreviousPage
-    }
-    result {
-      id
-      nome
-      email
-      pontos_totais
+  query GetRankingUsuarios($filters: RankingUsuariosFiltroInput) {
+    GetRankingUsuarios(filters: $filters) {
+      result {
+        id
+        nome
+        email
+        tipo_pessoa
+        pontos_totais
+      }
+      pageInfo {
+        currentPage
+        totalPages
+        totalItems
+        hasNextPage
+        hasPreviousPage
+      }
     }
   }
-}
+`;
 
-`
+export const GET_FUNCIONARIO_INSIGHTS = gql`
+  query GetUsuariosInsights($filters: UsuarioInsightsFiltroInput) {
+    GetUsuariosInsights(filters: $filters) {
+      pageInfo {
+        currentPage
+        totalPages
+        totalItems
+        hasNextPage
+        hasPreviousPage
+      }
+      result {
+        id
+        nome
+        email
+        tipo_pessoa
+        pontos_totais
+        lojas {
+          nome
+          quantidade
+        }
+        marcas {
+          nome
+          quantidade
+        }
+      }
+    }
+  }
+`;

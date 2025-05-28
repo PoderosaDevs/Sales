@@ -9,7 +9,7 @@ import { gql } from "@apollo/client";
 import { client } from "../services/conection";
 import { authMiddleware } from "./middlewares/AuthMiddleware";
 import { useJwt } from "react-jwt";
-import Swal from "sweetalert2"; // Importação do SweetAlert2
+import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
 interface Usuario {
@@ -33,6 +33,7 @@ interface Usuario {
 interface AuthContextData {
   authenticated: boolean;
   usuarioData: Usuario | null;
+  loading: boolean;
 }
 
 interface AuthProviderProps {
@@ -46,86 +47,102 @@ export const AuthContext = createContext<AuthContextData>(
 export function AuthProvider({ children }: AuthProviderProps) {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [usuarioData, setUsuarioData] = useState<Usuario | null>(null);
-  const navigate = useNavigate(); // Hook para redirecionamento
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
-  // Hook useJwt para decodificar e verificar o token
   const token = localStorage.getItem("token");
   const { decodedToken, isExpired } = useJwt<Usuario>(token || "");
 
   useEffect(() => {
-    // Se não houver token, não faça nada
+    console.log("[AuthProvider] useEffect disparado");
+    console.log("[AuthProvider] Token:", token);
+    console.log("[AuthProvider] isExpired:", isExpired);
+    console.log("[AuthProvider] decodedToken:", decodedToken);
+
     if (!token) {
+      console.log("[AuthProvider] Sem token no localStorage");
       setAuthenticated(false);
       setUsuarioData(null);
-      return; // Saia do useEffect
+      setLoading(false);
+      return;
     }
 
-    // Token existe, agora verifique se ele está expirado
-    if (!isExpired) {
-      client.setLink(client.link.concat(authMiddleware)); // Middleware de autenticação
-      setAuthenticated(true);
-
-      // Definir usuarioData com base nos dados do decodedToken
-      if (decodedToken) {
-        const userData: Usuario = {
-          id: decodedToken.id,
-          email: decodedToken.email,
-          nome: decodedToken.nome,
-          token_api: token,
-          tipo_usuario: decodedToken.tipo_usuario,
-          tipo_sistemas: decodedToken.tipo_sistemas,
-          funcao: decodedToken.funcao,
-          complemento: decodedToken.complemento,
-          cpf: decodedToken.cpf,
-          endereco: decodedToken.endereco,
-          data_nascimento: decodedToken.data_nascimento,
-          is_whatsapp: decodedToken.is_whatsapp,
-          numero: decodedToken.numero,
-          telefone: decodedToken.telefone,
-          cep: decodedToken.cep,
-        };
-        setUsuarioData(userData);
-      }
-    } else {
-      // Exibir Swal quando o token expirar
+    if (isExpired) {
+      console.log("[AuthProvider] Token expirado");
       Swal.fire({
         icon: "warning",
         title: "Sessão Expirada",
         text: "Sua sessão expirou. Por favor, faça login novamente.",
         confirmButtonText: "OK",
       }).then(() => {
-        localStorage.removeItem("token"); // Remover o token do localStorage
-        location.reload();
-        navigate("/"); // Redirecionar para a página de logout
+        localStorage.removeItem("token");
+        setAuthenticated(false);
+        setUsuarioData(null);
+        setLoading(false);
+        navigate("/");
       });
+      return;
+    }
+
+    if (decodedToken) {
+      const userData: Usuario = {
+        id: decodedToken.id,
+        email: decodedToken.email,
+        nome: decodedToken.nome,
+        token_api: token,
+        tipo_usuario: decodedToken.tipo_usuario,
+        tipo_sistemas: decodedToken.tipo_sistemas,
+        funcao: decodedToken.funcao,
+        complemento: decodedToken.complemento,
+        cpf: decodedToken.cpf,
+        endereco: decodedToken.endereco,
+        data_nascimento: decodedToken.data_nascimento,
+        is_whatsapp: decodedToken.is_whatsapp,
+        numero: decodedToken.numero,
+        telefone: decodedToken.telefone,
+        cep: decodedToken.cep,
+      };
+
+      console.log("[AuthProvider] Usuário autenticado:", userData);
+      client.setLink(client.link.concat(authMiddleware));
+      setAuthenticated(true);
+      setUsuarioData(userData);
+      setLoading(false);
+    } else {
+      console.warn("[AuthProvider] decodedToken inválido ou vazio");
+      setAuthenticated(false);
+      setUsuarioData(null);
+      setLoading(false);
     }
   }, [token, isExpired, decodedToken, navigate]);
 
+  // Opcional: Monitorar expiração em background
   useEffect(() => {
     const intervalId = setInterval(() => {
       const currentToken = localStorage.getItem("token");
-      const { isExpired } = useJwt<Usuario>(currentToken || "");
-      
-      if (isExpired) {
-        // Exibir Swal quando o token expirar
+      const { isExpired: tokenExpired } = useJwt<Usuario>(currentToken || "");
+
+      if (tokenExpired) {
+        console.log("[AuthProvider] Token expirou no background");
         Swal.fire({
           icon: "warning",
           title: "Sessão Expirada",
           text: "Sua sessão expirou. Por favor, faça login novamente.",
           confirmButtonText: "OK",
         }).then(() => {
-          localStorage.removeItem("token"); // Remover o token do localStorage
-          location.reload();
-          navigate("/"); // Redirecionar para a página de logout
+          localStorage.removeItem("token");
+          setAuthenticated(false);
+          setUsuarioData(null);
+          navigate("/");
         });
       }
-    }, 1000); // Verifica a expiração a cada segundo
+    }, 60 * 1000); // Verifica a cada 1 minuto
 
-    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ authenticated, usuarioData }}>
+    <AuthContext.Provider value={{ authenticated, usuarioData, loading }}>
       {children}
     </AuthContext.Provider>
   );

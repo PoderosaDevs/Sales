@@ -19,6 +19,10 @@ import { ProtectedRoute } from "./partials/ProtectedRoute";
 import { routeTitles } from "./routeConfig";
 import { Ajuda } from "../pages/Ajuda";
 import { Backoffice } from "../pages/Backoffice";
+import { EmployeeInsights } from "../pages/Backoffice/EmployeeInsights";
+import { StoreInsights } from "../pages/Backoffice/StoreInsights";
+
+
 import { Vendas } from "../pages/Vendas";
 
 export function PrivateRoutes() {
@@ -67,6 +71,25 @@ export function PrivateRoutes() {
           element={
             <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
               <Backoffice />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Backoffice Routes - Protegidas */}
+        <Route
+          path="/backoffice/store/:id"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+              <StoreInsights />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/backoffice/employee/:id"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+              <EmployeeInsights />
             </ProtectedRoute>
           }
         />

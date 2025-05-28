@@ -4,26 +4,34 @@ import { useAuth } from "../../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: JSX.Element;
-  allowedRoles: string[]; // Lista de tipos de usuário permitidos
+  allowedRoles: string[];
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { usuarioData } = useAuth();
+  console.log("[ProtectedRoute] Render started");
 
-  // Log para verificar o estado do usuário
-  console.log("usuarioData:", usuarioData);
+  const authContext = useAuth();
 
-  // Se não houver usuarioData, redireciona para a página de erro
+  // Log para validar se o hook foi chamado corretamente
+  console.log("[ProtectedRoute] useAuth() returned:", authContext);
+
+  if (!authContext) {
+    console.error("[ProtectedRoute] useAuth() returned undefined or null. Hook usado fora de contexto?");
+    return <Navigate to="/error404" />;
+  }
+
+  const { usuarioData } = authContext;
+
   if (!usuarioData) {
-    console.log("Usuário não autenticado, redirecionando para erro.");
+    console.warn("[ProtectedRoute] usuarioData está null. Redirecionando para /error404");
     return <Navigate to="/error404" />;
   }
 
-  // Se o tipo de usuário não estiver na lista de permitidos, redireciona para a página de erro
   if (!allowedRoles.includes(usuarioData.tipo_usuario)) {
-    console.log(`Acesso negado para o tipo de usuário: ${usuarioData.tipo_usuario}. Redirecionando para erro.`);
+    console.warn(`[ProtectedRoute] Tipo de usuário '${usuarioData.tipo_usuario}' não permitido. Redirecionando para /error404`);
     return <Navigate to="/error404" />;
   }
 
+  console.log("[ProtectedRoute] Acesso permitido, renderizando children.");
   return children;
 }

@@ -3,12 +3,19 @@ import { QueryRankingMarcas } from "../../../graphql/Marca/Query";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { TypesRankingMarcasFields } from "../../../graphql/Marca/Types";
 
-export function RankingMarcas() {
+interface RankingProps {
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export function RankingMarcas({ startDate, endDate }:RankingProps) {
   const { data, error, loading } = QueryRankingMarcas({
     variables: {
       filters: {
         pagina: 0,
         quantidade: 1000,
+        startDate: startDate ? startDate : null,
+        endDate: endDate ? endDate : null
       },
     },
   });

@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
-import { TypesGetLojasFields, TypesRankingLojasTypes } from "./Types";
-import { GET_LOJAS, GET_RANKING_LOJAS } from "./Schema";
+import { TypesGetLojaInsights, TypesGetLojasFields, TypesRankingLojasTypes } from "./Types";
+import { GET_LOJA_INSIGHTS, GET_LOJAS, GET_RANKING_LOJAS } from "./Schema";
 
 interface QueryProps {
   variables: any
@@ -25,4 +25,17 @@ export function QueryRankingLojas({variables}: QueryProps) {
   });
 
   return { data, error, loading };
+}
+
+export function QueryLojaInsights({variables}: QueryProps) {
+
+  const { data, error, loading, refetch } = useQuery<TypesGetLojaInsights>(
+    GET_LOJA_INSIGHTS,
+    {
+      variables,
+      fetchPolicy: "network-only", // Evita cachear dados já carregados
+    }
+  );
+
+  return { data, error, loading, refetch };
 }

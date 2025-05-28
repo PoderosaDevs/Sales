@@ -32,6 +32,31 @@ export interface TypesRankingLojasTypes {
   }
 }
 
+
+export interface TypesGetLojaInsights {
+  GetLojaInsights: {
+      pageInfo: {
+        currentPage: number
+        totalPages: number
+        totalItems: number
+        hasNextPage: boolean
+        hasPreviousPage: boolean
+      }
+      result: {
+        nome_fantasia: string
+        pontos_totais: number
+        marca: {
+          nome: string
+          quantidade: number
+        }[]
+        vendedores: {
+          nome: string
+          quantidade: number
+        }[]
+      }
+    }
+}
+
 export interface TypesSetLojaFields {
   SetLoja: {
     id: number;

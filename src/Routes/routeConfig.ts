@@ -10,6 +10,10 @@ export const routeTitles: RouteConfig = {
   "/ajuda": "Ajuda",
 
   "/backoffice": "Backoffice",
+  "/backoffice/store/:id": "Estatísticas da Loja",
+  "/backoffice/employee/:id": "Estatísticas do Vendedor",
+
+
   "/marcas": "Marcas",
   "/funcionarios": "Funcionarios",
   "/produtos": "Produtos",
