@@ -64,13 +64,18 @@ export function EmployeeInsights() {
 
   const applyFilters = () => {
     if (startDate && endDate) {
+      const formatToDDMMYYYY = (isoDate: string) => {
+        const [year, month, day] = isoDate.split("-");
+        return `${day}/${month}/${year}`;
+      };
+
       refetch({
         filters: {
           userId: parseInt(id!),
           pagina: 0,
           quantidade: 10,
-          startDate: formatDate(startDate),
-          endDate: formatDate(endDate),
+          startDate: formatToDDMMYYYY(startDate),
+          endDate: formatToDDMMYYYY(endDate),
         },
       });
     }
