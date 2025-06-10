@@ -69,13 +69,19 @@ export const GET_FUNCIONARIO_INSIGHTS = gql`
         email
         tipo_pessoa
         pontos_totais
+        pontos_totais_coloracao
+        pontos_totais_tratamento
+        marcas {
+          quantidade
+          nome
+          pontos_tratamento
+          pontos_coloracao
+        }
         lojas {
           nome
           quantidade
-        }
-        marcas {
-          nome
-          quantidade
+          pontos_tratamento
+          pontos_coloracao
         }
       }
     }

@@ -15,6 +15,24 @@ import { IoIosClose } from "react-icons/io";
 type SalesStat = {
   name: string;
   total: number;
+  tratamento?: number;
+  coloracao?: number;
+};
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const total =
+      (payload.find((p: any) => p.dataKey === "coloracao")?.value || 0) +
+      (payload.find((p: any) => p.dataKey === "tratamento")?.value || 0);
+
+    return (
+      <div className="bg-white p-2 rounded shadow text-sm text-gray-800 border border-gray-300">
+        <strong>Total:</strong> {total}
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export function EmployeeInsights() {
@@ -101,11 +119,15 @@ export function EmployeeInsights() {
 
   const employee = data.GetUsuariosInsights.result;
   const faturamentoTotal = employee.pontos_totais;
+  const coloracaoTotal = employee.pontos_totais_coloracao;
+  const tratamentoTotal = employee.pontos_totais_tratamento;
 
   const topStores: SalesStat[] = [...employee.lojas]
     .map((loja) => ({
       name: loja.nome,
       total: loja.quantidade,
+      tratamento: loja.pontos_tratamento,
+      coloracao: loja.pontos_coloracao,
     }))
     .sort((a, b) => b.total - a.total);
 
@@ -113,6 +135,8 @@ export function EmployeeInsights() {
     .map((marca) => ({
       name: marca.nome,
       total: marca.quantidade,
+      tratamento: marca.pontos_tratamento,
+      coloracao: marca.pontos_coloracao,
     }))
     .sort((a, b) => b.total - a.total);
 
@@ -182,6 +206,15 @@ export function EmployeeInsights() {
       <div>
         <div className="w-full flex flex-row justify-between">
           <h1 className="text-3xl">Estatísticas</h1>
+
+          <p className="text-2xl font-semibold">
+            Total de colorações:{" "}
+            <span className="text-purple-500">{coloracaoTotal}</span>
+          </p>
+          <p className="text-2xl font-semibold">
+            Total de tratamentos:{" "}
+            <span className="text-purple-500">{tratamentoTotal}</span>
+          </p>
           <p className="text-2xl font-semibold">
             Total produtos vendidos:{" "}
             <span className="text-purple-500">{faturamentoTotal}</span>
@@ -200,8 +233,33 @@ export function EmployeeInsights() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="coloracao"
+                  stackId="a"
+                  fill="#105fb9"
+                  name="Coloração"
+                  label={{
+                    position: "center",
+                    fill: "#fff",
+                    fontStyle: "bold",
+                    fontSize: 16,
+                  }}
+                  radius={[4, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="tratamento"
+                  stackId="a"
+                  fill="#8b5cf6"
+                  name="Tratamento"
+                  label={{
+                    position: "center",
+                    fill: "#fff",
+                    fontStyle: "bold",
+                    fontSize: 16,
+                  }}
+                  radius={[0, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -217,8 +275,33 @@ export function EmployeeInsights() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="coloracao"
+                  stackId="a"
+                  fill="#105fb9"
+                  name="Coloração"
+                  label={{
+                    position: "center",
+                    fill: "#fff",
+                    fontStyle: "bold",
+                    fontSize: 16,
+                  }}
+                  radius={[4, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="tratamento"
+                  stackId="a"
+                  fill="#8b5cf6"
+                  name="Tratamento"
+                  label={{
+                    position: "center",
+                    fill: "#fff",
+                    fontStyle: "bold",
+                    fontSize: 16,
+                  }}
+                  radius={[0, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

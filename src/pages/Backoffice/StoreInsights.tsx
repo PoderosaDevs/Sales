@@ -180,6 +180,7 @@ export function StoreInsights() {
             Total produtos vendidos:{" "}
             <span className="text-purple-500">{faturamentoTotal}</span>
           </p>
+          
         </div>
         <hr className="my-4" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

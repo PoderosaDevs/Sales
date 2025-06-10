@@ -63,11 +63,17 @@ export interface GetFuncionarioInsightsTypes {
       lojas: {
         nome: string;
         quantidade: number;
-      }[]
+        pontos_coloracao: number;
+        pontos_tratamento: number;
+      }[];
       marcas: {
         nome: string;
         quantidade: number;
-      }[]
+        pontos_coloracao: number;
+        pontos_tratamento: number;
+      }[];
+      pontos_totais_coloracao: number;
+      pontos_totais_tratamento: number;
     };
   };
 }
