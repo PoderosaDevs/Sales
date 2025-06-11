@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import { QueryFuncionarioInsights } from "../../graphql/Usuario/Query";
 import { IoIosClose } from "react-icons/io";
@@ -27,7 +28,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
     return (
       <div className="bg-white p-2 rounded shadow text-sm text-gray-800 border border-gray-300">
-        <strong>Total:</strong> {total}
+        <p><strong>Total:</strong> {total}</p>
       </div>
     );
   }
@@ -53,19 +54,11 @@ export function EmployeeInsights() {
     },
   });
 
-  const formatDate = (date: string) => {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  function formatDateString(dateStr: string) {
+  const formatDateString = (dateStr: string) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
     return `${day}/${month}/${year}`;
-  }
+  };
 
   const formatDateDisplay = (date: Date) =>
     `${String(date.getDate()).padStart(2, "0")}/${String(
@@ -208,100 +201,51 @@ export function EmployeeInsights() {
           <h1 className="text-3xl">Estatísticas</h1>
 
           <p className="text-2xl font-semibold">
-            Total de colorações:{" "}
-            <span className="text-purple-500">{coloracaoTotal}</span>
+            Total de colorações: <span className="text-purple-500">{coloracaoTotal}</span>
           </p>
           <p className="text-2xl font-semibold">
-            Total de tratamentos:{" "}
-            <span className="text-purple-500">{tratamentoTotal}</span>
+            Total de tratamentos: <span className="text-purple-500">{tratamentoTotal}</span>
           </p>
           <p className="text-2xl font-semibold">
-            Total produtos vendidos:{" "}
-            <span className="text-purple-500">{faturamentoTotal}</span>
+            Total produtos vendidos: <span className="text-purple-500">{faturamentoTotal}</span>
           </p>
         </div>
         <hr className="my-4" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Lojas */}
           <div className="bg-white shadow-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-4">Top Lojas Vendidas</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={topStores}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
+              <BarChart data={topStores} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="coloracao"
-                  stackId="a"
-                  fill="#105fb9"
-                  name="Coloração"
-                  label={{
-                    position: "center",
-                    fill: "#fff",
-                    fontStyle: "bold",
-                    fontSize: 16,
-                  }}
-                  radius={[4, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="tratamento"
-                  stackId="a"
-                  fill="#8b5cf6"
-                  name="Tratamento"
-                  label={{
-                    position: "center",
-                    fill: "#fff",
-                    fontStyle: "bold",
-                    fontSize: 16,
-                  }}
-                  radius={[0, 4, 0, 0]}
-                />
+                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
+                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                </Bar>
+                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
+                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
+          {/* Marcas */}
           <div className="bg-white shadow-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-4">Top Marcas Vendidas</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={topBrands}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
+              <BarChart data={topBrands} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="coloracao"
-                  stackId="a"
-                  fill="#105fb9"
-                  name="Coloração"
-                  label={{
-                    position: "center",
-                    fill: "#fff",
-                    fontStyle: "bold",
-                    fontSize: 16,
-                  }}
-                  radius={[4, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="tratamento"
-                  stackId="a"
-                  fill="#8b5cf6"
-                  name="Tratamento"
-                  label={{
-                    position: "center",
-                    fill: "#fff",
-                    fontStyle: "bold",
-                    fontSize: 16,
-                  }}
-                  radius={[0, 4, 0, 0]}
-                />
+                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
+                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                </Bar>
+                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
+                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
