@@ -85,19 +85,6 @@ export function Summary() {
     calculateTotalPoints();
   }, [cartItems]);
 
-  // Definir a data mínima e máxima para o campo de data
-  useEffect(() => {
-    const now = new Date();
-    
-    // Definindo minDate para 48 horas atrás
-    const minDate = new Date(now.getTime() - 48 * 60 * 60 * 1000); 
-    // Definindo maxDate para a data de hoje
-    const maxDate = now;
-
-    // Definindo minDate e maxDate como strings no formato YYYY-MM-DD
-    setMinDate(minDate.toISOString().split("T")[0]); // Data 48 horas atrás
-    setMaxDate(maxDate.toISOString().split("T")[0]); // Data atual
-  }, []);
 
   // Atualizar a data selecionada
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -369,9 +356,6 @@ export function Summary() {
             </label>
             <input
               type="date"
-              id="date"
-              min={minDate}
-              max={maxDate}
               value={selectedDate}
               onChange={handleDateChange}
               className="border w-64 text-center outline-none text-xl rounded-lg p-2 mt-1"
