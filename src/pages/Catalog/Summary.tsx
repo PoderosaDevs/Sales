@@ -23,7 +23,7 @@ export function Summary() {
     variables: {
       pagination: {
         pagina: 0,
-        quantidade: 30,
+        quantidade: 60,
       },
     },
   });
