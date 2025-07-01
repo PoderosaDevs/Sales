@@ -78,7 +78,7 @@ export function Vendas() {
           <div className="bg-white rounded-lg flex flex-col gap-4 justify-center shadow-custom p-6 md:hidden">
             <Link
               to={"/catalog"}
-              className="bg-purple-700 flex items-center justify-between text-lg font-semibold text-white rounded-lg px-4 py-4 hover:bg-purple-800"
+              className="bg-indigo-600 flex items-center justify-between text-lg font-semibold text-white rounded-lg px-4 py-4 hover:bg-purple-800"
             >
               Nova venda <IoBagHandleSharp size={20} />
             </Link>
@@ -109,7 +109,7 @@ export function Vendas() {
                 {loading ? (
                   <div className="flex justify-center items-center flex-col h-[50vh]">
                     <h2 className="text-3xl text-gray-900 mb-4">Carregando</h2>
-                    <BounceLoader color="#7e22ce" size={44} />
+                    <BounceLoader color="#6366f1" size={44} />
                   </div>
                 ) : data?.GetVendaByUsuarioID.length === 0 ? (
                   <span className="text-gray-500 text-center text-sm">

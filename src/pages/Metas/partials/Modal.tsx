@@ -104,7 +104,7 @@ export function MetaModal() {
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
-        <button className="px-3 py-2 bg-slate-900 text-white font-semibold flex items-center justify-center gap-2 rounded-lg">
+        <button className="px-3 py-2 bg-indigo-600 text-white flex items-center justify-center gap-2 rounded-lg">
           <FiPlusSquare size={20} /> Nova Meta
         </button>
       </Dialog.Trigger>

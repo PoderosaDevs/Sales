@@ -94,7 +94,7 @@ function LoginComponent() {
         </div>
         <button
           type="submit"
-          className="w-full outline-none bg-purple-700 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {loading ? <BounceLoader color="#ffffff" size={24} /> : "Entrar"}
         </button>

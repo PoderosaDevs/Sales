@@ -26,7 +26,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
     return (
       <div className="flex justify-center items-center flex-col h-[50vh]">
         <h2 className="text-3xl text-gray-900 mb-4">Carregando</h2>
-        <BounceLoader color="#7e22ce" size={84} />
+        <BounceLoader color="#6366f1" size={84} />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
                     <span className="ml-2">Pontos</span>
                   </span>
                   <button
-                    className="bg-purple-700 text-sm px-1 py-1  text-white rounded hover:bg-purple-800 transition md:px-3 md:py-2 "
+                    className="bg-indigo-600 text-sm px-1 py-1  text-white rounded hover:bg-purple-800 transition md:px-3 md:py-2 "
                     onClick={() => handleAddProduct(produto)}
                   >
                     <FaPlus size={18} />

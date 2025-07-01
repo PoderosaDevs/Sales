@@ -11,7 +11,7 @@ interface LoaderProps {
 
 export function Loader({
   size,
-  color = "#7e22ce",
+  color = "#6366f1",
   hasText,
   text = "Carregando...",
   sizeDiv = "h-[25vh]", // Valor padrão se sizeDiv não for passado

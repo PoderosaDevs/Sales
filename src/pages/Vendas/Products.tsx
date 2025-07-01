@@ -73,7 +73,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
                     <span className="ml-2">Pontos</span>
                   </span>
                   <button
-                    className="bg-purple-700 text-sm px-1 py-1  text-white rounded hover:bg-purple-800 transition md:px-3 md:py-2 "
+                    className="bg-indigo-600 text-sm px-1 py-1  text-white rounded hover:bg-purple-800 transition md:px-3 md:py-2 "
                     onClick={() => handleAddProduct(produto)}
                   >
                     <FaPlus size={18} />

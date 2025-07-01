@@ -23,7 +23,7 @@ export function Summary() {
     variables: {
       pagination: {
         pagina: 0,
-        quantidade: 30,
+        quantidade: 100,
       },
     },
   });
@@ -84,7 +84,6 @@ export function Summary() {
   useEffect(() => {
     calculateTotalPoints();
   }, [cartItems]);
-
 
   // Atualizar a data selecionada
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,7 +330,7 @@ export function Summary() {
         <div className="flex flex-col justify-between flex-wrap sm:flex-row items-center w-full">
           <div className="flex flex-row items-center w-full lg:w-auto justify-between mb-2 lg:mb-0">
             <label htmlFor="loja" className="block text-xl mr-2 font-semibold">
-              Loja:
+              Lojas:
             </label>
             <select
               className="border border-gray-300 bg-white shadow-md w-60 px-3 py-2 text-start text-lg outline-none rounded-lg mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition ease-in-out"
@@ -343,11 +342,17 @@ export function Summary() {
               <option value="" className="text-gray-500">
                 Selecione uma loja
               </option>
-              {dataLojas?.GetLojas.result.map((loja) => (
-                <option key={loja.id} value={loja.id} className="text-gray-800">
-                  {loja.nome_fantasia}
-                </option>
-              ))}
+              {[...(dataLojas?.GetLojas.result || [])]
+                .sort((a, b) => a.nome_fantasia.localeCompare(b.nome_fantasia))
+                .map((loja) => (
+                  <option
+                    key={loja.id}
+                    value={loja.id}
+                    className="text-gray-800"
+                  >
+                    {loja.nome_fantasia}
+                  </option>
+                ))} 
             </select>
           </div>
           <div className="flex flex-row items-center w-full lg:w-auto justify-between">

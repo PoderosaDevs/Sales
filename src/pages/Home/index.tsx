@@ -67,7 +67,7 @@ export function Home() {
         <div className="bg-white rounded-lg flex flex-col gap-4 justify-center shadow-custom p-6 md:hidden">
           <Link
             to={"/catalog"}
-            className="bg-purple-700 flex items-center justify-between text-lg font-semibold text-white rounded-lg px-4 py-4 hover:bg-purple-800"
+            className="bg-indigo-600 flex items-center justify-between text-lg font-semibold text-white rounded-lg px-4 py-4 hover:bg-purple-800"
           >
             Iniciar venda <IoBagHandleSharp size={20} />
           </Link>

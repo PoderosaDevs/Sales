@@ -8,6 +8,7 @@ import { DayPicker, DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { ptBR } from "date-fns/locale";
 import { FaXmark } from "react-icons/fa6";
+import { ManagerModules } from "./TableComponents/ManagerModules";
 
 export function Backoffice() {
   const { usuarioData } = useAuth();
@@ -83,7 +84,7 @@ export function Backoffice() {
             ) : (
               // Caso contrário, exibe o botão
               <button
-                className="bg-purple-700 text-white py-2 px-4 rounded"
+                className="bg-indigo-600 text-white py-2 px-4 rounded"
                 onClick={() => setIsPopupVisible(!isPopupVisible)} // Alterna a visibilidade do popup ao clicar no botão
               >
                 Selecionar Data
@@ -109,7 +110,7 @@ export function Backoffice() {
         </div>
       </div>
 
-      <div className="grid mt-6 mb-6 grid-cols-1 md:grid-cols-1 gap-4">
+      <div className="grid mt-6 mb-6 grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Vendas por Marcas</h2>
           <RankingMarcas
@@ -132,6 +133,10 @@ export function Backoffice() {
             startDate={isRangeComplete ? startDateFormatted : ""}
             endDate={isRangeComplete ? endDateFormatted : ""}
           />
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md col-span-1 relative">
+          <h2 className="text-xl font-bold mb-4">Modulos de gerenciamento</h2>
+            <ManagerModules />
         </div>
       </div>
     </div>
