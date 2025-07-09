@@ -160,13 +160,13 @@ export function Summary() {
         <div className="flex items-center flex-col gap-4 md:flex-row md:gap-0">
           <div className="flex justify-between">
             <span className="font-semibold text-xl">Total de Pontos:</span>
-            <span className="text-xl ml-2 text-custom-bg-start font-semibold">
+            <span className="text-xl ml-2 text-indigo-600 font-semibold">
               {totalPoints}
             </span>
           </div>
           <div className="flex justify-between px-2">
             <span className="font-semibold text-xl">Total de Itens:</span>
-            <span className="text-xl ml-2 text-custom-bg-start font-semibold">
+            <span className="text-xl ml-2 text-indigo-600 font-semibold">
               {totalItems}
             </span>
           </div>
@@ -175,7 +175,7 @@ export function Summary() {
           <button
             className={`p-2 ${
               viewMode === "grid"
-                ? "bg-gray-200 text-custom-bg-start"
+                ? "bg-gray-200 text-indigo-600"
                 : "bg-white"
             } rounded`}
             onClick={() => setViewMode("grid")}
@@ -329,11 +329,11 @@ export function Summary() {
       <div className="flex border-t pt-2 flex-col mt-4">
         <div className="flex flex-col justify-between flex-wrap sm:flex-row items-center w-full">
           <div className="flex flex-row items-center w-full lg:w-auto justify-between mb-2 lg:mb-0">
-            <label htmlFor="loja" className="block text-xl mr-2 font-semibold">
+            <label htmlFor="loja" className="block text-lg mr-2 font-semibold">
               Lojas:
             </label>
             <select
-              className="border border-gray-300 bg-white shadow-md w-60 px-3 py-2 text-start text-lg outline-none rounded-lg mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition ease-in-out"
+              className="border border-gray-300 bg-white shadow-md w-60 px-3 py-2 text-start text-md outline-none rounded-lg mt-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition ease-in-out"
               id="loja"
               name="loja"
               value={selectedLoja}
@@ -356,14 +356,14 @@ export function Summary() {
             </select>
           </div>
           <div className="flex flex-row items-center w-full lg:w-auto justify-between">
-            <label htmlFor="date" className="block text-xl mr-2 font-semibold">
+            <label htmlFor="date" className="block text-lg mr-2 font-semibold">
               Data da venda:
             </label>
             <input
               type="date"
               value={selectedDate}
               onChange={handleDateChange}
-              className="border w-64 text-center outline-none text-xl rounded-lg p-2 mt-1"
+              className="border w-64 text-center outline-none text-md rounded-lg p-2 mt-1"
               disabled={cartItems.length === 0} // Desativa o input se o carrinho estiver vazio
             />
           </div>

@@ -4,7 +4,7 @@ import { GET_METAS } from "./Schema";
 
 interface QueryProps {
   variables: any
-  skip: boolean
+  skip?: boolean
 }
 
 export function QueryGetMetas({variables, skip}: QueryProps) {

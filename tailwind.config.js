@@ -11,7 +11,7 @@ export default {
         'custom-bg-end': '#97D9E1',
       },
       backgroundImage: {
-        'custom-gradient': 'linear-gradient(to right, #240b36, #c31432)',
+        'custom-gradient': 'linear-gradient(to right, #240b36, #4f46e5)',
       },
       fontFamily: {
         outfit: ['Outfit', 'sans-serif'],

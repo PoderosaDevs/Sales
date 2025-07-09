@@ -52,13 +52,13 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
             </div>
           </div>
           <div className="p-4 flex-1 flex flex-col justify-end">
-            <h2 className="text-sm font-semibold mb-2 md:text-lg">{produto.nome}</h2>
+            <h2 className="text-sm font-semibold mb-2 md:text-lg">
+              {produto.nome}
+            </h2>
             <div className="flex items-center justify-between">
               {isProductInCart(produto.id) ? (
                 <div className="flex w-full items-center justify-between">
-                  <span className="text-sm text-gray-600  md:text-lg">
-                    Produto já adicionado
-                  </span>
+                
                   <button
                     className="bg-red-700 text-sm text-white px-3 py-2 rounded hover:bg-red-500 transition"
                     onClick={() => removeProduct(produto.id)}
@@ -67,13 +67,9 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
                   </button>
                 </div>
               ) : (
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-sm gap-2 md:text-xl">
-                    {produto.pontos || "N/A"}
-                    <span className="ml-2">Pontos</span>
-                  </span>
+                <div className="flex w-full">
                   <button
-                    className="bg-indigo-600 text-sm px-1 py-1  text-white rounded hover:bg-purple-800 transition md:px-3 md:py-2 "
+                    className="bg-indigo-600 w-full text-sm px-1 py-1  text-white rounded hover:bg-indigo-700 transition md:px-3 md:py-2 "
                     onClick={() => handleAddProduct(produto)}
                   >
                     <FaPlus size={18} />

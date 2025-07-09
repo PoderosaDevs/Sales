@@ -5,10 +5,11 @@ import PasswordFields from "./partials/PasswordsFields";
 import Swal from "sweetalert2";
 
 function Register() {
-  const { register, FormSetUsuario, loading, handleSubmit, errors } = MutationSetUsuario();
+  const { register, FormSetUsuario, loading, handleSubmit, errors } =
+    MutationSetUsuario();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
-  const navigate = useNavigate()
-  console.log(errors)
+  const navigate = useNavigate();
+  console.log(errors);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 450);
@@ -26,7 +27,6 @@ function Register() {
     Swal.showLoading();
   }
 
-
   const onSubmit = async (data: any) => {
     try {
       const result = await FormSetUsuario(data);
@@ -35,25 +35,25 @@ function Register() {
       // Verifica se o result tem um networkError ou response status 400
       if (result?.networkError?.response?.status === 400) {
         Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Ocorreu um erro, tente novamente mais tarde.',
+          icon: "error",
+          title: "Erro!",
+          text: "Ocorreu um erro, tente novamente mais tarde.",
         });
         return; // Para a execução em caso de erro
       }
 
       // Verifica se há erros no result
       if (result?.errors && result.errors.length > 0) {
-        let errorMessage = result.errors[0]?.message || 'Erro desconhecido.';
+        let errorMessage = result.errors[0]?.message || "Erro desconhecido.";
 
         // Verifica se o erro está relacionado ao email já cadastrado
-        if (result.errors[0]?.message === 'Email já cadastrado no sistema!') {
-          errorMessage = 'Esse email já está cadastrado. Tente outro.';
+        if (result.errors[0]?.message === "Email já cadastrado no sistema!") {
+          errorMessage = "Esse email já está cadastrado. Tente outro.";
         }
 
         Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
+          icon: "error",
+          title: "Erro!",
           text: errorMessage,
         });
         return; // Para a execução em caso de erro
@@ -61,19 +61,17 @@ function Register() {
 
       // Se não houver erros, exibe o Swal de sucesso
       Swal.fire({
-        icon: 'success',
-        title: 'Conta criada com sucesso!',
-        text: 'Você pode agora fazer login.',
+        icon: "success",
+        title: "Conta criada com sucesso!",
+        text: "Você pode agora fazer login.",
       }).then(() => {
         navigate("/");
       });
-
-
     } catch (error: any) {
       console.error(error);
 
       // Captura os erros de requisição HTTP
-      let errorMessage = 'Houve um erro ao salvar os dados do usuário.';
+      let errorMessage = "Houve um erro ao salvar os dados do usuário.";
 
       // Verifica se o erro tem uma resposta HTTP válida
       if (error?.response) {
@@ -83,28 +81,37 @@ function Register() {
       }
 
       Swal.fire({
-        icon: 'error',
-        title: 'Erro!',
+        icon: "error",
+        title: "Erro!",
         text: errorMessage,
       });
     }
   };
 
   return (
-    <div className={`bg-white ${isMobile ? 'w-[80%] px-5 py-3' : 'w-[500px] px-14 py-4'} rounded-lg mx-auto shadow-md w-full`}>
-      <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+    <div
+      className={`bg-white ${
+        isMobile ? "w-[80%] px-5 py-3" : "w-[500px] px-14 py-4"
+      } rounded-lg mx-auto shadow-md w-full`}
+    >
+      <form className="w-full pb-4" onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-2xl text-center font-bold my-2 text-gray-800">
           Criar Conta
         </h1>
 
         <div className="mb-4">
-          <label htmlFor="name" className="block font-bold text-xl text-gray-700 tracking-wide mb-2">
+          <label
+            htmlFor="name"
+            className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
+          >
             Nome
           </label>
           <input
             type="text"
             id="name"
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${errors.nome ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
+              errors.nome ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Seu nome completo"
             {...register("nome")}
             onKeyPress={(event) => {
@@ -115,36 +122,44 @@ function Register() {
             }}
           />
 
-          {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+          {errors.nome && (
+            <span className="text-red-500 text-sm">{errors.nome.message}</span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label htmlFor="email" className="block font-bold text-xl text-gray-700 tracking-wide mb-2">
+          <label
+            htmlFor="email"
+            className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
+          >
             Email
           </label>
           <input
             type="email"
             id="email"
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Ex: usuario@poderosa"
             {...register("email")}
           />
-          {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+          {errors.email && (
+            <span className="text-red-500 text-sm">{errors.email.message}</span>
+          )}
         </div>
-
 
         <PasswordFields errors={errors} register={register} />
 
         <button
           type="submit"
-          className="w-full bg-custom-gradient text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Criar Conta
         </button>
 
         <span className="block text-center font-semibold mt-5 text-gray-600 text-md">
           Já tem uma conta?{" "}
-          <Link to="/" className="text-blue-500 font-bold hover:underline">
+          <Link to="/" className="text-indigo-500 font-bold hover:underline">
             Fazer Login
           </Link>
         </span>

@@ -1,34 +1,37 @@
 import { gql } from "@apollo/client";
 
 export const GET_METAS = gql`
-query GetMetas($usuarioId: Int!) {
-  GetMetas(usuarioId: $usuarioId) {
-    id
-    nome
-    descricao
-    usuario_id
-    data_inicio
-    data_fim
-    pontos_objetivo
-    meta_etapas {
+  query GetMetas($usuarioId: Int!, $dataInicio: String, $dataFim: String) {
+    GetMetas(
+      usuarioId: $usuarioId
+      data_inicio: $dataInicio
+      data_fim: $dataFim
+    ) {
       id
-      meta_id
-      etapa_numero
-      quantidade
-      recompensa
-      valor
-      atingida
-      importancia
+      nome
+      descricao
+      data_inicio
+      data_fim
+      meta_etapas {
+        id
+        nome
+        quantidade_objetivo
+        quantidade_atual
+        atingida
+      }
+      marcaId
+      usuarioId
+      quantidade_atual
+      quantidade_objetivo
+      situacao
     }
-    marcaId
   }
-}
-`
+`;
 
 export const SET_META = gql`
-mutation SetMeta($etapas: [MetaEtapaInputs!]!, $pontosObjetivo: Float!, $usuarioId: Int!, $nome: String!, $marcaId: Int, $descricao: String) {
-  SetMeta(etapas: $etapas, pontos_objetivo: $pontosObjetivo, usuarioId: $usuarioId, nome: $nome, marcaId: $marcaId, descricao: $descricao) {
-    id
+  mutation Mutation($data: CreateMetaInput!) {
+    SetMeta(data: $data) {
+      id
+    }
   }
-}
-`
+`;

@@ -68,7 +68,7 @@ export function Aside({}: AsideProps) {
                 <RxDashboard
                   size={28}
                   className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "home" ? "text-custom-bg-start" : "text-gray-600"
+                    activeIcon === "home" ? "text-indigo-600" : "text-gray-600"
                   }`}
                 />
               </button>
@@ -85,7 +85,7 @@ export function Aside({}: AsideProps) {
                 <AiOutlineProduct
                   size={28}
                   className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "catalog" ? "text-custom-bg-start" : "text-gray-600"
+                    activeIcon === "catalog" ? "text-indigo-600" : "text-gray-600"
                   }`}
                 />
               </button>
@@ -102,7 +102,7 @@ export function Aside({}: AsideProps) {
                 <IoBagHandleOutline
                   size={28}
                   className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "vendas" ? "text-custom-bg-start" : "text-gray-600"
+                    activeIcon === "vendas" ? "text-indigo-600" : "text-gray-600"
                   }`}
                 />
               </button>
@@ -121,7 +121,7 @@ export function Aside({}: AsideProps) {
                   <GrDatabase
                     size={28}
                     className={`transition-colors duration-300 ease-in-out ${
-                      activeIcon === "backoffice" ? "text-custom-bg-start" : "text-gray-600"
+                      activeIcon === "backoffice" ? "text-indigo-600" : "text-gray-600"
                     }`}
                   />
                 </button>

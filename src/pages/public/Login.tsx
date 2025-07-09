@@ -79,7 +79,7 @@ function LoginComponent() {
             Senha
             <Link
               to="/forgot-password"
-              className="text-purple-700 text-sm hover:underline"
+              className="text-indigo-600 text-sm hover:underline"
             >
               Esqueceu sua senha?
             </Link>
@@ -94,7 +94,7 @@ function LoginComponent() {
         </div>
         <button
           type="submit"
-          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {loading ? <BounceLoader color="#ffffff" size={24} /> : "Entrar"}
         </button>
@@ -102,7 +102,7 @@ function LoginComponent() {
           Novo aqui?{" "}
           <Link
             to="/register"
-            className="text-purple-700 font-bold hover:underline"
+            className="text-indigo-600 font-bold hover:underline"
           >
             Criar uma Conta
           </Link>

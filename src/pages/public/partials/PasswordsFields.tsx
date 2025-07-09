@@ -1,10 +1,10 @@
 // PasswordFields.js
-import React, { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const PasswordFields = ({ register, errors }) => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -42,40 +42,54 @@ const PasswordFields = ({ register, errors }) => {
         </label>
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             id="password"
             {...register("senha", { required: "A senha é obrigatória." })} // Adicionando registro com validação
             value={password}
             onChange={handlePasswordChange}
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${errors.senha ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
+              errors.senha ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Digite sua senha"
           />
           <button
             type="button"
             onClick={toggleShowPassword}
-            className="absolute right-2 top-2"
+            className="absolute right-2 top-3"
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
+            {showPassword ? (
+              <FaEyeSlash className="text-indigo-500" />
+            ) : (
+              <FaEye className="text-indigo-500" />
+            )}
           </button>
         </div>
         <div className="mt-2">
           <div className="h-2 bg-gray-300 rounded">
             <div
-              className={`h-full ${passwordStrength === 1 ? 'bg-red-500' :
-                passwordStrength === 2 ? 'bg-yellow-500' :
-                passwordStrength === 3 ? 'bg-blue-500' : 'bg-green-500'
+              className={`h-full ${
+                passwordStrength === 1
+                  ? "bg-red-500"
+                  : passwordStrength === 2
+                  ? "bg-yellow-500"
+                  : passwordStrength === 3
+                  ? "bg-blue-500"
+                  : "bg-green-500"
               } rounded`}
               style={{ width: `${(passwordStrength / 4) * 100}%` }}
             ></div>
           </div>
           <p className="text-sm mt-1">
-            {passwordStrength === 1 && 'Senha fraca'}
-            {passwordStrength === 2 && 'Senha média'}
-            {passwordStrength === 3 && 'Senha boa'}
-            {passwordStrength === 4 && 'Senha forte'}
+            {passwordStrength === 1 && "Senha fraca"}
+            {passwordStrength === 2 && "Senha média"}
+            {passwordStrength === 3 && "Senha boa"}
+            {passwordStrength === 4 && "Senha forte"}
           </p>
         </div>
-        {errors.senha && <span className="text-red-500 text-sm">{errors.senha.message}</span>} {/* Mensagem de erro */}
+        {errors.senha && (
+          <span className="text-red-500 text-sm">{errors.senha.message}</span>
+        )}{" "}
+        {/* Mensagem de erro */}
       </div>
       <div className="mb-6">
         <label
@@ -86,19 +100,27 @@ const PasswordFields = ({ register, errors }) => {
         </label>
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             id="confirm-password"
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${password !== confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
+              password !== confirmPassword
+                ? "border-red-500"
+                : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="Confirme sua senha"
           />
           <button
             type="button"
             onClick={toggleShowPassword}
-            className="absolute right-2 top-2"
+            className="absolute right-2 top-3"
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
+            {showPassword ? (
+              <FaEyeSlash className="text-indigo-500" />
+            ) : (
+              <FaEye className="text-indigo-500" />
+            )}
           </button>
         </div>
         {confirmPassword && password !== confirmPassword && (
