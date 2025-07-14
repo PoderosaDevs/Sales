@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import { QueryFuncionarioInsights } from "../../graphql/Usuario/Query";
 import { IoIosClose } from "react-icons/io";
@@ -16,6 +17,24 @@ import { QueryLojaInsights } from "../../graphql/Loja/Query";
 type SalesStat = {
   name: string;
   total: number;
+  tratamento?: number;
+  coloracao?: number;
+};
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const total =
+      (payload.find((p: any) => p.dataKey === "coloracao")?.value || 0) +
+      (payload.find((p: any) => p.dataKey === "tratamento")?.value || 0);
+
+    return (
+      <div className="bg-white p-2 rounded shadow text-sm text-gray-800 border border-gray-300">
+        <p><strong>Total:</strong> {total}</p>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export function StoreInsights() {
@@ -36,19 +55,11 @@ export function StoreInsights() {
     },
   });
 
-  const formatDate = (date: string) => {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  function formatDateString(dateStr: string) {
+  const formatDateString = (dateStr: string) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
     return `${day}/${month}/${year}`;
-  }
+  };
 
   const formatDateDisplay = (date: Date) =>
     `${String(date.getDate()).padStart(2, "0")}/${String(
@@ -65,13 +76,18 @@ export function StoreInsights() {
 
   const applyFilters = () => {
     if (startDate && endDate) {
+      const formatToDDMMYYYY = (isoDate: string) => {
+        const [year, month, day] = isoDate.split("-");
+        return `${day}/${month}/${year}`;
+      };
+
       refetch({
         filters: {
-          userId: parseInt(id!),
+          lojaId: parseInt(id!),
           pagina: 0,
           quantidade: 10,
-          startDate: formatDate(startDate),
-          endDate: formatDate(endDate),
+          startDate: formatToDDMMYYYY(startDate),
+          endDate: formatToDDMMYYYY(endDate),
         },
       });
     }
@@ -82,7 +98,7 @@ export function StoreInsights() {
     setEndDate(null);
     refetch({
       filters: {
-        userId: parseInt(id!),
+        lojaId: parseInt(id!),
         pagina: 0,
         quantidade: 10,
         startDate: null,
@@ -93,22 +109,28 @@ export function StoreInsights() {
 
   if (loading) return <p>Carregando dados...</p>;
   if (!data || !data.GetLojaInsights?.result)
-    return <p>Funcionário não encontrado</p>;
+    return <p>Loja não encontrada</p>;
 
-  const employee = data.GetLojaInsights.result;
-  const faturamentoTotal = employee.pontos_totais;
+  const store = data.GetLojaInsights.result;
+  const faturamentoTotal = store.pontos_totais;
+  const coloracaoTotal = store.pontos_totais_coloracao;
+  const tratamentoTotal = store.pontos_totais_tratamento;
 
-  const topStores: SalesStat[] = [...employee.vendedores]
-    .map((loja) => ({
-      name: loja.nome,
-      total: loja.quantidade,
+  const topEmployees: SalesStat[] = [...store.vendedores]
+    .map((vendedor) => ({
+      name: vendedor.nome,
+      total: vendedor.quantidade,
+      tratamento: vendedor.pontos_totais_tratamento,
+      coloracao: vendedor.pontos_totais_coloracao,
     }))
     .sort((a, b) => b.total - a.total);
 
-  const topBrands: SalesStat[] = [...employee.marca]
+  const topBrands: SalesStat[] = [...store.marcas]
     .map((marca) => ({
       name: marca.nome,
       total: marca.quantidade,
+      tratamento: marca.pontos_tratamento,
+      coloracao: marca.pontos_coloracao,
     }))
     .sort((a, b) => b.total - a.total);
 
@@ -125,7 +147,7 @@ export function StoreInsights() {
     <div className="max-w-[1500px] px-6 mt-8 m-auto">
       <div className="w-full flex flex-col justify-between items-center md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-bold mb-4">
-          {employee.nome_fantasia} - {period}
+          {store.nome_fantasia} - {period}
         </h1>
 
         <div className="flex items-center gap-4 mb-6">
@@ -173,47 +195,58 @@ export function StoreInsights() {
         </div>
       </div>
 
+      <p className="text-gray-600 mb-2">{store.nome_fantasia}</p>
+
       <div>
         <div className="w-full flex flex-row justify-between">
           <h1 className="text-3xl">Estatísticas</h1>
+
           <p className="text-2xl font-semibold">
-            Total produtos vendidos:{" "}
-            <span className="text-purple-500">{faturamentoTotal}</span>
+            Total de colorações: <span className="text-purple-500">{coloracaoTotal}</span>
           </p>
-          
+          <p className="text-2xl font-semibold">
+            Total de tratamentos: <span className="text-purple-500">{tratamentoTotal}</span>
+          </p>
+          <p className="text-2xl font-semibold">
+            Total produtos vendidos: <span className="text-purple-500">{faturamentoTotal}</span>
+          </p>
         </div>
         <hr className="my-4" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Lojas */}
           <div className="bg-white shadow-md rounded-2xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Top Lojas Vendidas</h2>
+            <h2 className="text-xl font-semibold mb-4">Top Vendedores Vendidos</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={topStores}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
+              <BarChart data={topEmployees} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
+                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                </Bar>
+                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
+                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
+          {/* Marcas */}
           <div className="bg-white shadow-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-4">Top Marcas Vendidas</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={topBrands}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
+              <BarChart data={topBrands} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
+                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                </Bar>
+                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
+                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

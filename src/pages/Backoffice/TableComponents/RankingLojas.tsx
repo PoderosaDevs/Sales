@@ -14,7 +14,7 @@ export function RankingLojas({ startDate, endDate }: RankingProps) {
     variables: {
       filters: {
         pagina: 0,
-        quantidade: 10,
+        quantidade: 20,
         startDate: startDate ? startDate : null,
         endDate: endDate ? endDate : null,
       },

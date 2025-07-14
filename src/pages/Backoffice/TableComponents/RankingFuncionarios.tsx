@@ -14,7 +14,7 @@ export function RankingFuncionarios({ startDate, endDate }: RankingProps) {
     variables: {
       filters: {
         pagina: 0,
-        quantidade: 10,
+        quantidade: 20,
         startDate: startDate ? startDate : null,
         endDate: endDate ? endDate : null,
       },
@@ -24,14 +24,21 @@ export function RankingFuncionarios({ startDate, endDate }: RankingProps) {
   const [ranking, setRanking] = useState<
     GetRankingFuncionariosTypes["GetRankingUsuarios"]["result"]
   >([]);
-  const [sortBy, setSortBy] = useState<"nome" | "pontos_totais" | null>(null);
+  const [sortBy, setSortBy] = useState<"nome" | "pontos_totais">(
+    "pontos_totais"
+  );
   const [order, setOrder] = useState<"asc" | "desc" | null>(null);
   const [originalRanking, setOriginalRanking] = useState<typeof ranking>([]); // Guarda a ordem original
 
   useEffect(() => {
     if (data?.GetRankingUsuarios?.result) {
-      setRanking(data.GetRankingUsuarios.result);
-      setOriginalRanking(data.GetRankingUsuarios.result); // Salva a ordem original
+      const filtered = data.GetRankingUsuarios.result.filter(
+        (item) =>
+          item.nome.toLowerCase() !== "usuARua teste".toLowerCase() &&
+          item.nome.toLowerCase() !== "eduardo ramos".toLowerCase()
+      );
+      setRanking(filtered);
+      setOriginalRanking(filtered); // salva a ordem original filtrada
     }
   }, [data]);
 
@@ -45,7 +52,7 @@ export function RankingFuncionarios({ startDate, endDate }: RankingProps) {
 
   // Lógica de ordenação dinâmica
   const sortedRanking = (() => {
-    if (!sortBy) return originalRanking; // Se não houver ordenação, retorna a ordem original
+    if (!sortBy) return originalRanking;
 
     return [...ranking].sort((a, b) => {
       if (sortBy === "nome") {
@@ -62,17 +69,10 @@ export function RankingFuncionarios({ startDate, endDate }: RankingProps) {
   // Alternar ordenação ao clicar no cabeçalho
   const handleSort = (column: "nome" | "pontos_totais") => {
     if (sortBy === column) {
-      if (order === "asc") {
-        setOrder("desc");
-      } else if (order === "desc") {
-        setSortBy(null); // Volta para a ordem original
-        setOrder(null);
-      } else {
-        setOrder("asc");
-      }
+      setOrder(order === "asc" ? "desc" : "asc");
     } else {
       setSortBy(column);
-      setOrder("asc");
+      setOrder("desc");
     }
   };
 

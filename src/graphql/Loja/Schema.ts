@@ -39,29 +39,37 @@ export const GET_RANKING_LOJAS = gql`
 `;
 
 export const GET_LOJA_INSIGHTS = gql`
-  query GetLojaInsights($filters: LojaInsightsFiltroInput) {
-    GetLojaInsights(filters: $filters) {
-      pageInfo {
-        currentPage
-        totalPages
-        totalItems
-        hasNextPage
-        hasPreviousPage
+ query GetLojaInsights($filters: LojaInsightsFiltroInput) {
+  GetLojaInsights(filters: $filters) {
+    pageInfo {
+      currentPage
+      totalPages
+      totalItems
+      hasNextPage
+      hasPreviousPage
+    }
+    result {
+      id
+      nome_fantasia
+      razao_social
+      pontos_totais
+      pontos_totais_coloracao
+      pontos_totais_tratamento
+      marcas {
+        nome
+        quantidade
+        pontos_tratamento
+        pontos_coloracao
       }
-      result {
-        nome_fantasia
-        pontos_totais
-        marca {
-          nome
-          quantidade
-        }
-        vendedores {
-          nome
-          quantidade
-        }
+      vendedores {
+        nome
+        quantidade
+        pontos_totais_tratamento
+        pontos_totais_coloracao
       }
     }
   }
+}
 `;
 
 export const SET_LOJA = gql`

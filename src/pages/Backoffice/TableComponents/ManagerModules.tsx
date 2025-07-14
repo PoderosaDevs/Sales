@@ -6,10 +6,12 @@ export function ManagerModules() {
     { label: "Marcas", color: "bg-indigo-600", path: '/marcas' },
     { label: "Metas", color: "bg-indigo-700", path: '/metas' },
     { label: "Produtos", color: "bg-indigo-800", path: '/produtos' },
+    { label: "Funcionários", color: "bg-indigo-900", path: '/funcionarios' },
+
   ];
 
   return (
-    <div className="w-full flex flex-wrap">
+    <div className="w-full flex">
       {items.map((item, index) => (
         <Link
         to={item.path}
