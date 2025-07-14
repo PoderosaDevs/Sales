@@ -114,13 +114,7 @@ export function Backoffice() {
         <ManagerModules />
       </div>
       <div className="grid mt-6 mb-6 grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Vendas por Lojas</h2>
-          <RankingLojas
-            startDate={isRangeComplete ? startDateFormatted : ""}
-            endDate={isRangeComplete ? endDateFormatted : ""}
-          />
-        </div>
+        
 
         <div className="bg-white p-4 rounded-lg shadow-md col-span-1">
           <h2 className="text-xl font-bold mb-4">Ranking de Vendedores</h2>
@@ -133,6 +127,14 @@ export function Backoffice() {
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Vendas por Marcas</h2>
           <RankingMarcas
+            startDate={isRangeComplete ? startDateFormatted : ""}
+            endDate={isRangeComplete ? endDateFormatted : ""}
+          />
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4">Vendas por Lojas</h2>
+          <RankingLojas
             startDate={isRangeComplete ? startDateFormatted : ""}
             endDate={isRangeComplete ? endDateFormatted : ""}
           />
