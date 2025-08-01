@@ -1,82 +1,92 @@
 import { gql } from "@apollo/client";
 
 export const SET_VENDA_SCHEMA = gql`
-mutation SetVenda($data: VendaInput!) {
-  SetVenda(data: $data) {
-    id
+  mutation SetVenda($data: VendaInput!) {
+    SetVenda(data: $data) {
+      id
+    }
   }
-}
-`
+`;
 
 export const GET_VENDAS_SCHEMA = gql`
-query GetVendas($startDate: Date, $endDate: Date) {
-  GetVendas(startDate: $startDate, endDate: $endDate) {
-    id
-    data_venda
-    pontos_totais
-    situacao
-    funcionario {
+  query GetVendas($startDate: Date, $endDate: Date) {
+    GetVendas(startDate: $startDate, endDate: $endDate) {
       id
-      nome
-    }
-    venda_detalhe {
-      produto {
+      data_venda
+      pontos_totais
+      situacao
+      funcionario {
         id
         nome
-        imagem
       }
-      pontos
-      quantidade
+      venda_detalhe {
+        produto {
+          id
+          nome
+          imagem
+        }
+        pontos
+        quantidade
+      }
     }
   }
-}
-`
-
+`;
 
 export const GET_VENDA_BY_ID = gql`
-query GetVendaByID($getVendaByIdId: Float!) {
-  GetVendaByID(id: $getVendaByIdId) {
-    id
-    data_venda
-    pontos_totais
-    situacao
-    funcionario {
+  query GetVendaByID($getVendaByIdId: Float!) {
+    GetVendaByID(id: $getVendaByIdId) {
       id
-      nome
-    }
-    venda_detalhe {
-      produto {
+      data_venda
+      pontos_totais
+      situacao
+      funcionario {
         id
         nome
-        imagem
       }
-      pontos
-      quantidade
+      venda_detalhe {
+        produto {
+          id
+          nome
+          imagem
+        }
+        pontos
+        quantidade
+      }
     }
   }
-}
-`
+`;
 
 export const GET_VENDA_BY_USUARIO_ID = gql`
-query GetVendaByUsuarioID($getVendaByUsuarioIdId: Float!, $dataMensal: String) {
-  GetVendaByUsuarioID(id: $getVendaByUsuarioIdId, data_mensal: $dataMensal) {
-    id
-    data_venda
-    pontos_totais
-    situacao
-    funcionario {
+  query GetVendaByUsuarioID(
+    $getVendaByUsuarioIdId: Float!
+    $dataMensal: String
+  ) {
+    GetVendaByUsuarioID(id: $getVendaByUsuarioIdId, data_mensal: $dataMensal) {
       id
-      nome
-    }
-    venda_detalhe {
-      produto {
+      data_venda
+      pontos_totais
+      situacao
+      funcionario {
         id
         nome
-        imagem
       }
-      pontos
-      quantidade
+      venda_detalhe {
+        produto {
+          id
+          nome
+          imagem
+        }
+        pontos
+        quantidade
+      }
     }
   }
-}
-`
+`;
+
+export const DELETE_VENDA = gql`
+  mutation DeleteVenda($deleteVendaId: Float!) {
+    DeleteVenda(id: $deleteVendaId) {
+      id
+    }
+  }
+`;

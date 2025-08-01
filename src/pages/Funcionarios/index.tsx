@@ -6,6 +6,7 @@ import { RelatorioModal } from "./Reports";
 import { VendasUsuarioModal } from "./Sells";
 import { formatPhoneNumber } from "../../utils/phoneUtils";
 import { formatCPF } from "../../utils/documentUtils";
+import { RecoveryModal } from "./partials/modalRecovery";
 
 export default function Funcionarios() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -16,7 +17,7 @@ export default function Funcionarios() {
       pagination: {
         pagina: paginacao.pagina,
         quantidade: paginacao.quantidade,
-      }
+      },
     },
   });
 
@@ -126,7 +127,9 @@ export default function Funcionarios() {
                           </td>
                           <td className="text-left">
                             <span className="text-gray-500 font-semibold block">
-                              {usuario.cpf ? formatCPF(usuario.cpf) : "Não Informado"}
+                              {usuario.cpf
+                                ? formatCPF(usuario.cpf)
+                                : "Não Informado"}
                             </span>
                           </td>
                           <td className="text-left">
@@ -134,14 +137,11 @@ export default function Funcionarios() {
                               {usuario.email}
                             </span>
                           </td>
-                       
+
                           <td className="text-right py-2">
-                   
-                              <VendasUsuarioModal idUser={usuario.id} />
-                           
-                            <button className="bg-green-100 text-green-600 p-4 rounded-xl hover:bg-green-200 mr-2">
-                              <FaPencilAlt size={18} />
-                            </button>
+                            <VendasUsuarioModal idUser={usuario.id} />
+
+                            <RecoveryModal id={usuario.id} />
                             <button
                               onClick={() => {
                                 confirmDelete(parseInt(usuario.id));

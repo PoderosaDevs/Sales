@@ -87,3 +87,12 @@ export const GET_FUNCIONARIO_INSIGHTS = gql`
     }
   }
 `;
+
+export const SET_RECOVERY_PASSWORD = gql`
+  mutation RecoveryUsuario($recoveryUsuarioId: Float!, $senha: String!) {
+    RecoveryUsuario(id: $recoveryUsuarioId, senha: $senha) {
+      id
+      nome
+    }
+  }
+`;

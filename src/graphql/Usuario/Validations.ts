@@ -70,3 +70,12 @@ export const SetUsuarioFieldsFormSchema = z.object({
 });
 
 export type SetUsuarioFieldsFormData = z.infer<typeof SetUsuarioFieldsFormSchema>;
+
+
+// Esquema de validação para o login
+export const RecoveryFieldsFormSchema = z.object({
+  recoveryUsuarioId: z.number().min(1, "Por favor, insira um ID válido."),
+  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres.").optional(),
+});
+
+export type RecoveryFieldsFormData = z.infer<typeof RecoveryFieldsFormSchema>;

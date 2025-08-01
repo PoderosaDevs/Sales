@@ -69,3 +69,9 @@ export interface GeVendaByIDTypes {
     }[];
   };
 }
+
+export interface DeleteVendaTypes{
+   DeleteVenda: {
+      id: number
+    }
+}

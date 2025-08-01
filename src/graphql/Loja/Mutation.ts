@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import { DeleteLojaMutation, TypesSetLojaFields } from "./Types";
+import { TypesDeleteLojaFields, TypesSetLojaFields } from "./Types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DELETE_LOJA, GET_LOJAS, SET_LOJA } from "./Schema";
@@ -40,7 +40,7 @@ export function MutationSetLoja() {
 }
 
 export function MutationDeleteLoja() {
-  const [deleteLoja, { loading, data, error }] = useMutation<DeleteLojaMutation>(DELETE_LOJA, {
+  const [deleteLoja, { loading, data, error }] = useMutation<TypesDeleteLojaFields>(DELETE_LOJA, {
     refetchQueries: [GET_LOJAS],
   })
 

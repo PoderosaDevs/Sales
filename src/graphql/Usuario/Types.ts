@@ -13,6 +13,13 @@ export interface SetUsuarioFieldsTypes {
   };
 }
 
+export interface SetRecoveryPasswordFieldsTypes {
+  RecoveryUsuario: {
+      id: number;
+      nome: string;
+  };
+}
+
 export interface GetFuncionarioFieldsTypes {
   GetUsuarios: {
     id: string;

@@ -6,6 +6,8 @@ import { FaTrashAlt } from "react-icons/fa";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { QueryGetVendasByUsuarioID } from "../../graphql/Venda/Query";
 import { formatDateToString } from "../../utils/dateUtils";
+import { MutationDeleteVenda } from "../../graphql/Venda/Mutation";
+import Swal from "sweetalert2";
 
 interface Props {
   idUser: string;
@@ -38,10 +40,12 @@ export function VendasUsuarioModal({ idUser }: Props) {
     },
   });
 
-  const vendas = Array.isArray(data?.GetVendaByUsuarioID) ? data.GetVendaByUsuarioID : [];
+  const vendas = Array.isArray(data?.GetVendaByUsuarioID)
+    ? data.GetVendaByUsuarioID
+    : [];
 
   // Função para filtrar vendas por data
-  const filteredVendas = vendas.filter(venda => {
+  const filteredVendas = vendas.filter((venda) => {
     const vendaDate = new Date(venda.data_venda);
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
@@ -65,6 +69,57 @@ export function VendasUsuarioModal({ idUser }: Props) {
     setExpandedRow(expandedRow === id ? null : id);
   };
 
+  const { FormDeleteVenda } = MutationDeleteVenda(parseInt(idUser));
+
+  async function confirmDelete(id: number) {
+  // Fecha o modal primeiro
+  setIsOpen(false);
+
+  // Aguarda a animação/render do Dialog fechar
+  setTimeout(async () => {
+    const confirm = await Swal.fire({
+      title: "Tem certeza que deseja excluir?",
+      text: "Esta ação não poderá ser desfeita.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sim, excluir",
+      cancelButtonText: "Cancelar",
+      showCloseButton: true,
+      backdrop: true, // Garante o backdrop do próprio swal
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        Swal.fire({
+          title: "Excluindo...",
+          text: "Por favor, aguarde.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        const result = await FormDeleteVenda(id);
+
+        if (!result) {
+          Swal.fire("Erro!", "Erro ao excluir o registro.", "error");
+        } else {
+          Swal.fire("Sucesso!", "Registro excluído com sucesso.", "success");
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire("Erro!", "Ocorreu um erro inesperado.", "error");
+      }
+    } else {
+      // Reabre o modal se cancelado
+      setIsOpen(true);
+    }
+  }, 150); // tempo ideal para o modal do Radix fechar (ajustável)
+}
+
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
@@ -76,7 +131,7 @@ export function VendasUsuarioModal({ idUser }: Props) {
         <Dialog.Overlay className="fixed inset-0 bg-gray-800 bg-opacity-50" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Content
-            className="bg-white rounded-lg shadow-lg p-6 w-full px-10 max-w-[1000px] max-h-[80vh] overflow-auto"
+            className="bg-white rounded-lg shadow-lg p-6 w-full px-10 max-w-[1000px] max-h-[80vh] overflow-auto z-[600]"
             aria-labelledby="dialog-title"
           >
             <button
@@ -120,26 +175,42 @@ export function VendasUsuarioModal({ idUser }: Props) {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr className="border-0">
-                    <th className="p-0 min-w-36 text-left text-gray-700 py-3">ID</th>
-                    <th className="p-0 min-w-36 text-left text-gray-700 py-3">Data Venda</th>
-                    <th className="p-0 min-w-36 text-gray-700 text-left py-3">Pontos Totais</th>
-                    <th className="p-0 min-w-28 justify-end flex py-3">Ações</th>
+                    <th className="p-0 min-w-36 text-left text-gray-700 py-3">
+                      ID
+                    </th>
+                    <th className="p-0 min-w-36 text-left text-gray-700 py-3">
+                      Data Venda
+                    </th>
+                    <th className="p-0 min-w-36 text-gray-700 text-left py-3">
+                      Pontos Totais
+                    </th>
+                    <th className="p-0 min-w-28 justify-end flex py-3">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="space-y-1.5">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-10">Carregando...</td>
+                      <td colSpan={5} className="text-center py-10">
+                        Carregando...
+                      </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-10 text-red-500">
+                      <td
+                        colSpan={5}
+                        className="text-center py-10 text-red-500"
+                      >
                         Erro ao carregar as vendas: {error.message}
                       </td>
                     </tr>
                   ) : filteredVendas.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-10 text-gray-500">
+                      <td
+                        colSpan={5}
+                        className="text-center py-10 text-gray-500"
+                      >
                         Nenhuma venda encontrada.
                       </td>
                     </tr>
@@ -148,7 +219,9 @@ export function VendasUsuarioModal({ idUser }: Props) {
                       <React.Fragment key={venda.id}>
                         <tr className="border-b border-gray-200">
                           <td className="flex text-center py-2">{venda.id}</td>
-                          <td className="text-left py-2">{formatDateToString(venda.data_venda)}</td>
+                          <td className="text-left py-2">
+                            {formatDateToString(venda.data_venda)}
+                          </td>
                           <td className="text-left">
                             <span className="text-gray-500 font-semibold block">
                               {venda.pontos_totais}
@@ -161,7 +234,12 @@ export function VendasUsuarioModal({ idUser }: Props) {
                             >
                               <FaBoxesStacked size={18} />
                             </button>
-                            <button className="bg-red-100 text-red-600 p-4 rounded-xl hover:bg-red-200">
+                            <button
+                              onClick={() => {
+                                confirmDelete(venda.id);
+                              }}
+                              className="bg-red-100 text-red-600 p-4 rounded-xl hover:bg-red-200"
+                            >
                               <FaTrashAlt size={18} />
                             </button>
                           </td>
@@ -170,15 +248,30 @@ export function VendasUsuarioModal({ idUser }: Props) {
                           <tr>
                             <td colSpan={5} className="py-2">
                               <div className="bg-gray-100 p-4 rounded">
-                                <h4 className="text-lg font-semibold mb-2">Produtos da Venda:</h4>
+                                <h4 className="text-lg font-semibold mb-2">
+                                  Produtos da Venda:
+                                </h4>
                                 <ul>
                                   {venda.venda_detalhe.map((detail, index) => (
-                                    <li key={index} className="flex items-center py-1">
-                                      <img src={detail.produto.imagem} alt={detail.produto.nome} className="w-16 h-16 object-cover mr-4" />
+                                    <li
+                                      key={index}
+                                      className="flex items-center py-1"
+                                    >
+                                      <img
+                                        src={detail.produto.imagem}
+                                        alt={detail.produto.nome}
+                                        className="w-16 h-16 object-cover mr-4"
+                                      />
                                       <div>
-                                        <div className="font-medium">{detail.produto.nome}</div>
-                                        <div className="text-gray-500">Pontos: {detail.pontos}</div>
-                                        <div className="text-gray-500">Quantidade: {detail.quantidade}</div>
+                                        <div className="font-medium">
+                                          {detail.produto.nome}
+                                        </div>
+                                        <div className="text-gray-500">
+                                          Pontos: {detail.pontos}
+                                        </div>
+                                        <div className="text-gray-500">
+                                          Quantidade: {detail.quantidade}
+                                        </div>
                                       </div>
                                     </li>
                                   ))}
