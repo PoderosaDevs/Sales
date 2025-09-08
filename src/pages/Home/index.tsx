@@ -79,7 +79,7 @@ export function Home() {
       {/* Saudações --------------------------------------------------------- */}
       {isVisible && (
         <h1 className="text-3xl mt-4 pb-4 flex items-end">
-          <span className="font-bold">Olá</span>, seja‑bem‑vindo
+          <span className="font-bold">Olá</span>, seja bem‑vinda
           <span className="font-bold ml-2">{usuarioData.nome}</span>
           <div className="w-2 h-2 bg-custom-bg-start mb-1 ml-1" />
         </h1>

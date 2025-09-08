@@ -19,6 +19,18 @@ export const CREATE_USUARIO_SCHEMA = gql`
   }
 `;
 
+export const GET_INSIGHTS_VENDAS_PERIODO = gql`
+query GetInsightsGastosPeriodos($usuarioId: Int!, $type: String!) {
+  GetInsightsGastosPeriodos(usuarioId: $usuarioId, type: $type) {
+    data
+    categories {
+      title
+      value
+    }
+  }
+}
+`
+
 export const GET_FUNCIONARIO_SCHEMA = gql`
   query GetUsuarios($tipoPessoa: String) {
     GetUsuarios(Tipo_Pessoa: $tipoPessoa) {

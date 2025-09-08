@@ -20,6 +20,17 @@ export interface SetRecoveryPasswordFieldsTypes {
   };
 }
 
+export interface GetInsightsVendasPeriodosTypes {
+  GetInsightsGastosPeriodos: {
+    data: string;
+    categories: {
+      title: "tratamentos" | "colorações";
+      value: number;
+    }[];
+  }[];
+}
+
+
 export interface GetFuncionarioFieldsTypes {
   GetUsuarios: {
     id: string;

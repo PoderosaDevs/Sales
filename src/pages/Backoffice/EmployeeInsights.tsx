@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { QueryFuncionarioInsights } from "../../graphql/Usuario/Query";
 import { IoIosClose } from "react-icons/io";
+import { EarningsChart } from "./ChartComponents/LineChart";
 
 type SalesStat = {
   name: string;
@@ -28,7 +29,9 @@ const CustomTooltip = ({ active, payload }: any) => {
 
     return (
       <div className="bg-white p-2 rounded shadow text-sm text-gray-800 border border-gray-300">
-        <p><strong>Total:</strong> {total}</p>
+        <p>
+          <strong>Total:</strong> {total}
+        </p>
       </div>
     );
   }
@@ -71,6 +74,13 @@ export function EmployeeInsights() {
     } else {
       setEndDate(value);
     }
+  };
+
+  const diasNoPeriodo = (start: string, end: string) => {
+    const startD = new Date(start);
+    const endD = new Date(end);
+    const diff = Math.abs(endD.getTime() - startD.getTime());
+    return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1, 1); // +1 para incluir o dia final
   };
 
   const applyFilters = () => {
@@ -137,6 +147,18 @@ export function EmployeeInsights() {
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
+  const dias =
+    startDate && endDate
+      ? diasNoPeriodo(startDate, endDate)
+      : diasNoPeriodo(
+          firstDay.toISOString().split("T")[0],
+          lastDay.toISOString().split("T")[0]
+        );
+
+  const mediaColoracao = (coloracaoTotal / dias).toFixed(1);
+  const mediaTratamento = (tratamentoTotal / dias).toFixed(1);
+  const mediaTotal = (faturamentoTotal / dias).toFixed(1);
+
   const period =
     startDate && endDate
       ? `${formatDateString(startDate)} - ${formatDateString(endDate)}`
@@ -201,13 +223,16 @@ export function EmployeeInsights() {
           <h1 className="text-3xl">Estatísticas</h1>
 
           <p className="text-2xl font-semibold">
-            Total de colorações: <span className="text-purple-500">{coloracaoTotal}</span>
+            Total de colorações:{" "}
+            <span className="text-purple-500">{coloracaoTotal}</span>
           </p>
           <p className="text-2xl font-semibold">
-            Total de tratamentos: <span className="text-purple-500">{tratamentoTotal}</span>
+            Total de tratamentos:{" "}
+            <span className="text-purple-500">{tratamentoTotal}</span>
           </p>
           <p className="text-2xl font-semibold">
-            Total produtos vendidos: <span className="text-purple-500">{faturamentoTotal}</span>
+            Total produtos vendidos:{" "}
+            <span className="text-purple-500">{faturamentoTotal}</span>
           </p>
         </div>
         <hr className="my-4" />
@@ -216,16 +241,40 @@ export function EmployeeInsights() {
           <div className="bg-white shadow-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-4">Top Lojas Vendidas</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topStores} layout="vertical" margin={{ left: 20 }}>
+              <BarChart
+                data={topStores}
+                layout="vertical"
+                margin={{ left: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
-                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                <Bar
+                  dataKey="coloracao"
+                  stackId="a"
+                  fill="#105fb9"
+                  name="Coloração"
+                >
+                  <LabelList
+                    dataKey="coloracao"
+                    position="center"
+                    fill="#fff"
+                    fontSize={18}
+                  />
                 </Bar>
-                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
-                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                <Bar
+                  dataKey="tratamento"
+                  stackId="a"
+                  fill="#8b5cf6"
+                  name="Tratamento"
+                >
+                  <LabelList
+                    dataKey="tratamento"
+                    position="center"
+                    fill="#fff"
+                    fontSize={18}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -235,20 +284,66 @@ export function EmployeeInsights() {
           <div className="bg-white shadow-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-4">Top Marcas Vendidas</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topBrands} layout="vertical" margin={{ left: 20 }}>
+              <BarChart
+                data={topBrands}
+                layout="vertical"
+                margin={{ left: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
-                  <LabelList dataKey="coloracao" position="center" fill="#fff" fontSize={18} />
+                <Bar
+                  dataKey="coloracao"
+                  stackId="a"
+                  fill="#105fb9"
+                  name="Coloração"
+                >
+                  <LabelList
+                    dataKey="coloracao"
+                    position="center"
+                    fill="#fff"
+                    fontSize={18}
+                  />
                 </Bar>
-                <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
-                  <LabelList dataKey="tratamento" position="center" fill="#fff" fontSize={18} />
+                <Bar
+                  dataKey="tratamento"
+                  stackId="a"
+                  fill="#8b5cf6"
+                  name="Tratamento"
+                >
+                  <LabelList
+                    dataKey="tratamento"
+                    position="center"
+                    fill="#fff"
+                    fontSize={18}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="p-4 bg-white shadow rounded-lg text-center">
+            <p className="text-gray-500 text-sm">Média diária de colorações</p>
+            <p className="text-xl font-semibold text-blue-600">
+              {mediaColoracao}
+            </p>
+          </div>
+          <div className="p-4 bg-white shadow rounded-lg text-center">
+            <p className="text-gray-500 text-sm">Média diária de tratamentos</p>
+            <p className="text-xl font-semibold text-purple-600">
+              {mediaTratamento}
+            </p>
+          </div>
+          <div className="p-4 bg-white shadow rounded-lg text-center">
+            <p className="text-gray-500 text-sm">Média diária total</p>
+            <p className="text-xl font-semibold text-gray-800">{mediaTotal}</p>
+          </div>
+        </div>
+
+        <div className="w-full mt-6">
+          <EarningsChart />
         </div>
       </div>
     </div>
