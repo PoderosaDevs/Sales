@@ -1,43 +1,21 @@
 import { useEffect, useState } from "react";
 import ApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import { useQuery } from "@apollo/client";
-import { GET_INSIGHTS_VENDAS_PERIODO } from "../../../graphql/Usuario/Schema";
 import { GetInsightsVendasPeriodosTypes } from "../../../graphql/Usuario/Types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
-import { useParams } from "react-router-dom";
 
-// Formatador BRL
-const brl = (n: number, withCents = true) =>
-  new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: withCents ? 2 : 0,
-    minimumFractionDigits: withCents ? 2 : 0,
-  }).format(n);
 
-const EarningsChart = () => {
-  const { id } = useParams<{ id: string }>();
+interface EarningsChartProps {
+  data: GetInsightsVendasPeriodosTypes;
+}
 
-  const [type, setType] = useState<"week" | "mounth" | "tree-mouth" | "year">("mounth");
+const EarningsChart: React.FC<EarningsChartProps> = ({
+  data
+}) => {
+ 
 
-  const { data, refetch } = useQuery<GetInsightsVendasPeriodosTypes>(
-    GET_INSIGHTS_VENDAS_PERIODO,
-    {
-      variables: {
-        usuarioId: parseInt(id!),
-        type,
-      },
-    }
+  const [charData, setCharData] = useState<{ name: string; data: number[] }[]>(
+    []
   );
-
-  const [charData, setCharData] = useState<{ name: string; data: number[] }[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -47,11 +25,13 @@ const EarningsChart = () => {
       const datas = raw.map((item) => item.data);
 
       const tratamentos = raw.map(
-        (item) => item.categories.find((c) => c.title === "tratamentos")?.value ?? 0
+        (item) =>
+          item.categories.find((c) => c.title === "tratamentos")?.value ?? 0
       );
 
       const coloracoes = raw.map(
-        (item) => item.categories.find((c) => c.title === "colorações")?.value ?? 0
+        (item) =>
+          item.categories.find((c) => c.title === "colorações")?.value ?? 0
       );
 
       setCategories(datas);
@@ -153,29 +133,13 @@ const EarningsChart = () => {
     },
   };
 
+
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Quantidade por período</h3>
-        <div className="flex items-center gap-5">
-          <Select
-            defaultValue={type}
-            onValueChange={(value) => {
-              setType(value as typeof type);
-              refetch({ type: value });
-            }}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent className="w-40">
-              <SelectItem value="week">Última semana</SelectItem>
-              <SelectItem value="mounth">Mês atual</SelectItem>
-              <SelectItem value="tree-mouth">Últimos 3 meses</SelectItem>
-              <SelectItem value="year">Ano atual</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <h3 className="text-lg font-semibold text-gray-800">
+          Quantidade por período
+        </h3>
       </div>
       <div className="px-2 pb-1">
         {charData.length > 0 && (

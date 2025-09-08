@@ -20,8 +20,8 @@ export const CREATE_USUARIO_SCHEMA = gql`
 `;
 
 export const GET_INSIGHTS_VENDAS_PERIODO = gql`
-query GetInsightsGastosPeriodos($usuarioId: Int!, $type: String!) {
-  GetInsightsGastosPeriodos(usuarioId: $usuarioId, type: $type) {
+query GetInsightsGastosPeriodos($filters: UsuarioInsightsGastosInput) {
+  GetInsightsGastosPeriodos(filters: $filters) {
     data
     categories {
       title

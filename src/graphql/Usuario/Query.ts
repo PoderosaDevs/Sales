@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
-import { GetFuncionarioFieldsTypes, GetFuncionarioInsightsTypes, GetRankingFuncionariosTypes } from "./Types";
-import { GET_FUNCIONARIO_INSIGHTS, GET_FUNCIONARIO_SCHEMA, GET_RANKING_FUNCIONARIOS } from "./Schema";
+import { GetFuncionarioFieldsTypes, GetFuncionarioInsightsTypes, GetInsightsVendasPeriodosTypes, GetRankingFuncionariosTypes } from "./Types";
+import { GET_FUNCIONARIO_INSIGHTS, GET_FUNCIONARIO_SCHEMA, GET_INSIGHTS_VENDAS_PERIODO, GET_RANKING_FUNCIONARIOS } from "./Schema";
 
 interface QueryProps {
   variables: any
@@ -45,4 +45,16 @@ export function QueryFuncionarioInsights({variables}: QueryProps) {
   );
 
   return { data, error, loading, refetch };
+}
+
+export function QueryGetInsightsVendasPeriodos({variables}: QueryProps) {
+ 
+   const { data, refetch, loading } = useQuery<GetInsightsVendasPeriodosTypes>(
+     GET_INSIGHTS_VENDAS_PERIODO,
+      {
+      variables,
+      fetchPolicy: "network-only", // Evita cachear dados já carregados
+    }
+   );
+  return { data, loading, refetch };
 }
