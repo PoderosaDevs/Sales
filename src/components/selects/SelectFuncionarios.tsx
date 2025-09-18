@@ -1,61 +1,66 @@
 import React, { useEffect, useState } from "react";
-import Select from "react-select";
+import Select, { OnChangeValue } from "react-select";
 import { QueryGetFuncionarios } from "../../graphql/Usuario/Query";
 
 type UsuarioOption = { value: number; label: string };
 
 interface SelectFuncionariosProps {
   isMulti?: boolean;
-  className?: string; // Adicionando prop className
-  onChange?: (selected: UsuarioOption[] | UsuarioOption | null) => void;
+  className?: string;
+  // Sempre retorna array
+  onChange?: (selected: UsuarioOption[]) => void;
 }
 
 const SelectFuncionarios: React.FC<SelectFuncionariosProps> = ({
   isMulti = false,
-  className = "", // Prop padrão para className
+  className = "",
   onChange,
 }) => {
   const [funcionarios, setFuncionarios] = useState<UsuarioOption[]>([]);
-  const [selectedOption, setSelectedOption] = useState<UsuarioOption | null>(
-    null
-  );
 
-  const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 10 });
   const { data, loading, error } = QueryGetFuncionarios({
     variables: {
-      pagination: {
-        pagina: paginacao.pagina,
-        quantidade: paginacao.quantidade,
-      },
-      tipoSistema: 'SALES',
+      pagination: { pagina: 0, quantidade: 10 },
+      tipoSistema: "SALES",
     },
   });
+
   useEffect(() => {
     if (data) {
-      const fetchedFuncionarios = data.GetUsuarios.map((funcionario: any) => ({
-        value: funcionario.id,
-        label: funcionario.nome,
+      const fetched = data.GetUsuarios.map((f: any) => ({
+        value: f.id,
+        label: f.nome,
       }));
-      setFuncionarios([{ value: 0, label: "Todos os Funcionarios" }, ...fetchedFuncionarios]);
+      setFuncionarios([
+        { value: 0, label: "Todos os Funcionários" },
+        ...fetched,
+      ]);
     }
   }, [data]);
 
-  const handleChange = (selected: any) => {
-    setSelectedOption(selected);
-    if (onChange) {
-      onChange(selected);
-    }
+  const handleChange = (
+    selected: OnChangeValue<UsuarioOption, boolean>
+  ) => {
+    // Normaliza pra sempre ser array
+    const normalized = Array.isArray(selected)
+      ? selected
+      : selected
+      ? [selected]
+      : [];
+    onChange?.(normalized);
   };
 
   return (
-    <Select
-      className={className} // Aplicando a prop className
+    <Select<UsuarioOption, boolean>
+      className={className}
       isMulti={isMulti}
       options={funcionarios}
-      value={selectedOption}
       onChange={handleChange}
       isLoading={loading}
       placeholder="Selecione os funcionários"
+      isClearable
+      closeMenuOnSelect={!isMulti}
+      getOptionValue={(opt) => String(opt.value)}
     />
   );
 };

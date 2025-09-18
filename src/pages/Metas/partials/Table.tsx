@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
-import { QueryGetMetas } from "../../../graphql/Meta/Query";
+import { QueryGetMetas, useConfirmDeleteMeta } from "../../../graphql/Meta/Query";
 import { QueryGetFuncionarios } from "../../../graphql/Usuario/Query";
 import { Loader } from "../../../components/Loader";
 
@@ -17,6 +17,8 @@ export function Table() {
   const { data, loading, error } = QueryGetFuncionarios({
     variables: { pagination: paginacao },
   });
+
+  const { confirmAndDelete } = useConfirmDeleteMeta();
 
   const {
     data: metasData,
@@ -144,7 +146,7 @@ export function Table() {
                                     <button className="bg-green-100 text-green-600 p-3 rounded-xl hover:bg-green-200">
                                       <FaPencilAlt size={18} />
                                     </button>
-                                    <button className="bg-red-100 text-red-600 p-3 rounded-xl hover:bg-red-200">
+                                    <button onClick={() => confirmAndDelete(meta.id)} className="bg-red-100 text-red-600 p-3 rounded-xl hover:bg-red-200">
                                       <FaTrashAlt size={18} />
                                     </button>
                                   </td>

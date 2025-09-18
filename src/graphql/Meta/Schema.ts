@@ -20,7 +20,7 @@ export const GET_METAS = gql`
         atingida
       }
       marcaId
-      usuarioId
+      
       quantidade_atual
       quantidade_objetivo
       situacao
@@ -33,5 +33,11 @@ export const SET_META = gql`
     SetMeta(data: $data) {
       id
     }
+  }
+`;
+
+export const DELETE_META = gql`
+  mutation DeleteMeta($metaId: Int!) {
+    DeleteMeta(metaId: $metaId)
   }
 `;

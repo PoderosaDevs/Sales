@@ -22,7 +22,7 @@ interface CreateMetaInput {
   quantidade_objetivo: number;
   data_inicio: Date;
   data_fim: Date;
-  usuarioId: number;
+  usuarioIds: number[];
   descricao?: string;
   etapas: MetaEtapaInput[];
 }
@@ -54,16 +54,23 @@ export const CreateMetaSchema = yup.object({
     .date()
     .required("Data de fim é obrigatória")
     .min(yup.ref("data_inicio"), "data_fim deve ser posterior a data_inicio"),
-  usuarioId: yup
-    .number()
-    .integer()
-    .positive()
-    .required("Usuário é obrigatório"),
+  usuarioIds: yup
+    .array()
+    .of(yup.number())
+    .required("Usuários são obrigatórios"),
+
   descricao: yup.string().optional(),
   etapas: yup.array(MetaEtapaSchema).optional(),
 });
 
 export function MetaModal() {
+  /* ---------- DEBUG HELPERS ---------- */
+  const DEBUG = true;
+  const dlog = (...args: any[]) => DEBUG && console.log("[MetaModal]", ...args);
+  const dgroup = (label: string) =>
+    DEBUG && console.groupCollapsed(`🧪 ${label}`);
+  const gend = () => DEBUG && console.groupEnd();
+
   /* ---------- Estados ---------- */
   const [isOpen, setIsOpen] = useState(false);
   const [isMultiple, setIsMultiple] = useState(false);
@@ -87,44 +94,111 @@ export function MetaModal() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { FormSetMeta } = useMutationSetMeta();
-  /* ---------- Helpers de etapas ---------- */
-  const handleAddTask = () =>
-    setTasks((prev) => [
-      ...prev,
-      { id: prev.length + 1, nome: `Etapa ${prev.length + 1}`, quantidade: 1 },
-    ]);
 
-  const handleRemoveTask = (id: number) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  /* ---------- Effects pequenos de debug ---------- */
+  React.useEffect(() => {
+    dlog("Modal open =", isOpen);
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    dlog("isMultiple =", isMultiple);
+  }, [isMultiple]);
+
+  React.useEffect(() => {
+    dlog("selectedMarcas =", selectedMarcas);
+  }, [selectedMarcas]);
+
+  React.useEffect(() => {
+    dlog("selectedUsuarios =", selectedUsuarios);
+  }, [selectedUsuarios]);
+
+  /* ---------- Helpers de etapas ---------- */
+  const handleAddTask = () => {
+    dgroup("Adicionar Etapa");
+    const next = [
+      ...tasks,
+      {
+        id: tasks.length + 1,
+        nome: `Etapa ${tasks.length + 1}`,
+        quantidade: 1,
+      },
+    ];
+    dlog("Antes:", tasks);
+    dlog("Depois:", next);
+    gend();
+    setTasks(next);
+  };
+
+  const handleRemoveTask = (id: number) => {
+    dgroup("Remover Etapa");
+    dlog("ID:", id);
+    dlog("Atual:", tasks);
+    const next = tasks.filter((t) => t.id !== id);
+    dlog("Resultado:", next);
+    gend();
+    setTasks(next);
+  };
 
   const handleTaskChange = (
     id: number,
     field: "nome" | "quantidade",
     value: string | number
-  ) =>
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t))
-    );
+  ) => {
+    dgroup("Alterar Etapa");
+    dlog({ id, field, value });
+    const next = tasks.map((t) => (t.id === id ? { ...t, [field]: value } : t));
+    dlog("Preview:", next);
+    gend();
+    setTasks(next);
+  };
 
-  const handleClearTasks = () =>
+  const handleClearTasks = () => {
+    dlog("Limpar etapas → reset para Etapa 1");
     setTasks([{ id: 1, nome: "Etapa 1", quantidade: 1 }]);
+  };
 
   /* ---------- Handlers de input ---------- */
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    dgroup("Input change");
+    dlog("name:", name, "raw value:", value);
+    const next = {
+      ...formData,
       [name]: name === "quantidade_objetivo" ? Number(value) : value,
-    }));
+    };
+    dlog("formData (prev):", formData);
+    dlog("formData (next):", next);
+    gend();
+    setFormData(next);
   };
 
   /* ---------- SEND DATA ---------- */
   const sendData = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.count("[MetaModal] submit count");
+    console.time("[MetaModal] submit time");
+    dgroup("Submit Handler START");
+    dlog("event defaultPrevented?", (e as any).defaultPrevented);
     e.preventDefault();
+
     setIsSubmitting(true);
     setErrors({});
+
+    dlog("formData at submit:", formData);
+    dlog("selectedMarcas at submit:", selectedMarcas);
+    dlog("selectedUsuarios at submit:", selectedUsuarios);
+    dlog("tasks at submit:", tasks);
+    dlog("isMultiple at submit:", isMultiple);
+
+    // garante number[]
+    const usuarioIds: number[] = Array.isArray(selectedUsuarios)
+      ? selectedUsuarios
+          .map((u) => Number(u?.value)) // coerce "18" -> 18
+          .filter((v): v is number => Number.isFinite(v)) // remove NaN
+      : [];
+
+    dlog("usuarioIds derivado:", usuarioIds);
 
     // 1. Monta objeto base
     const basePayload: Partial<CreateMetaInput> = {
@@ -133,31 +207,39 @@ export function MetaModal() {
       data_inicio: new Date(formData.data_inicio),
       data_fim: new Date(formData.data_fim),
       marcaId: parseInt(String(selectedMarcas?.value)),
-      usuarioId: parseInt(String(selectedUsuarios[0]?.value)),
+      usuarioIds: usuarioIds,
       descricao: formData.descricao || undefined,
     };
+
+    dgroup("Base Payload");
+    dlog(basePayload);
+    gend();
 
     // 2. Etapas
     const etapas: MetaEtapaInput[] =
       isMultiple && tasks.length
         ? tasks.map((t) => ({
-            nome: t.nome.trim() || `Etapa ${t.id}`,
-            quantidade_objetivo: t.quantidade,
+            nome: (t.nome ?? "").toString().trim() || `Etapa ${t.id}`,
+            quantidade_objetivo: Number(t.quantidade),
           }))
         : [
             {
               nome: "Etapa única",
-              quantidade_objetivo: formData.quantidade_objetivo,
+              quantidade_objetivo: Number(formData.quantidade_objetivo),
             },
           ];
 
     const payload = { ...basePayload, etapas } as CreateMetaInput;
 
+    dgroup("Payload antes da validação");
+    dlog(payload);
+    gend();
+
     try {
-      // 3. Validação Yup
+      // 3) Validação Yup
       await CreateMetaSchema.validate(payload, { abortEarly: false });
 
-      /* 4. Ajusta datas ISO */
+      // 4) Ajusta datas ISO
       const inicioISO = payload.data_inicio.toISOString();
       const fimDate = new Date(payload.data_fim);
       fimDate.setHours(23, 59, 59, 0);
@@ -169,15 +251,19 @@ export function MetaModal() {
         data_fim: fimISO,
       };
 
-      console.log("[MetaModal] payload →", finalPayload);
+      // 5) Envia para o service (hook já usa errorPolicy: 'all')
+      const resp = await FormSetMeta(finalPayload as any);
 
-      /* 5. Envia para o seu service  */
-      await FormSetMeta(finalPayload); // ← AQUI estamos aguardando!
+      if (!resp.ok || !resp.id) {
+        const msg = resp.errors?.[0] || "Não foi possível salvar a meta.";
+        Swal.fire("Erro", msg, "error");
+        return;
+      }
 
-      /* 6. Alerta de sucesso (agora só dispara após FormSetMeta) */
+      // 6) Sucesso
       Swal.fire("Sucesso!", "Meta salva com sucesso.", "success");
 
-      /* 7. Reset */
+      // 7) Reset
       setIsOpen(false);
       setFormData({
         nome: "",
@@ -190,17 +276,25 @@ export function MetaModal() {
       setSelectedMarcas(null);
       setSelectedUsuarios([]);
     } catch (err: any) {
-      if (err.name === "ValidationError") {
-        // Erros de validação Yup
+      if (err?.name === "ValidationError") {
         const fieldErrors: Record<string, string> = {};
-        err.inner.forEach((issue: any) => {
+        (err.inner || []).forEach((issue: any) => {
           if (issue.path) fieldErrors[issue.path] = issue.message;
         });
         setErrors(fieldErrors);
+        Swal.fire(
+          "Erro de validação",
+          "Corrija os campos destacados.",
+          "warning"
+        );
       } else {
-        // Erros de requisição ou outros
-        console.error(err);
-        Swal.fire("Erro", "Não foi possível salvar a meta.", "error");
+        const msg =
+          err?.graphQLErrors?.[0]?.message ||
+          err?.networkError?.result?.errors?.[0]?.message ||
+          err?.networkError?.message ||
+          err?.message ||
+          "Não foi possível salvar a meta.";
+        Swal.fire("Erro", msg, "error");
       }
     } finally {
       setIsSubmitting(false);
@@ -209,9 +303,18 @@ export function MetaModal() {
 
   /* ---------- JSX ---------- */
   return (
-    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(v) => {
+        dlog("onOpenChange:", v);
+        setIsOpen(v);
+      }}
+    >
       <Dialog.Trigger asChild>
-        <button className="px-3 py-2 bg-indigo-600 text-white flex items-center gap-2 rounded-lg">
+        <button
+          className="px-3 py-2 bg-indigo-600 text-white flex items-center gap-2 rounded-lg"
+          onClick={() => dlog("Botão 'Nova Meta' clicado")}
+        >
           <FiPlusSquare size={20} /> Nova Meta
         </button>
       </Dialog.Trigger>
@@ -224,7 +327,10 @@ export function MetaModal() {
             <button
               className="absolute top-6 right-6 text-gray-500 hover:text-gray-300"
               aria-label="Close"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                dlog("Fechar modal clicado");
+                setIsOpen(false);
+              }}
             >
               <X size={24} />
             </button>
@@ -234,7 +340,13 @@ export function MetaModal() {
             </Dialog.Title>
 
             {/* --- FORM --- */}
-            <form className="space-y-6" onSubmit={sendData}>
+            <form
+              className="space-y-6"
+              onSubmit={(ev) => {
+                dlog("onSubmit disparou (capturado no form)");
+                sendData(ev);
+              }}
+            >
               {/* Nome & Quantidade objetivo */}
               <div className="flex flex-col md:flex-row md:space-x-4">
                 <div className="flex flex-col w-full">
@@ -246,6 +358,7 @@ export function MetaModal() {
                     name="nome"
                     value={formData.nome}
                     onChange={handleInputChange}
+                    onBlur={() => dlog("blur nome:", formData.nome)}
                   />
                   {errors.nome && (
                     <span className="text-red-600 text-sm">{errors.nome}</span>
@@ -261,6 +374,12 @@ export function MetaModal() {
                     name="quantidade_objetivo"
                     value={formData.quantidade_objetivo}
                     onChange={handleInputChange}
+                    onBlur={() =>
+                      dlog(
+                        "blur quantidade_objetivo:",
+                        formData.quantidade_objetivo
+                      )
+                    }
                     className="w-full px-4 py-2 bg-gray-100 border rounded-lg outline-none"
                   />
                   {errors.quantidade_objetivo && (
@@ -281,6 +400,7 @@ export function MetaModal() {
                   name="descricao"
                   value={formData.descricao}
                   onChange={handleInputChange}
+                  onBlur={() => dlog("blur descricao:", formData.descricao)}
                 />
               </div>
 
@@ -290,7 +410,10 @@ export function MetaModal() {
                   <label className="font-semibold mb-2 block">Marcas</label>
                   <SelectMarcas
                     isMulti={false}
-                    setSelectedMarcas={setSelectedMarcas}
+                    setSelectedMarcas={(v: any) => {
+                      dlog("SelectMarcas onChange:", v);
+                      setSelectedMarcas(v);
+                    }}
                   />
                   {errors.marcaId && (
                     <span className="text-red-600 text-sm">
@@ -304,10 +427,17 @@ export function MetaModal() {
                   </label>
                   <SelectFuncionarios
                     isMulti={true}
-                    onChange={(sel) =>
-                      setSelectedUsuarios(Array.isArray(sel) ? sel : [])
-                    }
+                    onChange={(sel: any) => {
+                      dlog("SelectFuncionarios onChange:", sel);
+                      setSelectedUsuarios(sel);
+                    }}
                   />
+                  {/* atenção ao nome do campo: usuarioIds no schema */}
+                  {(errors as any).usuarioIds && (
+                    <span className="text-red-600 text-sm">
+                      {(errors as any).usuarioIds}
+                    </span>
+                  )}
                   {errors.usuarioId && (
                     <span className="text-red-600 text-sm">
                       {errors.usuarioId}
@@ -325,6 +455,9 @@ export function MetaModal() {
                     name="data_inicio"
                     value={formData.data_inicio}
                     onChange={handleInputChange}
+                    onBlur={() =>
+                      dlog("blur data_inicio:", formData.data_inicio)
+                    }
                     className="w-full px-4 py-2 bg-gray-100 border rounded-lg outline-none"
                   />
                   {errors.data_inicio && (
@@ -340,6 +473,7 @@ export function MetaModal() {
                     name="data_fim"
                     value={formData.data_fim}
                     onChange={handleInputChange}
+                    onBlur={() => dlog("blur data_fim:", formData.data_fim)}
                     className="w-full px-4 py-2 bg-gray-100 border rounded-lg outline-none"
                   />
                   {errors.data_fim && (
@@ -356,6 +490,7 @@ export function MetaModal() {
                   type="checkbox"
                   checked={isMultiple}
                   onChange={() => {
+                    dlog("Toggle isMultiple →", !isMultiple);
                     setIsMultiple(!isMultiple);
                     if (isMultiple) handleClearTasks();
                   }}
@@ -416,6 +551,7 @@ export function MetaModal() {
               <button
                 type="submit"
                 disabled={isSubmitting}
+                onClick={() => dlog("Botão submit clicado")}
                 className={`w-full py-2 mt-3 text-white font-semibold rounded-lg ${
                   isSubmitting
                     ? "bg-gray-400 cursor-not-allowed"

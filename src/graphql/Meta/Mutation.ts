@@ -1,16 +1,38 @@
-import { useMutation } from "@apollo/client";
-import { TypesSetMetaFields } from "./Types";
-import { GET_METAS, SET_META } from "./Schema";
-// import { GET_FUNCIONARIOS } from "./Queries"; // <- se precisar de outra
+import { useMutation, ApolloError, FetchResult } from "@apollo/client";
+import { SET_META } from "./Schema";
+// import { TypesSetMetaFields } ... // seus tipos gerados, se houver
+
+type SetMetaResult = {
+  ok: boolean;
+  id?: number;
+  data?: any;
+  errors: string[];
+  raw?: FetchResult;
+};
+
+function parseApolloErrors(err: any): string[] {
+  const msgs: string[] = [];
+  if (err?.graphQLErrors?.length) {
+    msgs.push(...err.graphQLErrors.map((e: any) => e?.message).filter(Boolean));
+  }
+  const net = err?.networkError as any;
+  if (net?.result?.errors?.length) {
+    msgs.push(...net.result.errors.map((e: any) => e?.message).filter(Boolean));
+  }
+  if (net?.message) msgs.push(net.message);
+  if (err?.message && msgs.length === 0) msgs.push(err.message);
+  return [...new Set(msgs)];
+}
 
 export function useMutationSetMeta() {
-  const [mutationSetMeta, { error, loading, data }] =
-    useMutation<TypesSetMetaFields>(SET_META, {
-      awaitRefetchQueries: true,      // garante que espere as refetches
-    });
+  const [mutationSetMeta, { loading }] = useMutation(SET_META, {
+    // MUITO IMPORTANTE:
+    errorPolicy: "all",          // <- não rejeita quando houver data + errors
+    awaitRefetchQueries: true,   // espera refetch terminar
+  });
 
   /* ------------ Envia o formulário ------------ */
-  async function FormSetMeta(formData: any) {
+  async function FormSetMeta(formData: any): Promise<SetMetaResult> {
     try {
       const {
         nome,
@@ -19,44 +41,53 @@ export function useMutationSetMeta() {
         data_inicio,
         data_fim,
         marcaId,
-        usuarioId,
+        usuarioIds,
         etapas,
       } = formData;
 
-      const etapasValidadas = Array.isArray(etapas) ? etapas : [];
+      // não envie null para campos não-nulos do schema
+      const varsEtapas = Array.isArray(etapas)
+        ? etapas.map((etapa: any, idx: number) => ({
+            nome: etapa?.nome ?? `Nivel ${idx + 1}`,
+            quantidade_objetivo: Number(etapa?.quantidade_objetivo ?? 0),
+          }))
+        : [];
 
       const variables = {
         data: {
-          nome,
-          descricao: descricao ?? null,
-          quantidade_objetivo: quantidade_objetivo ?? null,
-          data_inicio,
+          nome, // string!
+          descricao: descricao ?? undefined, // opcional
+          quantidade_objetivo: Number(quantidade_objetivo), // Int!
+          data_inicio, // ISO string ou Date compatível com seu schema
           data_fim,
-          marcaId: marcaId ?? null,
-          usuarioId: usuarioId ?? null,
-          etapas: etapasValidadas.map((etapa: any, idx: number) => ({
-            nome: etapa.nome ?? `Nivel ${idx + 1}`,
-            quantidade_objetivo: etapa.quantidade_objetivo ?? null,
-          })),
+          marcaId: Number(marcaId), // Int!
+          usuarioIds: (usuarioIds ?? []).map((n: any) => Number(n)), // [Int]!
+          etapas: varsEtapas, // opcional conforme schema
         },
       };
 
-      /* --------- mutation + refetch --------- */
-      return await mutationSetMeta({
+  
+      const resp = await mutationSetMeta({
         variables,
-        refetchQueries: [
-          {
-            query: GET_METAS,
-            variables: { usuarioId }, // ← mantém a lista de metas do usuário atualizada
-          },
-          // { query: GET_FUNCIONARIOS },        // ← descomente se quiser atualizar outra lista
-        ],
       });
-    } catch (e: any) {
-      console.error("Erro na requisição:", e.message);
-      throw e;
+
+      // Apollo não lançou. Ainda assim, pode haver errors:
+      const apolloErrors = parseApolloErrors(resp);
+      const id = resp?.data?.SetMeta?.id as number | undefined;
+
+      return {
+        ok: Boolean(id),
+        id,
+        data: resp?.data,
+        errors: apolloErrors,
+        raw: resp,
+      };
+    } catch (err: any) {
+      // Apollo lançou (ex.: network error duro)
+      const apolloErrors = parseApolloErrors(err);
+      return { ok: false, errors: apolloErrors, raw: err };
     }
   }
 
-  return { FormSetMeta, loading, error, data };
+  return { FormSetMeta, loading };
 }
