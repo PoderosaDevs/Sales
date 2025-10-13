@@ -219,18 +219,18 @@ export function EmployeeInsights() {
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária de colorações</p>
           <p className="text-xl font-semibold text-blue-600">
-            {mediaColoracoes}
+            {mediaColoracoes.toFixed(2)}
           </p>
         </div>
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária de tratamentos</p>
           <p className="text-xl font-semibold text-purple-600">
-            {mediaTratamentos}
+            {mediaTratamentos.toFixed(2)}
           </p>
         </div>
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária total</p>
-          <p className="text-xl font-semibold text-gray-800">{mediaTotal}</p>
+          <p className="text-xl font-semibold text-gray-800">{mediaTotal.toFixed(2)}</p>
         </div>
       </div>
 
