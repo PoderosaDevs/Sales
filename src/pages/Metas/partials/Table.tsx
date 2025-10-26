@@ -75,9 +75,9 @@ export function Table() {
                     <span className="text-gray-900 font-bold text-lg">
                       {usuario.nome}
                     </span>
-                    <span className="text-gray-500 font-semibold block">
+                    {/* <span className="text-gray-500 font-semibold block">
                       Metas concluídas:
-                    </span>
+                    </span> */}
                   </td>
                   <td className="py-4 px-3 text-right space-x-2">
                     <button
@@ -86,12 +86,7 @@ export function Table() {
                     >
                       Metas
                     </button>
-                    <button className="bg-green-100 text-green-600 p-3 rounded-xl hover:bg-green-200">
-                      <FaPencilAlt size={18} />
-                    </button>
-                    <button className="bg-red-100 text-red-600 p-3 rounded-xl hover:bg-red-200">
-                      <FaTrashAlt size={18} />
-                    </button>
+                   
                   </td>
                 </tr>
 
