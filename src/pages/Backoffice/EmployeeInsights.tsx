@@ -18,13 +18,38 @@ import {
 import {
   CustomTooltip,
   DateFilter,
-  diasNoPeriodoSemDomingos,
-  formatDateDisplay,
   formatDateString,
-  mapEmployeeSales,
-  SalesStat,
+  formatDateDisplay,
 } from "./utils";
 import { useMetricasVendas } from "./ChartComponents/useMetricas";
+
+type SalesStat = {
+  name: string;
+  tratamento: number;
+  coloracao: number;
+  total: number;
+};
+
+/**
+ * Mapeia marcas e lojas, calcula total e ordena do maior para o menor
+ */
+function mapEmployeeSales(items: any[]): SalesStat[] {
+  if (!items) return [];
+
+  return items
+    .map((item) => {
+      const tratamento = item.pontos_tratamento ?? 0;
+      const coloracao = item.pontos_coloracao ?? 0;
+
+      return {
+        name: item.nome,
+        tratamento,
+        coloracao,
+        total: tratamento + coloracao,
+      };
+    })
+    .sort((a, b) => b.total - a.total); // maior para menor
+}
 
 export function EmployeeInsights() {
   const { id } = useParams<{ id: string }>();
@@ -65,30 +90,33 @@ export function EmployeeInsights() {
   };
 
   const applyFilters = () => {
-    if (startDate && endDate) {
-      const formatToDDMMYYYY = (isoDate: string) => formatDateString(isoDate);
-      refetch({
-        filters: {
-          userId: parseInt(id!),
-          pagina: 0,
-          quantidade: 10,
-          startDate: formatToDDMMYYYY(startDate),
-          endDate: formatToDDMMYYYY(endDate),
-        },
-      });
-      refetchVendas({
-        filters: {
-          endDate: formatToDDMMYYYY(endDate),
-          startDate: formatToDDMMYYYY(startDate),
-          userId: parseInt(id!),
-        },
-      });
-    }
+    if (!startDate || !endDate) return;
+
+    const fmt = (date: string) => formatDateString(date);
+
+    refetch({
+      filters: {
+        userId: parseInt(id!),
+        pagina: 0,
+        quantidade: 10,
+        startDate: fmt(startDate),
+        endDate: fmt(endDate),
+      },
+    });
+
+    refetchVendas({
+      filters: {
+        userId: parseInt(id!),
+        startDate: fmt(startDate),
+        endDate: fmt(endDate),
+      },
+    });
   };
 
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);
+
     refetch({
       filters: {
         userId: parseInt(id!),
@@ -98,11 +126,12 @@ export function EmployeeInsights() {
         endDate: null,
       },
     });
+
     refetchVendas({
       filters: {
+        userId: parseInt(id!),
         startDate: null,
         endDate: null,
-        userId: parseInt(id!),
       },
     });
   };
@@ -112,6 +141,7 @@ export function EmployeeInsights() {
     return <p>Funcionário não encontrado</p>;
 
   const employee = data.GetUsuariosInsights.result;
+
   const {
     pontos_totais,
     pontos_totais_coloracao,
@@ -120,8 +150,9 @@ export function EmployeeInsights() {
     marcas,
   } = employee;
 
-  const topStores: SalesStat[] = mapEmployeeSales(lojas);
-  const topBrands: SalesStat[] = mapEmployeeSales(marcas);
+  // 🔥 Transformações ordenadas
+  const topStores = mapEmployeeSales(lojas);
+  const topBrands = mapEmployeeSales(marcas);
 
   const now = new Date();
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -134,10 +165,13 @@ export function EmployeeInsights() {
 
   return (
     <div className="max-w-[1500px] px-6 mt-8 m-auto">
+
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">
           {employee.nome} - {period}
         </h1>
+
         <DateFilter
           startDate={startDate}
           endDate={endDate}
@@ -147,6 +181,7 @@ export function EmployeeInsights() {
         />
       </div>
 
+      {/* CARDS RESUMO */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Total de Coloração</p>
@@ -162,59 +197,54 @@ export function EmployeeInsights() {
         </div>
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Total vendido</p>
-          <p className="text-xl font-semibold text-gray-800">{pontos_totais}</p>
+          <p className="text-xl font-semibold text-gray-800">
+            {pontos_totais}
+          </p>
         </div>
       </div>
 
+      {/* GRAFICOS LOJAS + MARCAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {[
-          { title: "Top Lojas Vendidas", data: topStores },
-          { title: "Top Marcas Vendidas", data: topBrands },
-        ].map((chart) => (
-          <div key={chart.title} className="bg-white shadow-md rounded-2xl p-6">
-            <h2 className="text-xl font-semibold mb-4">{chart.title}</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={chart.data}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="coloracao"
-                  stackId="a"
-                  fill="#105fb9"
-                  name="Coloração"
-                >
-                  <LabelList
-                    dataKey="coloracao"
-                    position="center"
-                    fill="#fff"
-                    fontSize={18}
+        {[{ title: "Top Lojas Vendidas", data: topStores },
+          { title: "Top Marcas Vendidas", data: topBrands }].map((chart) => {
+
+          const maxValue = Math.max(...chart.data.map((d) => d.total));
+
+          return (
+            <div key={chart.title} className="bg-white shadow-md rounded-2xl p-6">
+              <h2 className="text-xl font-semibold mb-4">{chart.title}</h2>
+
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={chart.data} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+
+                  {/* 🔥 Eixo X indo até o maior valor + 10 */}
+                  <XAxis type="number" domain={[0, maxValue + 10]} />
+
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={180}
+                    interval={0}
                   />
-                </Bar>
-                <Bar
-                  dataKey="tratamento"
-                  stackId="a"
-                  fill="#8b5cf6"
-                  name="Tratamento"
-                >
-                  <LabelList
-                    dataKey="tratamento"
-                    position="center"
-                    fill="#fff"
-                    fontSize={18}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        ))}
+
+                  <Tooltip content={<CustomTooltip />} />
+
+                  <Bar dataKey="coloracao" stackId="a" fill="#105fb9" name="Coloração">
+                    <LabelList dataKey="coloracao" position="center" fill="#fff" />
+                  </Bar>
+
+                  <Bar dataKey="tratamento" stackId="a" fill="#8b5cf6" name="Tratamento">
+                    <LabelList dataKey="tratamento" position="center" fill="#fff" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          );
+        })}
       </div>
 
+      {/* MÉDIAS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária de colorações</p>
@@ -222,19 +252,24 @@ export function EmployeeInsights() {
             {mediaColoracoes.toFixed(2)}
           </p>
         </div>
+
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária de tratamentos</p>
           <p className="text-xl font-semibold text-purple-600">
             {mediaTratamentos.toFixed(2)}
           </p>
         </div>
+
         <div className="p-4 bg-white shadow rounded-lg text-center">
           <p className="text-gray-500 text-sm">Média diária total</p>
-          <p className="text-xl font-semibold text-gray-800">{mediaTotal.toFixed(2)}</p>
+          <p className="text-xl font-semibold text-gray-800">
+            {mediaTotal.toFixed(2)}
+          </p>
         </div>
       </div>
 
-      <div className="w-full mt-6">
+      {/* GRAFICO LINHA */}
+      <div className="w-full mt-6 pb-12">
         <EarningsChart data={dataVendas!} />
       </div>
     </div>

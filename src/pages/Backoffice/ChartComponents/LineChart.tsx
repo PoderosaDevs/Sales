@@ -3,155 +3,196 @@ import ApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { GetInsightsVendasPeriodosTypes } from "../../../graphql/Usuario/Types";
 
-
 interface EarningsChartProps {
   data: GetInsightsVendasPeriodosTypes;
 }
 
-const EarningsChart: React.FC<EarningsChartProps> = ({
-  data
-}) => {
- 
+type GastoPeriodo = NonNullable<
+  GetInsightsVendasPeriodosTypes["GetInsightsGastosPeriodos"]
+>[number];
 
-  const [charData, setCharData] = useState<{ name: string; data: number[] }[]>(
-    []
-  );
-  const [categories, setCategories] = useState<string[]>([]);
+interface ProcessedPoint {
+  label: string;       // o que aparece no eixo X
+  tratamentos: number;
+  coloracoes: number;
+}
+
+type SeriesItem = { name: string; data: number[] };
+
+/**
+ * Converte "DD/MM/YYYY" → Date
+ */
+function parseDDMMYYYY(str: string): Date {
+  const [dd, mm, yyyy] = str.split("/");
+  return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+}
+
+/**
+ * Exibe "Mai/2025"
+ */
+function formatMonthLabel(date: Date) {
+  return date.toLocaleString("pt-BR", {
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/**
+ * Agrupa por blocos fixos de dias
+ */
+function groupByRange(
+  raw: GastoPeriodo[],
+  rangeDays: number
+): ProcessedPoint[] {
+  const grouped: ProcessedPoint[] = [];
+
+  for (let i = 0; i < raw.length; i += rangeDays) {
+    const slice = raw.slice(i, i + rangeDays);
+    if (slice.length === 0) continue;
+
+    const start = parseDDMMYYYY(slice[0].data);
+    const end = parseDDMMYYYY(slice[slice.length - 1].data);
+
+    const tratamentos = slice.reduce(
+      (sum, d) =>
+        sum +
+        (d.categories.find((c) => c.title === "tratamentos")?.value ?? 0),
+      0
+    );
+
+    const coloracoes = slice.reduce(
+      (sum, d) =>
+        sum +
+        (d.categories.find((c) => c.title === "colorações")?.value ?? 0),
+      0
+    );
+
+    grouped.push({
+      label: `${start.toLocaleDateString("pt-BR")} → ${end.toLocaleDateString(
+        "pt-BR"
+      )}`,
+      tratamentos,
+      coloracoes,
+    });
+  }
+
+  return grouped;
+}
+
+/**
+ * Agrupa por mês
+ */
+function groupByMonth(raw: GastoPeriodo[]): ProcessedPoint[] {
+  const map = new Map<
+    string,
+    { date: Date; tratamentos: number; coloracoes: number }
+  >();
+
+  raw.forEach((item) => {
+    const dt = parseDDMMYYYY(item.data);
+    const key = `${dt.getFullYear()}-${dt.getMonth()}`;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        date: new Date(dt.getFullYear(), dt.getMonth(), 1),
+        tratamentos: 0,
+        coloracoes: 0,
+      });
+    }
+
+    const entry = map.get(key)!;
+
+    entry.tratamentos +=
+      item.categories.find((c) => c.title === "tratamentos")?.value ?? 0;
+
+    entry.coloracoes +=
+      item.categories.find((c) => c.title === "colorações")?.value ?? 0;
+  });
+
+  return [...map.values()].map((v) => ({
+    label: formatMonthLabel(v.date),
+    tratamentos: v.tratamentos,
+    coloracoes: v.coloracoes,
+  }));
+}
+
+const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
+  const [processed, setProcessed] = useState<ProcessedPoint[]>([]);
+  const [series, setSeries] = useState<SeriesItem[]>([]);
 
   useEffect(() => {
-    if (data?.GetInsightsGastosPeriodos) {
-      const raw = data.GetInsightsGastosPeriodos;
+    const raw = data?.GetInsightsGastosPeriodos;
+    if (!raw || raw.length === 0) return;
 
-      const datas = raw.map((item) => item.data);
+    const totalDias = raw.length;
+    let result: ProcessedPoint[] = [];
 
-      const tratamentos = raw.map(
-        (item) =>
-          item.categories.find((c) => c.title === "tratamentos")?.value ?? 0
-      );
-
-      const coloracoes = raw.map(
-        (item) =>
-          item.categories.find((c) => c.title === "colorações")?.value ?? 0
-      );
-
-      setCategories(datas);
-      setCharData([
-        { name: "Tratamentos", data: tratamentos },
-        { name: "Colorações", data: coloracoes },
-      ]);
+    // 🔥 Regras reais agora funcionando!
+    if (totalDias > 90) {
+      result = groupByMonth(raw);
+    } else if (totalDias > 60) {
+      result = groupByRange(raw, 21);
+    } else {
+      result = raw.map((item) => ({
+        label: item.data, // já está em DD/MM/YYYY
+        tratamentos:
+          item.categories.find((c) => c.title === "tratamentos")?.value ?? 0,
+        coloracoes:
+          item.categories.find((c) => c.title === "colorações")?.value ?? 0,
+      }));
     }
+
+    setProcessed(result);
+
+    setSeries([
+      { name: "Tratamentos", data: result.map((p) => p.tratamentos) },
+      { name: "Colorações", data: result.map((p) => p.coloracoes) },
+    ]);
   }, [data]);
 
+  const categories = processed.map((p) => p.label);
+
   const options: ApexOptions = {
-    series: charData,
     chart: {
       height: 250,
       type: "area",
       toolbar: { show: false },
     },
-    dataLabels: { enabled: false },
-    legend: {
-      show: true,
-      position: "top",
-      horizontalAlign: "left",
-      fontSize: "14px",
-      labels: {
-        colors: "#374151",
-      },
-    },
-    stroke: {
-      curve: "smooth",
-      show: true,
-      width: 3,
-    },
     xaxis: {
       categories,
-      axisBorder: { show: false },
-      axisTicks: { show: false },
+      tickAmount: 6,
       labels: {
-        style: {
-          colors: "#6b7280",
-          fontSize: "12px",
-        },
-      },
-      crosshairs: {
-        position: "front",
-        stroke: {
-          color: "#1e3a8a",
-          width: 1,
-          dashArray: 3,
-        },
+        rotate: -45,
+        style: { colors: "#6b7280", fontSize: "12px" },
       },
     },
-    yaxis: {
-      min: 0,
-      tickAmount: 5,
-      labels: {
-        style: {
-          colors: "#6b7280",
-          fontSize: "12px",
-        },
-        formatter: (val: number) => `${Math.floor(val)} unid`,
-      },
-    },
+    stroke: { curve: "smooth", width: 3 },
     tooltip: {
-      enabled: true,
       custom: ({ series, dataPointIndex }) => {
-        const dia = categories[dataPointIndex] ?? "";
-        const tratamentos = series[0][dataPointIndex] ?? 0;
-        const coloracoes = series[1][dataPointIndex] ?? 0;
+        const label = categories[dataPointIndex];
+        const t = series[0][dataPointIndex];
+        const c = series[1][dataPointIndex];
 
         return `
-          <div class="flex flex-col gap-2 p-3.5">
-            <div class="font-medium text-sm text-gray-600">Quantidade em ${dia}</div>
-            <div class="flex flex-col gap-1.5 text-sm text-gray-800">
-              <div>🧴 Tratamentos: <strong>${tratamentos} unid</strong></div>
-              <div>🎨 Colorações: <strong>${coloracoes} unid</strong></div>
-            </div>
+          <div class="p-3 text-sm">
+            <strong>${label}</strong><br/>
+            🧴 Tratamentos: <b>${t}</b><br/>
+            🎨 Colorações: <b>${c}</b>
           </div>
         `;
       },
     },
-    markers: {
-      size: 0,
-      strokeColors: ["#8b5cf6", "#105fb9"],
-      strokeWidth: 4,
-      hover: { size: 8 },
-    },
     colors: ["#8b5cf6", "#105fb9"],
-    fill: {
-      gradient: {
-        opacityFrom: 0.25,
-        opacityTo: 0,
-      },
-    },
-    grid: {
-      borderColor: "#e5e7eb",
-      strokeDashArray: 5,
-      yaxis: { lines: { show: true } },
-      xaxis: { lines: { show: false } },
-    },
   };
-
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Quantidade por período
-        </h3>
-      </div>
-      <div className="px-2 pb-1">
-        {charData.length > 0 && (
-          <ApexChart
-            id="earnings_chart"
-            options={options}
-            series={options.series}
-            type="area"
-            height={250}
-          />
-        )}
-      </div>
+      <ApexChart
+        options={options}
+        series={series}
+        type="area"
+        height={250}
+      />
     </div>
   );
 };
