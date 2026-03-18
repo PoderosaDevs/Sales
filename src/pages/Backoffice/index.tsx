@@ -7,139 +7,169 @@ import { RankingMarcas } from "./TableComponents/RankingMarcas";
 import { DayPicker, DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { ptBR } from "date-fns/locale";
-import { FaXmark } from "react-icons/fa6";
+import { FaXmark, FaCalendarDays, FaFilter } from "react-icons/fa6";
 import { ManagerModules } from "./TableComponents/ManagerModules";
 
 export function Backoffice() {
   const { usuarioData } = useAuth();
-
   const [range, setRange] = useState<DateRange | undefined>(undefined);
-  const [isPopupVisible, setIsPopupVisible] = useState(false); // Controle do popup
-  const popupRef = useRef<HTMLDivElement>(null); // Referência para o popup
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   const { data } = QueryGetVendasByUsuarioID({
-    variables: {
-      getVendaByUsuarioIdId: usuarioData ? parseInt(usuarioData.id) : 0,
-    },
+    variables: { getVendaByUsuarioIdId: usuarioData ? parseInt(usuarioData.id) : 0 },
     skip: !usuarioData,
   });
 
-  if (!usuarioData) return <div>Loading...</div>;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setIsPopupVisible(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  function formatDateToDDMMYYYY(date: Date | undefined) {
-    if (!date) return "";
-    return date.toLocaleDateString("pt-BR");
-  }
+  if (!usuarioData) return null;
 
+  const formatDateToDDMMYYYY = (date: Date | undefined) => date ? date.toLocaleDateString("pt-BR") : "";
   const isRangeComplete = range?.from && range?.to;
   const startDateFormatted = formatDateToDDMMYYYY(range?.from);
   const endDateFormatted = formatDateToDDMMYYYY(range?.to);
 
-  // Função para fechar o popup se o clique for fora do popup
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        popupRef.current &&
-        !popupRef.current.contains(event.target as Node)
-      ) {
-        setIsPopupVisible(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   return (
-    <div className="max-w-[1500px] px-6 mt-8 m-auto">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <h1 className="text-2xl mt-4 flex items-end hidden md:block">
-          <span className="font-bold">Olá</span>, seja bem-vindo
-          <span className="font-bold ml-2">{usuarioData.nome}</span>
-        </h1>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      
+      {/* HEADER: Welcome & Date Filter */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              Painel de <span className="text-emerald-500 font-light">Gestão</span>
+            </h1>
+          </div>
+          <p className="text-gray-500 text-sm ml-4.5">Visão estratégica e análise de performance.</p>
+        </div>
 
-        <div className="mt-4 mb-8 flex items-center gap-4">
-          <label className="flex text-gray-700 mb-1">Filtrar:</label>
-
-          {/* Exibe o botão ou as datas selecionadas */}
-          <div>
-            {startDateFormatted && endDateFormatted ? (
-              <div className="flex gap-3">
-                <span
-                  className="cursor-pointer text-purple-700 font-bold bg-white shadow-md px-4 py-2 rounded-lg"
-                  onClick={() => setIsPopupVisible(!isPopupVisible)} // Alterna a visibilidade do popup ao clicar nas datas
-                >
-                  {startDateFormatted} - {endDateFormatted}
-                </span>
+        {/* CONTROLE DE DATA PREMIUM */}
+        <div className="relative flex items-center gap-3 self-start lg:self-center">
+          <div className="flex items-center gap-2 text-gray-500 text-[10px] font-bold uppercase tracking-[2px] mr-2">
+            <FaFilter className="text-emerald-500" /> Período:
+          </div>
+          
+          <div className="relative">
+            {isRangeComplete ? (
+              <div className="flex items-center gap-2">
                 <button
-                  className="bg-white shadow-md rounded-lg flex items-center justify-center p-2"
+                  onClick={() => setIsPopupVisible(!isPopupVisible)}
+                  className="bg-[#0d0d10] border border-emerald-500/30 text-emerald-500 px-5 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-emerald-900/10 hover:bg-emerald-500/5 transition-all flex items-center gap-3"
+                >
+                  <FaCalendarDays />
+                  {startDateFormatted} — {endDateFormatted}
+                </button>
+                <button
                   onClick={() => setRange(undefined)}
+                  className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
                 >
                   <FaXmark />
                 </button>
               </div>
             ) : (
-              // Caso contrário, exibe o botão
               <button
-                className="bg-indigo-600 text-white py-2 px-4 rounded"
-                onClick={() => setIsPopupVisible(!isPopupVisible)} // Alterna a visibilidade do popup ao clicar no botão
+                onClick={() => setIsPopupVisible(!isPopupVisible)}
+                className="bg-[#0d0d10] border border-white/10 text-gray-300 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] hover:bg-white/5 transition-all flex items-center gap-3"
               >
-                Selecionar Data
+                <FaCalendarDays className="text-emerald-500" />
+                Selecionar Intervalo
               </button>
             )}
-          </div>
 
-          {/* Popup com o DayPicker */}
-          {isPopupVisible && (
-            <div
-              ref={popupRef}
-              className="absolute bg-white p-4 rounded-lg shadow-md mt-10 z-10"
-            >
-              <DayPicker
-                mode="range"
-                selected={range}
-                onSelect={setRange}
-                locale={ptBR}
-                className="bg-white p-2 rounded"
-              />
-            </div>
-          )}
+            {/* POPUP CALENDÁRIO DARK */}
+            {isPopupVisible && (
+              <div
+                ref={popupRef}
+                className="absolute right-0 top-full mt-4 z-50 bg-[#0d0d10] border border-white/10 p-4 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200"
+              >
+                <style>{`
+                  .rdp { --rdp-accent-color: #10b981; --rdp-background-color: #1a1a1e; margin: 0; }
+                  .rdp-day_selected { background-color: #10b981 !important; color: #000 !important; font-weight: bold; }
+                  .rdp-button:hover:not([disabled]):not(.rdp-day_selected) { background-color: rgba(16,185,129,0.1); color: #10b981; }
+                  .rdp-caption_label { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+                  .rdp-head_cell { font-size: 10px; font-weight: 800; color: #4b5563; text-transform: uppercase; }
+                  .rdp-day { color: #9ca3af; border-radius: 8px; }
+                `}</style>
+                <DayPicker
+                  mode="range"
+                  selected={range}
+                  onSelect={setRange}
+                  locale={ptBR}
+                  className="text-white"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-md col-span-1 relative">
-        <h2 className="text-xl font-bold mb-4">Modulos de gerenciamento</h2>
-        <ManagerModules />
-      </div>
-      <div className="grid mt-6 mb-6 grid-cols-1 md:grid-cols-2 gap-4">
-        
 
-        <div className="bg-white p-4 rounded-lg shadow-md col-span-1">
-          <h2 className="text-xl font-bold mb-4">Ranking de Vendedores</h2>
+      {/* MÓDULOS DE GERENCIAMENTO (Card Principal) */}
+      <section className="bg-[#0d0d10] border border-white/5 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] -mr-32 -mt-32 transition-all group-hover:bg-emerald-500/10" />
+        <div className="relative z-10">
+            <header className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
+                    <FaFilter size={18} />
+                </div>
+                <h2 className="text-sm font-black text-white uppercase tracking-[3px]">Módulos de Gerenciamento</h2>
+            </header>
+            <ManagerModules />
+        </div>
+      </section>
+
+      {/* GRID DE RANKINGS / BI */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        
+        {/* RANKING FUNCIONÁRIOS */}
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl">
+          <header className="flex items-center justify-between mb-8">
+            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Ranking de Vendedores</h2>
+            <div className="h-px flex-1 bg-white/5 mx-6" />
+            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Top Performers</span>
+          </header>
           <RankingFuncionarios
             startDate={isRangeComplete ? startDateFormatted : ""}
             endDate={isRangeComplete ? endDateFormatted : ""}
           />
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Vendas por Marcas</h2>
+        {/* RANKING MARCAS */}
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl">
+          <header className="flex items-center justify-between mb-8">
+            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Vendas por Marcas</h2>
+            <div className="h-px flex-1 bg-white/5 mx-6" />
+            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Share de Mercado</span>
+          </header>
           <RankingMarcas
             startDate={isRangeComplete ? startDateFormatted : ""}
             endDate={isRangeComplete ? endDateFormatted : ""}
           />
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Vendas por Lojas</h2>
+        {/* RANKING LOJAS (Full Width opcional ou metade) */}
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl xl:col-span-2">
+          <header className="flex items-center justify-between mb-8">
+            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Performance por Unidade / Loja</h2>
+            <div className="h-px flex-1 bg-white/5 mx-6" />
+            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Visão Geográfica</span>
+          </header>
           <RankingLojas
             startDate={isRangeComplete ? startDateFormatted : ""}
             endDate={isRangeComplete ? endDateFormatted : ""}
           />
         </div>
       </div>
+
     </div>
   );
 }

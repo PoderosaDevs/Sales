@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "phosphor-react";
+import { X, Tag, Palette } from "phosphor-react";
 import { FiPlusSquare } from "react-icons/fi";
 import { SliderPicker } from "react-color";
 import { useForm } from "react-hook-form";
@@ -10,114 +10,123 @@ import { MutationSetMeta, SetMarcaType } from "../../../graphql/Marca/Mutation";
 export function MarcaModal() {
   const [isOpen, setIsOpen] = useState(false);
   const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<SetMarcaType>();
-  const [selectedColor, setSelectedColor] = useState("#000000");
+  const [selectedColor, setSelectedColor] = useState("#10b981");
   
   const { FormSetMarca } = MutationSetMeta();
 
   const handleProductSubmit = async (data: SetMarcaType) => {
     try {
       Swal.fire({
-        title: "Enviando...",
-        text: "Sua marca e produtos estão sendo cadastrados.",
-        icon: "info",
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        willOpen: () => {
-          Swal.showLoading();
-        },
+        title: "Criando Marca",
+        background: "#0d0d10",
+        color: "#fff",
+        didOpen: () => Swal.showLoading(),
       });
+
       await FormSetMarca(data);
       reset();
       setIsOpen(false);
       Swal.fire({
         title: "Sucesso!",
-        text: "Marca e produtos cadastrados com sucesso.",
+        text: "Fabricante registrado.",
         icon: "success",
-        confirmButtonText: "Ok",
+        background: "#0d0d10",
+        color: "#fff",
+        confirmButtonColor: "#10b981",
       });
     } catch (e) {
       Swal.fire({
         title: "Erro!",
-        text: "Houve um erro ao cadastrar a marca e os produtos.",
+        text: "Houve uma falha no cadastro.",
         icon: "error",
-        confirmButtonText: "Ok",
+        background: "#0d0d10",
+        color: "#fff",
       });
     }
   };
 
   const handleColorChange = (color: { hex: string }) => {
     setSelectedColor(color.hex);
-    setValue("cor", color.hex); // Atualiza o valor do campo "cor"
+    setValue("cor", color.hex);
   };
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
-        <button
-          className="px-3 py-2 bg-slate-900 text-white font-semibold 
-            flex items-center justify-center gap-2 rounded-lg"
-        >
+        <button className="flex items-center gap-3 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
           <FiPlusSquare size={20} /> Nova Marca
         </button>
       </Dialog.Trigger>
+      
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-gray-800 bg-opacity-50" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Content
-            className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-auto"
-            aria-labelledby="dialog-title"
-          >
-            <button
-              className="absolute top-6 right-6 text-gray-500 hover:text-gray-300"
-              aria-label="Close"
-              onClick={() => setIsOpen(false)}
-            >
-              <X size={24} />
-            </button>
-            <Dialog.Title id="dialog-title" className="text-xl font-semibold mb-4">
-              Cadastrar Marcas
-            </Dialog.Title>
-            <div className="border w-full mb-6" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-300" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0d0d10] border border-white/10 rounded-[40px] p-10 w-full max-w-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] outline-none">
+          
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3 text-white">
+              <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+              <Dialog.Title className="text-xl font-bold uppercase tracking-wider">
+                Configurar Marca
+              </Dialog.Title>
+            </div>
+            <Dialog.Close className="text-gray-500 hover:text-white transition-colors">
+              <X size={24} weight="bold" />
+            </Dialog.Close>
+          </div>
 
-            <form onSubmit={handleSubmit(handleProductSubmit)} className="space-y-6">
-              <div className="flex items-center">
+          <form onSubmit={handleSubmit(handleProductSubmit)} className="space-y-8">
+            
+            {/* Nome da Marca */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[2px] ml-1">Nome Comercial</label>
+              <div className="relative group">
+                <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-emerald-500 transition-colors" size={22} />
                 <input
                   type="text"
-                  placeholder="Nome da Marca"
+                  placeholder="Ex: L'Oréal, Wella..."
                   {...register("nome", { required: "Nome é obrigatório" })}
-                  className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
-                />
-                <p className="text-red-500 text-sm">
-                  {errors.nome?.message}
-                </p>
-              </div>
-
-              <div className="flex flex-col space-y-4">
-                <label className="font-semibold text-gray-700">Cor da Marca</label>
-                <SliderPicker
-                  color={selectedColor}
-                  onChange={handleColorChange}
-                />
-                <input
-                  type="text"
-                  {...register("cor")}
-                  value={selectedColor}
-                  readOnly
-                  className="w-full p-4 outline-none bg-gray-100 text-gray-800 border rounded-lg"
+                  className="w-full pl-14 pr-6 py-5 bg-[#0a0a0c] border border-white/10 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all"
                 />
               </div>
+              {errors.nome && <p className="text-red-500 text-[10px] font-bold uppercase ml-1 italic">{errors.nome.message}</p>}
+            </div>
 
-              <div className="w-full flex justify-end">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-200"
-                >
-                  Salvar
+            {/* Cor da Marca */}
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[2px] ml-1">
+                <Palette size={14} className="text-emerald-500" /> Identidade Visual (Cor)
+              </label>
+              <div className="p-6 bg-[#0a0a0c] border border-white/10 rounded-2xl space-y-6">
+                <SliderPicker color={selectedColor} onChange={handleColorChange} />
+                <div className="flex items-center gap-4 pt-2">
+                    <div className="w-12 h-12 rounded-xl border border-white/20 shadow-inner" style={{ backgroundColor: selectedColor }} />
+                    <input
+                      type="text"
+                      {...register("cor")}
+                      value={selectedColor}
+                      readOnly
+                      className="flex-1 bg-white/5 border border-white/10 text-white font-mono text-center py-3 rounded-xl outline-none"
+                    />
+                </div>
+              </div>
+            </div>
+
+            {/* Ações */}
+            <div className="flex gap-4 pt-4">
+              <Dialog.Close asChild>
+                <button type="button" className="flex-1 py-5 bg-white/5 text-gray-400 font-black text-[10px] uppercase tracking-[3px] rounded-2xl hover:bg-white/10 transition-all">
+                  Cancelar
                 </button>
-              </div>
-            </form>
-          </Dialog.Content>
-        </div>
+              </Dialog.Close>
+              <button
+                type="submit"
+                className="flex-1 py-5 bg-emerald-600 text-white font-black text-[10px] uppercase tracking-[3px] rounded-2xl hover:bg-emerald-500 shadow-lg shadow-emerald-900/30 transition-all"
+              >
+                Salvar Marca
+              </button>
+            </div>
+          </form>
+        </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
   );

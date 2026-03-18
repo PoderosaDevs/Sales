@@ -1,112 +1,113 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react"; // Adicionado useState
 import { Link } from "react-router-dom";
 import { MutationLogin } from "../../graphql/Usuario/Mutation";
 import { BounceLoader } from "react-spinners";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importação dos ícones
 import Swal from "sweetalert2";
 
 function LoginComponent() {
-  const { FormLogin, errors, handleSubmit, register, loading, DataLogin } =
-    MutationLogin();
-
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
-
-  useEffect(() => {
-    // Function to handle window resize and update state
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 450);
-    };
-
-    // Add event listener for window resize
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup event listener on component unmount
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const { FormLogin, handleSubmit, register, loading } = MutationLogin();
+  
+  // Estado para controlar a visibilidade da senha
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: any) => {
     try {
       const result = await FormLogin(data);
       if (result.data?.Login) {
         localStorage.setItem("token", result.data.Login.token_api);
-        window.location.replace("/"); // Redireciona imediatamente após o login
+        window.location.replace("/");
       } else {
         throw new Error("Login inválido");
       }
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || "Usuário ou senha incorretos.";
       Swal.fire({
         icon: "error",
-        title: "Erro no Login",
-        text: errorMessage,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Tentar novamente",
+        title: "Acesso Negado",
+        text: "Verifique suas credenciais e tente novamente.",
+        background: '#121214',
+        color: '#fff',
+        confirmButtonColor: '#10b981',
       });
     }
   };
 
   return (
-    <div
-      className={
-        `bg-white ${
-          isMobile ? "w-[100%] px-5 py-7" : "w-[450px] px-16 py-14"
-        } rounded-lg mx-auto shadow-md w-full` + "sm:w-4/5"
-      }
-    >
-      <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block font-bold text-md text-gray-700 tracking-wide mb-2"
-          >
-            Email
+    <div className="w-full">
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        
+        {/* Input Email */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[2px] ml-1">
+            E-mail Profissional
           </label>
           <input
             type="email"
-            id="email"
-            className="w-full px-3 py-2 bg-[#f5f5f5] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Digite seu email"
+            className="w-full px-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300 shadow-inner"
+            placeholder="nome@empresa.com"
             {...register("email")}
           />
         </div>
-        <div className="mb-6">
-          <label
-            htmlFor="password"
-            className="flex justify-between items-center font-bold text-md text-gray-700 tracking-wide mb-2"
-          >
-            Senha
-            <Link
-              to="/forgot-password"
-              className="text-indigo-600 text-sm hover:underline"
-            >
-              Esqueceu sua senha?
+
+        {/* Input Senha */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center ml-1">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[2px]">
+              Senha
+            </label>
+            <Link to="/forgot-password" className="text-emerald-500 text-[11px] font-semibold hover:text-emerald-400 transition-colors">
+              Esqueceu a senha?
             </Link>
-          </label>
-          <input
-            type="password"
-            id="password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Digite sua senha"
-            {...register("senha")}
-          />
+          </div>
+          
+          <div className="relative group">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300 shadow-inner"
+              placeholder="••••••••"
+              {...register("senha")}
+            />
+            
+            {/* Botão de Toggle da Senha */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-400 transition-colors focus:outline-none"
+            >
+              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+            </button>
+          </div>
         </div>
+
+        {/* Botão de Ação */}
         <button
           type="submit"
-          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={loading}
+          className="group relative w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-900/20 active:scale-[0.98] overflow-hidden"
         >
-          {loading ? <BounceLoader color="#ffffff" size={24} /> : "Entrar"}
+          <div className="relative z-10 flex items-center justify-center gap-2">
+            {loading ? <BounceLoader color="#ffffff" size={20} /> : (
+              <>
+                <span className="tracking-widest text-sm">ENTRAR NO SISTEMA</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </>
+            )}
+          </div>
+          {/* Efeito de brilho */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
         </button>
-        <span className="block text-center font-semibold mt-7 text-gray-600 text-md">
-          Novo aqui?{" "}
-          <Link
-            to="/register"
-            className="text-indigo-600 font-bold hover:underline"
-          >
-            Criar uma Conta
-          </Link>
-        </span>
+
+        {/* Footer do Form */}
+        <div className="pt-6 text-center border-t border-white/5">
+          <p className="text-gray-500 text-sm font-medium">
+            Não possui acesso?{" "}
+            <Link to="/register" className="text-white hover:text-emerald-400 font-bold transition-colors">
+              Solicitar Cadastro
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );

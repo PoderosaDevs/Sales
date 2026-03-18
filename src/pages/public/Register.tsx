@@ -1,168 +1,132 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MutationSetUsuario } from "../../graphql/Usuario/Mutation";
 import PasswordFields from "./partials/PasswordsFields";
+import { BounceLoader } from "react-spinners"; // Substituindo o Swal de carregamento por algo mais moderno
 import Swal from "sweetalert2";
 
 function Register() {
-  const { register, FormSetUsuario, loading, handleSubmit, errors } =
-    MutationSetUsuario();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
+  const { register, FormSetUsuario, loading, handleSubmit, errors } = MutationSetUsuario();
   const navigate = useNavigate();
-  console.log(errors);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 450);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  if (loading) {
-    Swal.fire("Enviando Informações...", "");
-    Swal.showLoading();
-  }
 
   const onSubmit = async (data: any) => {
     try {
       const result = await FormSetUsuario(data);
-      console.log(result);
 
-      // Verifica se o result tem um networkError ou response status 400
-      if (result?.networkError?.response?.status === 400) {
-        Swal.fire({
-          icon: "error",
-          title: "Erro!",
-          text: "Ocorreu um erro, tente novamente mais tarde.",
-        });
-        return; // Para a execução em caso de erro
-      }
-
-      // Verifica se há erros no result
-      if (result?.errors && result.errors.length > 0) {
-        let errorMessage = result.errors[0]?.message || "Erro desconhecido.";
-
-        // Verifica se o erro está relacionado ao email já cadastrado
-        if (result.errors[0]?.message === "Email já cadastrado no sistema!") {
-          errorMessage = "Esse email já está cadastrado. Tente outro.";
-        }
+      if (result?.networkError?.response?.status === 400 || (result?.errors && result.errors.length > 0)) {
+        const errorMessage = result.errors?.[0]?.message === "Email já cadastrado no sistema!" 
+          ? "Este e-mail já está em uso em nossa base." 
+          : "Não foi possível processar seu cadastro agora.";
 
         Swal.fire({
           icon: "error",
-          title: "Erro!",
+          title: "Ops!",
           text: errorMessage,
+          background: '#121214',
+          color: '#fff',
+          confirmButtonColor: '#10b981',
         });
-        return; // Para a execução em caso de erro
+        return;
       }
 
-      // Se não houver erros, exibe o Swal de sucesso
       Swal.fire({
         icon: "success",
-        title: "Conta criada com sucesso!",
-        text: "Você pode agora fazer login.",
-      }).then(() => {
-        navigate("/");
-      });
+        title: "Bem-vinda ao Paraíso!",
+        text: "Sua conta foi criada com sucesso.",
+        background: '#121214',
+        color: '#fff',
+        confirmButtonColor: '#10b981',
+      }).then(() => navigate("/"));
+      
     } catch (error: any) {
-      console.error(error);
-
-      // Captura os erros de requisição HTTP
-      let errorMessage = "Houve um erro ao salvar os dados do usuário.";
-
-      // Verifica se o erro tem uma resposta HTTP válida
-      if (error?.response) {
-        errorMessage = `Erro: ${error.response.status} - ${error.response.statusText}`;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
       Swal.fire({
         icon: "error",
-        title: "Erro!",
-        text: errorMessage,
+        title: "Erro no Sistema",
+        text: "Houve uma falha na comunicação. Tente novamente.",
+        background: '#121214',
+        color: '#fff',
+        confirmButtonColor: '#10b981',
       });
     }
   };
 
   return (
-    <div
-      className={`bg-white ${
-        isMobile ? "w-[80%] px-5 py-3" : "w-[500px] px-14 py-4"
-      } rounded-lg mx-auto shadow-md w-full`}
-    >
-      <form className="w-full pb-4" onSubmit={handleSubmit(onSubmit)}>
-        <h1 className="text-2xl text-center font-bold my-2 text-gray-800">
-          Criar Conta
-        </h1>
+    <div className="w-full animate-in fade-in duration-500">
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
 
-        <div className="mb-4">
-          <label
-            htmlFor="name"
-            className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
-          >
-            Nome
+        {/* Campo Nome */}
+        <div className="space-y-1.5">
+          <label htmlFor="name" className="text-[10px] font-bold text-gray-400 uppercase tracking-[2px] ml-1">
+            Nome Completo
           </label>
           <input
             type="text"
             id="name"
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
-              errors.nome ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="Seu nome completo"
+            className={`w-full px-4 py-3 bg-white/[0.03] border ${
+              errors.nome ? "border-red-500/50" : "border-white/10"
+            } rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all shadow-inner`}
+            placeholder="Como deseja ser chamada?"
             {...register("nome")}
             onKeyPress={(event) => {
-              const regex = /^[A-Za-z\s]+$/; // Permite letras maiúsculas, minúsculas e espaços
-              if (!regex.test(event.key)) {
-                event.preventDefault(); // Impede a entrada de caracteres inválidos
-              }
+              const regex = /^[A-Za-z\s]+$/;
+              if (!regex.test(event.key)) event.preventDefault();
             }}
           />
-
           {errors.nome && (
-            <span className="text-red-500 text-sm">{errors.nome.message}</span>
+            <span className="text-red-400 text-xs ml-1 font-medium">{errors.nome.message}</span>
           )}
         </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block font-bold text-xl text-gray-700 tracking-wide mb-2"
-          >
-            Email
+        {/* Campo Email */}
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-[10px] font-bold text-gray-400 uppercase tracking-[2px] ml-1">
+            E-mail
           </label>
           <input
             type="email"
             id="email"
-            className={`w-full px-3 py-2 bg-[#f5f5f5] border ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="Ex: usuario@poderosa"
+            className={`w-full px-4 py-3 bg-white/[0.03] border ${
+              errors.email ? "border-red-500/50" : "border-white/10"
+            } rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all shadow-inner`}
+            placeholder="seu@email.com"
             {...register("email")}
           />
           {errors.email && (
-            <span className="text-red-500 text-sm">{errors.email.message}</span>
+            <span className="text-red-400 text-xs ml-1 font-medium">{errors.email.message}</span>
           )}
         </div>
 
-        <PasswordFields errors={errors} register={register} />
+        {/* Campos de Senha (Lembre-se de atualizar o estilo interno deste componente também) */}
+        <div className="py-2">
+            <PasswordFields errors={errors} register={register} />
+        </div>
 
+        {/* Botão Registrar */}
         <button
           type="submit"
-          className="w-full outline-none bg-indigo-600 text-xl font-semibold tracking-wide text-white py-2 rounded-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={loading}
+          className="group relative w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-900/20 active:scale-[0.98] mt-4"
         >
-          Criar Conta
+          <div className="relative z-10 flex items-center justify-center gap-2">
+            {loading ? <BounceLoader color="#ffffff" size={20} /> : (
+              <>
+                <span>FINALIZAR CADASTRO</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
+            )}
+          </div>
         </button>
 
-        <span className="block text-center font-semibold mt-5 text-gray-600 text-md">
-          Já tem uma conta?{" "}
-          <Link to="/" className="text-indigo-500 font-bold hover:underline">
-            Fazer Login
-          </Link>
-        </span>
+        <div className="pt-6 text-center">
+          <p className="text-gray-500 text-sm font-medium">
+            Já possui uma conta?{" "}
+            <Link to="/" className="text-white hover:text-emerald-400 font-bold transition-colors">
+              Fazer Login
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );

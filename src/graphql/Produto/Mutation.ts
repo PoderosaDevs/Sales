@@ -19,6 +19,7 @@ export function MutationSetProduto() {
     handleSubmit,
     formState: { isSubmitting, errors },
     reset,
+    setValue
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   });
@@ -47,6 +48,7 @@ export function MutationSetProduto() {
     error,
     DataSetProduto,
     isSubmitting,
+    setValue
   };
 }
 

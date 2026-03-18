@@ -40,14 +40,18 @@ const PaginationComponent: React.FC<PaginationProps> = ({
     setQuantity(selectedQuantity);
   };
 
+  const onPageChange = (page: number, quantity: number) => {
+    setPagesInfo(page < 0 ? 0 : page, quantity);
+  };
+
   const renderPageNumbers = () => {
     const maxButtons = 5;
     let startPage = 0;
-    let endPage = totalPages;
+    let endPage = totalPages - 1; // Ajuste para índice 0
 
     if (totalPages > maxButtons) {
       if (currentPage < Math.ceil(maxButtons / 2)) {
-        endPage = maxButtons;
+        endPage = maxButtons - 1;
       } else if (currentPage >= totalPages - Math.floor(maxButtons / 2)) {
         startPage = totalPages - maxButtons;
       } else {
@@ -57,18 +61,18 @@ const PaginationComponent: React.FC<PaginationProps> = ({
     }
 
     const pageNumbers = Array.from(
-      { length: endPage - startPage + 1 },
+      { length: Math.max(0, endPage - startPage + 1) },
       (_, index) => index + startPage
     );
 
     return pageNumbers.map((pageNumber) => (
-      <li key={pageNumber} className="page-item">
+      <li key={pageNumber}>
         <button
-          className={`px-3 py-1 rounded-md text-sm font-medium ${
+          className={`w-9 h-9 flex items-center justify-center rounded-xl text-xs font-black transition-all duration-200 ${
             pageNumber === currentPage
-              ? "bg-custom-bg-start text-white"
-              : "bg-gray-200 text-gray-700"
-          } hover:bg-custom-bg-start hover:text-white`}
+              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 active:scale-95"
+              : "bg-white/5 text-gray-500 hover:bg-white/10 hover:text-gray-300 border border-white/5"
+          }`}
           onClick={() => onPageChange(pageNumber, quantity)}
         >
           {pageNumber + 1}
@@ -77,83 +81,103 @@ const PaginationComponent: React.FC<PaginationProps> = ({
     ));
   };
 
-  const onPageChange = (page: number, quantity: number) => {
-    setPagesInfo(page < 0 ? 0 : page, quantity);
-  };
-
   return (
-    <nav aria-label="Pagination" className="w-full flex items-center justify-end py-4">
-      <div className="flex items-center mr-6">
-        <label htmlFor="quantity-select" className="text-gray-700 mr-2">
-          Quantidade:
+    <nav aria-label="Pagination" className="w-full flex flex-col md:flex-row items-center justify-between gap-6 py-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      
+      {/* SELETOR DE QUANTIDADE */}
+      <div className="flex items-center gap-3 order-2 md:order-1">
+        <label htmlFor="quantity-select" className="text-[10px] font-black text-gray-500 uppercase tracking-[2px]">
+          Exibir:
         </label>
-        <select
-          id="quantity-select"
-          className="border border-gray-300 rounded-md p-2 text-gray-700 bg-white"
-          value={quantity}
-          onChange={handleQuantityChange}
-        >
-          <option value={10}>10</option>
-          <option value={15}>15</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
+        <div className="relative group">
+            <select
+              id="quantity-select"
+              className="bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-gray-300 outline-none focus:ring-1 focus:ring-emerald-500/40 appearance-none cursor-pointer pr-10 transition-all hover:border-white/20"
+              value={quantity}
+              onChange={handleQuantityChange}
+            >
+              <option value={10}>10 linhas</option>
+              <option value={15}>15 linhas</option>
+              <option value={20}>20 linhas</option>
+              <option value={50}>50 linhas</option>
+              <option value={100}>100 linhas</option>
+            </select>
+            {/* Ícone customizado para o select */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600">
+                <BiChevronRight className="rotate-90" size={16} />
+            </div>
+        </div>
+        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-2">
+            Total: {pagesInfo.totalItems}
+        </span>
       </div>
-      <ul className="flex items-center space-x-2">
+
+      {/* NAVEGAÇÃO DE PÁGINAS */}
+      <ul className="flex items-center gap-2 order-1 md:order-2">
+        {/* Ir para início */}
         <li>
           <button
             disabled={!hasPreviousPage}
-            className={`px-1 py-1 rounded-md text-sm font-medium ${
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all ${
               !hasPreviousPage
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-transparent border-white/5 text-gray-800 cursor-not-allowed"
+                : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-emerald-500"
             }`}
-            onClick={() => setPagesInfo(0, quantity)}
+            onClick={() => onPageChange(0, quantity)}
+            title="Primeira página"
           >
-            <BiChevronsLeft className="w-5 h-5" />
-          </button>
-        </li>
-        <li>
-          <button
-            disabled={!hasPreviousPage}
-            className={`px-1 py-1 rounded-md text-sm font-medium ${
-              !hasPreviousPage
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-            onClick={() => setPagesInfo(pagesInfo.currentPage - 1, quantity)}
-          >
-            <BiChevronLeft className="w-5 h-5" />
+            <BiChevronsLeft size={20} />
           </button>
         </li>
 
+        {/* Anterior */}
+        <li>
+          <button
+            disabled={!hasPreviousPage}
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all ${
+              !hasPreviousPage
+                ? "bg-transparent border-white/5 text-gray-800 cursor-not-allowed"
+                : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-emerald-500"
+            }`}
+            onClick={() => onPageChange(currentPage - 1, quantity)}
+            title="Anterior"
+          >
+            <BiChevronLeft size={20} />
+          </button>
+        </li>
+
+        {/* Números das Páginas */}
         {renderPageNumbers()}
 
+        {/* Próximo */}
         <li>
           <button
             disabled={!hasNextPage}
-            className={`px-1 py-1 rounded-md text-sm font-medium ${
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all ${
               !hasNextPage
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-transparent border-white/5 text-gray-800 cursor-not-allowed"
+                : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-emerald-500"
             }`}
-            onClick={() => setPagesInfo(pagesInfo.currentPage + 1, quantity)}
+            onClick={() => onPageChange(currentPage + 1, quantity)}
+            title="Próxima"
           >
-            <BiChevronRight className="w-5 h-5" />
+            <BiChevronRight size={20} />
           </button>
         </li>
+
+        {/* Última página */}
         <li>
           <button
             disabled={!hasNextPage}
-            className={`px-1 py-1 rounded-md text-sm font-medium ${
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all ${
               !hasNextPage
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-transparent border-white/5 text-gray-800 cursor-not-allowed"
+                : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-emerald-500"
             }`}
-            onClick={() => setPagesInfo(pagesInfo.totalPages, quantity)}
+            onClick={() => onPageChange(totalPages - 1, quantity)}
+            title="Última página"
           >
-            <BiChevronsRight className="w-5 h-5" />
+            <BiChevronsRight size={20} />
           </button>
         </li>
       </ul>

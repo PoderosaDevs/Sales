@@ -6,43 +6,34 @@ import { routeTitles } from "../Routes/routeConfig";
 import { AsideMobile } from "../components/asideMobile";
 
 export function AppLayout() {
-  const [isSecondaryOpen, setIsSecondaryOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-
   const location = useLocation();
   const currentPath = location.pathname;
-  const title = routeTitles[currentPath] || "Default Title";
+  const title = routeTitles[currentPath] || "Dashboard";
 
-  // Atualiza o estado de isMobile com base na largura da tela
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
-
-    // Limpeza do listener ao desmontar o componente
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    <div className="flex h-screen">
-      {isMobile ? (
-        <AsideMobile /> // Exibe AsideMobile em telas menores que 1024px
-      ) : (
-        <Aside setIsSecondaryOpen={setIsSecondaryOpen} /> // Exibe Aside em telas maiores ou iguais a 1024px
-      )}
+    <div className="flex h-screen bg-[#0a0a0c] text-white overflow-hidden font-sans">
+      {/* Sidebar Desktop */}
+      {!isMobile && <Aside />}
 
-      <div
-        className={`flex-1 ml-[0px] flex flex-col transition-all duration-300 ease-in-out ${
-          isMobile ? "pl-0" : "pl-[120px]"
-        }`}
-      >
-        <main className="flex-1 bg-[#f5f5f5]">
-          <Header title={title} />
-          <Outlet />
+      {/* Sidebar Mobile */}
+      {isMobile && <AsideMobile />}
+
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ${!isMobile ? "pl-24" : "pl-0"}`}>
+        {/* Header com Glassmorphism */}
+        <Header title={title} />
+        
+        <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="p-6 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* O conteúdo das páginas (Outlet) deve usar cards bg-[#0d0d10] e border-white/10 */}
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

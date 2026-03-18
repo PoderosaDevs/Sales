@@ -13,138 +13,68 @@ interface AsideProps {}
 
 type IconType = "home" | "user" | "cog" | "vendas" | "catalog" | "backoffice";
 
-export function Aside({}: AsideProps) {
-  const [activeIcon, setActiveIcon] = useState<IconType | null>(null);
+export function Aside() {
+  const [activeIcon, setActiveIcon] = useState<string | null>(null);
   const { usuarioData } = useAuth();
   const location = useLocation();
-  const currentPath = location.pathname;
   const navigateTo = useNavigation();
 
   useEffect(() => {
-    if (currentPath === "/") {
-      setActiveIcon("home");
-    } else if (currentPath === "/catalog") {
-      setActiveIcon("catalog");
-    } else if (currentPath === "/vendas") {
-      setActiveIcon("vendas");
-    } else if (currentPath === "/configuracoes") {
-      setActiveIcon("cog");
-    } else if (
-      currentPath === "/backoffice" ||
-      currentPath === "/produtos" ||
-      currentPath === "/linhas" ||
-      currentPath === "/metas" ||
-      currentPath === "/lojas" ||
-      currentPath === "/marcas" ||
-      currentPath === "/funcionarios"
-    ) {
-      setActiveIcon("backoffice");
-    } else {
-      setActiveIcon(null);
-    }
-  }, [currentPath]);
+    const path = location.pathname;
+    if (path === "/") setActiveIcon("home");
+    else if (path.includes("catalog")) setActiveIcon("catalog");
+    else if (path.includes("vendas")) setActiveIcon("vendas");
+    else if (path.includes("backoffice")) setActiveIcon("backoffice");
+  }, [location.pathname]);
+
+  const MenuItem = ({ id, icon: Icon, label, path }: any) => (
+    <li className="relative group flex justify-center">
+      <Tooltip tooltipText={label}>
+        <button
+          onClick={() => navigateTo(path)}
+          className={`p-4 rounded-2xl transition-all duration-300 relative ${
+            activeIcon === id 
+            ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
+            : "text-gray-500 hover:text-emerald-400 hover:bg-white/[0.03]"
+          }`}
+        >
+          <Icon size={26} />
+        </button>
+      </Tooltip>
+      {/* Indicador Ativo Lateral */}
+      {activeIcon === id && (
+        <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-8 bg-emerald-500 rounded-r-full shadow-[0_0_15px_#10b981]" />
+      )}
+    </li>
+  );
 
   return (
-    <div className="fixed bg-white h-full flex justify-center flex-row">
-      <div className="flex flex-col w-[120px] items-center py-6 shadow-md">
-        <div>
-          <img
-            src="https://media.graphassets.com/1ueVAwCoS6yTxCUa2mCX"
-            width={80}
-            alt="Logo"
-          />
-        </div>
-
-        {/* Menu Items */}
-        <ul className="flex-1 space-y-6 flex flex-col items-center justify-center">
-          <li className="flex items-center space-x-2 text-center">
-            <Tooltip tooltipText="Home">
-              <button
-                onClick={() => navigateTo("/")}
-                className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                  activeIcon === "home" ? "bg-[#f5f5f5]" : "bg-transparent"
-                }`}
-              >
-                <RxDashboard
-                  size={28}
-                  className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "home" ? "text-indigo-600" : "text-gray-600"
-                  }`}
-                />
-              </button>
-            </Tooltip>
-          </li>
-          <li className="flex items-center space-x-2 text-center">
-            <Tooltip tooltipText="Catálogo">
-              <button
-                onClick={() => navigateTo("/catalog")}
-                className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                  activeIcon === "catalog" ? "bg-[#f5f5f5]" : "bg-transparent"
-                }`}
-              >
-                <AiOutlineProduct
-                  size={28}
-                  className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "catalog" ? "text-indigo-600" : "text-gray-600"
-                  }`}
-                />
-              </button>
-            </Tooltip>
-          </li>
-          <li className="flex items-center space-x-2 text-center">
-            <Tooltip tooltipText="Vendas">
-              <button
-                onClick={() => navigateTo("/vendas")}
-                className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                  activeIcon === "vendas" ? "bg-[#f5f5f5]" : "bg-transparent"
-                }`}
-              >
-                <IoBagHandleOutline
-                  size={28}
-                  className={`transition-colors duration-300 ease-in-out ${
-                    activeIcon === "vendas" ? "text-indigo-600" : "text-gray-600"
-                  }`}
-                />
-              </button>
-            </Tooltip>
-          </li>
-
-          {usuarioData?.tipo_usuario !== 'EMPLOYEE' && (
-            <li className="flex items-center space-x-2 text-center">
-              <Tooltip tooltipText="Backoffice">
-                <button
-                  onClick={() => navigateTo("/backoffice")}
-                  className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                    activeIcon === "backoffice" ? "bg-[#f5f5f5]" : "bg-transparent"
-                  }`}
-                >
-                  <GrDatabase
-                    size={28}
-                    className={`transition-colors duration-300 ease-in-out ${
-                      activeIcon === "backoffice" ? "text-indigo-600" : "text-gray-600"
-                    }`}
-                  />
-                </button>
-              </Tooltip>
-            </li>
-          )}
-        </ul>
-
-        {/* Logout Icon */}
-        <div>
-          <Tooltip tooltipText="Sair">
-            <button
-              onClick={() => navigateTo("/sair")}
-              className="p-2 rounded transition-colors duration-300 ease-in-out hover:bg-[#f5f5f5]"
-            >
-              <IoLogOutOutline
-                size={28}
-                className="text-gray-600 hover:text-red-600 transition-colors duration-300 ease-in-out"
-              />
-            </button>
-          </Tooltip>
+    <aside className="fixed left-0 top-0 h-full w-24 bg-[#0d0d10] border-r border-white/5 flex flex-col items-center py-10 z-50">
+      {/* Logo idêntica à do Login */}
+      <div className="mb-14">
+        <div className="w-12 h-12 bg-gradient-to-tr from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <span className="text-white font-bold text-xl">P</span>
         </div>
       </div>
-    </div>
+
+      <nav className="flex-1">
+        <ul className="space-y-8">
+          <MenuItem id="home" icon={RxDashboard} label="Dashboard" path="/" />
+          <MenuItem id="catalog" icon={AiOutlineProduct} label="Catálogo" path="/catalog" />
+          <MenuItem id="vendas" icon={IoBagHandleOutline} label="Vendas" path="/vendas" />
+          {usuarioData?.tipo_usuario !== 'EMPLOYEE' && (
+            <MenuItem id="backoffice" icon={GrDatabase} label="Backoffice" path="/backoffice" />
+          )}
+        </ul>
+      </nav>
+
+      {/* Logout com hover em Vermelho Suave */}
+      <button
+        onClick={() => navigateTo("/sair")}
+        className="p-4 text-gray-600 hover:text-red-400 hover:bg-red-400/10 rounded-2xl transition-all duration-300"
+      >
+        <IoLogOutOutline size={26} />
+      </button>
+    </aside>
   );
 }

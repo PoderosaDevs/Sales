@@ -4,40 +4,58 @@ import {
   FaTrashAlt,
   FaCaretDown,
   FaCaretUp,
+  FaTags,
+  FaBoxOpen,
+  FaPlus,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { QueryGetMarcas } from "../../graphql/Marca/Query";
 import { MutationDeleteProduto } from "../../graphql/Produto/Mutation";
 import { MarcaModal } from "./partials/Modal";
+import { BounceLoader } from "react-spinners";
 
 export default function Marcas() {
-  const [expandedMarca, setExpandedMarca] = useState<number | null>(null); // controla qual marca está expandida
+  const [expandedMarca, setExpandedMarca] = useState<number | null>(null);
   const [filterText, setFilterText] = useState<string>("");
 
   const { data, loading, error } = QueryGetMarcas();
 
   const { HandleDeleteProduto, loading: loadingSet } = MutationDeleteProduto();
+
+  const swalConfig = {
+    background: "#0d0d10",
+    color: "#fff",
+    confirmButtonColor: "#10b981",
+    cancelButtonColor: "#1f1f23",
+  };
+
   if (loadingSet) {
-    Swal.fire("Enviando Informações...", "");
-    Swal.showLoading();
+    Swal.fire({
+      title: "Processando...",
+      background: "#0d0d10",
+      color: "#fff",
+      didOpen: () => Swal.showLoading(),
+    });
   }
 
   function confirmDelete(id: number) {
     Swal.fire({
-      title: "Tem certeza que deseja excluir?",
+      ...swalConfig,
+      title: "Remover Produto?",
+      text: "Esta ação é irreversível no catálogo.",
+      icon: "warning",
       showCancelButton: true,
+      confirmButtonText: "Sim, remover",
       cancelButtonText: "Cancelar",
-      confirmButtonText: "Excluir",
-      showCloseButton: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
         const result = await HandleDeleteProduto({
           variables: { deleteProdutoId: id },
         });
         if (!result) {
-          Swal.fire("ERRO!", "Ocorreu um erro durante a execução.", "warning");
+          Swal.fire({ ...swalConfig, title: "Erro!", text: "Falha na execução.", icon: "error" });
         } else {
-          Swal.fire("Sucesso!", "Produto deletado com sucesso.", "success");
+          Swal.fire({ ...swalConfig, title: "Sucesso!", text: "Item removido.", icon: "success" });
         }
       }
     });
@@ -47,196 +65,136 @@ export default function Marcas() {
     setExpandedMarca(expandedMarca === marcaId ? null : marcaId);
   }
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilterText(e.target.value);
-  };
-
   return (
-    <div className="max-w-[1500px] pt-10 m-auto">
-      <div className="bg-white px-10 py-6 rounded-xl flex flex-col mb-5 lg:mb-8">
-        <div className="flex justify-between items-start border-0">
-          <h3 className="flex flex-col items-start">
-            <span className="font-bold text-3xl text-gray-800 mb-1">
-              Marcas
-            </span>
-            <span className="text-gray-500 mt-1 font-semibold text-sm">
-              {loading
-                ? "Carregando marcas..."
-                : error
-                ? "Erro ao carregar marcas"
-                : `${data?.GetMarcas.length} marcas disponíveis.`}
-            </span>
-          </h3>
-
-          <MarcaModal />
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-1.5 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Gestão de Marcas</h1>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[2px] mt-1">
+              {loading ? "Sincronizando..." : `${data?.GetMarcas.length} Fabricantes no portfólio`}
+            </p>
+          </div>
         </div>
+        <MarcaModal />
+      </div>
 
-        <div className="py-3">
-          <div className="tab-content">
-            <div
-              className="tab-pane fade show active"
-              id="kt_table_widget_5_tab_1"
-            >
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y border-t-2 divide-gray-200">
-                  <thead>
-                    <tr className="border-0">
-                      <th className="p-0 max-w-4 text-left text-gray-700 py-3">
-                        Cor
-                      </th>
-                      <th className="p-0 min-w-36 text-left text-gray-700 py-3">
-                        Nome da Marca
-                      </th>
-                      <th className="p-0 min-w-36 text-gray-700 text-left py-3">
-                        Produtos
-                      </th>
-                      <th className="p-0 min-w-28 justify-end flex py-3">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="space-y-1.5">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={7} className="text-center py-10">
-                          Carregando...
-                        </td>
-                      </tr>
-                    ) : error ? (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="text-center py-10 text-red-500"
+      {/* TABELA DE MARCAS */}
+      <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/5">
+                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Identidade</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Nome da Marca</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px] text-center">Portfólio</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px] text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.03]">
+              {loading ? (
+                <tr><td colSpan={4} className="py-20 text-center"><BounceLoader color="#10b981" size={40} className="m-auto" /></td></tr>
+              ) : error ? (
+                <tr><td colSpan={4} className="py-20 text-center text-red-500 uppercase text-xs font-bold">Erro ao carregar fabricantes.</td></tr>
+              ) : (
+                data?.GetMarcas.map((marca: any) => (
+                  <React.Fragment key={marca.id}>
+                    <tr className={`group transition-colors ${expandedMarca === marca.id ? 'bg-emerald-500/[0.03]' : 'hover:bg-white/[0.01]'}`}>
+                      <td className="px-8 py-5">
+                        <div 
+                          className="w-8 h-8 rounded-lg shadow-lg border border-white/10" 
+                          style={{ backgroundColor: marca.cor }} 
+                        />
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className="text-white font-bold text-lg tracking-tight group-hover:text-emerald-400 transition-colors">
+                          {marca.nome}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-center">
+                        <button
+                          onClick={() => toggleExpand(marca.id)}
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            expandedMarca === marca.id 
+                            ? 'bg-emerald-500 text-[#0d0d10]' 
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                          }`}
                         >
-                          Erro ao carregar as marcas: {error.message}
-                        </td>
-                      </tr>
-                    ) : (
-                      data?.GetMarcas.map((marca) => (
-                        <>
-                          <tr
-                            key={marca.id}
-                            className="border-b border-gray-200"
+                          {expandedMarca === marca.id ? <FaCaretUp size={14} /> : <FaCaretDown size={14} />}
+                          {expandedMarca === marca.id ? "Ocultar" : "Ver Produtos"}
+                        </button>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all">
+                            <FaPencilAlt size={14} />
+                          </button>
+                          <button 
+                            onClick={() => confirmDelete(marca.id)}
+                            className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all"
                           >
-                            <td className="text-left py-2">
-                              <div
-                                style={{ backgroundColor: marca.cor }}
-                                className="w-6 h-6 rounded-md"
-                              />
-                            </td>
-                            <td className="text-left py-2">
-                              <span className="text-gray-900 font-bold hover:text-primary mb-1 text-lg">
-                                {marca.nome}
-                              </span>
-                            </td>
-                            <td className="text-center py-2">
-                              <button
-                                className={`bg-blue-100 text-blue-600 px-3 text-sm py-2 flex items-center justify-center space-x-2 rounded-xl hover:bg-blue-200 `}
-                                onClick={() => toggleExpand(marca.id)}
-                              >
-                                {expandedMarca === marca.id ? (
-                                  <FaCaretUp size={18} />
-                                ) : (
-                                  <FaCaretDown size={18} />
-                                )}
-                                <span>
-                                  {expandedMarca === marca.id
-                                    ? "Ocultar Produtos"
-                                    : "Exibir Produtos"}
-                                </span>
-                              </button>
-                            </td>
-                            <td className="text-right py-2">
-                              <button className="bg-green-100 text-green-600 p-4 rounded-xl hover:bg-green-200 mr-2">
-                                <FaPencilAlt size={18} />
-                              </button>
-                              <button
-                                onClick={() => confirmDelete(marca.id)}
-                                className="bg-red-100 text-red-600 p-4 rounded-xl hover:bg-red-200"
-                              >
-                                <FaTrashAlt size={18} />
-                              </button>
-                            </td>
-                          </tr>
+                            <FaTrashAlt size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
 
-                          {/* Subtabela de produtos */}
-                          {expandedMarca === marca.id && (
-                            <tr>
-                              <td colSpan={4} className="bg-gray-50 p-4">
-                                <div className="w-full flex border-b-2 justify-between items-center">
-                                  <h4 className="font-bold text-lg mb-2">
-                                    Produtos Associados
-                                  </h4>
-                                  <div className="mb-4 flex space-x-3">
-                                    <input
-                                      type="text"
-                                      value={filterText}
-                                      onChange={handleFilterChange}
-                                      placeholder="Filtrar produtos..."
-                                      className="p-2 border border-gray-300 rounded"
-                                    />
-                                    <button className="bg-gray-900 text-white py-3 px-2 rounded-xl text-sm">
-                                      Associar novos produtos
+                    {/* SUB-TABELA DE PRODUTOS */}
+                    {expandedMarca === marca.id && (
+                      <tr>
+                        <td colSpan={4} className="p-0 bg-[#0a0a0c]">
+                          <div className="p-8 space-y-6 animate-in slide-in-from-top-4 duration-300">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-6">
+                              <div className="flex items-center gap-3">
+                                <FaBoxOpen className="text-emerald-500" size={20} />
+                                <h4 className="text-white font-bold text-base uppercase tracking-wider">Produtos Associados</h4>
+                              </div>
+                              <div className="flex gap-3 w-full md:w-auto">
+                                <input
+                                  type="text"
+                                  placeholder="Filtrar nesta marca..."
+                                  value={filterText}
+                                  onChange={(e) => setFilterText(e.target.value)}
+                                  className="flex-1 md:w-64 bg-[#0d0d10] border border-white/10 text-white text-xs rounded-xl px-4 py-2.5 outline-none focus:ring-1 focus:ring-emerald-500/40"
+                                />
+                                <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-emerald-500 text-[10px] font-black uppercase tracking-tighter rounded-xl transition-all border border-emerald-500/20">
+                                  <FaPlus size={10} /> Associar Itens
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {marca.produtos?.filter((p: any) => p.nome.toLowerCase().includes(filterText.toLowerCase()))
+                                .map((produto: any) => (
+                                  <div key={produto.id} className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl group/item hover:border-emerald-500/30 transition-all">
+                                    <img src={produto.imagem} alt={produto.nome} className="w-14 h-14 object-cover rounded-xl border border-white/10" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-white font-bold text-sm truncate">{produto.nome}</p>
+                                      <p className="text-gray-500 text-[10px] font-mono mt-0.5">SKU: {produto.codigo || 'N/A'}</p>
+                                    </div>
+                                    <button onClick={() => confirmDelete(produto.id)} className="opacity-0 group-hover/item:opacity-100 p-2 text-gray-600 hover:text-red-500 transition-all">
+                                      <FaTrashAlt size={12} />
                                     </button>
                                   </div>
-                                </div>
-                                <table className="min-w-full divide-y divide-gray-200">
-                                  <thead>
-                                    <tr>
-                                      <th className="p-2 text-left">Nome</th>
-                                      <th className="p-2 text-left">Código</th>
-                                      <th className="p-2 text-left">Imagem</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {marca.produtos &&
-                                    marca.produtos.length > 0 ? (
-                                      marca.produtos
-                                        .filter((produto) =>
-                                          produto.nome
-                                            .toLowerCase()
-                                            .includes(filterText.toLowerCase())
-                                        )
-                                        .map((produto) => (
-                                          <tr key={produto.id}>
-                                            <td className="p-2">
-                                              {produto.nome}
-                                            </td>
-                                            <td className="p-2">
-                                              {produto.codigo}
-                                            </td>
-                                            <td className="p-2">
-                                              <img
-                                                src={produto.imagem}
-                                                alt={produto.nome}
-                                                className="w-12 h-12 rounded"
-                                              />
-                                            </td>
-                                          </tr>
-                                        ))
-                                    ) : (
-                                      <tr>
-                                        <td
-                                          colSpan={3}
-                                          className="text-center py-2 text-gray-500"
-                                        >
-                                          Nenhum produto associado.
-                                        </td>
-                                      </tr>
-                                    )}
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          )}
-                        </>
-                      ))
+                                ))}
+                                {(!marca.produtos || marca.produtos.length === 0) && (
+                                  <div className="col-span-full py-10 text-center text-gray-600 text-xs uppercase font-bold tracking-widest opacity-50">
+                                    Nenhum produto vinculado a esta marca.
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
                     )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+                  </React.Fragment>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

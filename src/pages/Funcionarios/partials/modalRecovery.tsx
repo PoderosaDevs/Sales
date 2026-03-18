@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "phosphor-react";
-import { FaPencilAlt } from "react-icons/fa";
+import { X, Key, ShieldCheck } from "phosphor-react";
+import { FaLock } from "react-icons/fa";
 import { MutationSetUsuarioRecovery } from "../../../graphql/Usuario/Mutation";
 
 interface RecoveryModalProps {
@@ -20,104 +20,121 @@ export function RecoveryModal({ id }: RecoveryModalProps) {
     errors,
   } = MutationSetUsuarioRecovery();
 
-  // seta o id na abertura do modal
+  // Seta o id na abertura do modal (Mantendo sua lógica original)
   useEffect(() => {
     if (isOpen && id) {
       setValue("recoveryUsuarioId", Number(id));
     }
   }, [isOpen, id, setValue]);
 
-  // loading visual
+  // Configuração de feedback visual Dark
   useEffect(() => {
     if (loading) {
-      Swal.fire("Enviando informações...", "");
-      Swal.showLoading();
+      Swal.fire({
+        title: "Criptografando...",
+        background: "#0d0d10",
+        color: "#fff",
+        didOpen: () => Swal.showLoading(),
+      });
     }
   }, [loading]);
 
   const onSubmit = async (data: any) => {
+    const swalConfig = {
+      background: "#0d0d10",
+      color: "#fff",
+      confirmButtonColor: "#10b981",
+    };
+
     try {
       const result = await FormSetRecovery(data);
-
       setIsOpen(false);
 
       if (!result) {
-        Swal.fire("Erro!", "Ocorreu um erro durante a execução.", "error");
+        Swal.fire({ ...swalConfig, title: "Erro!", text: "Ocorreu um erro durante a execução.", icon: "error" });
       } else {
-        Swal.fire("Sucesso!", "Senha redefinida com sucesso.", "success");
+        Swal.fire({ ...swalConfig, title: "Sucesso!", text: "Credenciais atualizadas.", icon: "success" });
       }
     } catch (error) {
-      Swal.fire("Erro!", "Falha ao redefinir a senha.", "error");
+      Swal.fire({ ...swalConfig, title: "Erro!", text: "Falha ao redefinir a senha.", icon: "error" });
     }
   };
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
-        <button className="px-4 py-4 bg-slate-900 text-white font-semibold gap-2 rounded-xl mr-2">
-          <FaPencilAlt size={18} />
+        {/* Botão de ação na tabela padronizado */}
+        <button className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all duration-300" title="Redefinir Senha">
+          <FaLock size={16} />
         </button>
       </Dialog.Trigger>
+      
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-gray-800 bg-opacity-50" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Content
-            className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-auto"
-            aria-labelledby="dialog-title"
-          >
-            <button
-              className="absolute top-6 right-6 text-gray-500 hover:text-gray-300"
-              aria-label="Close"
-              onClick={() => setIsOpen(false)}
-            >
-              <X size={24} />
-            </button>
-            <Dialog.Title
-              id="dialog-title"
-              className="text-xl font-semibold mb-4"
-            >
-              Redefinir Senha
-            </Dialog.Title>
-            <div className="border w-full mb-6" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-300" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0d0d10] border border-white/10 rounded-[40px] p-10 w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] outline-none">
+          
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]" />
+              <Dialog.Title className="text-xl font-bold text-white uppercase tracking-wider">
+                Segurança
+              </Dialog.Title>
+            </div>
+            <Dialog.Close className="text-gray-500 hover:text-white transition-colors">
+              <X size={24} weight="bold" />
+            </Dialog.Close>
+          </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Campo hidden via useEffect (não precisa renderizar input para recoveryUsuarioId) */}
-              <div className="flex flex-col space-y-4">
-                <label htmlFor="senha" className="block text-sm">
-                  Nova Senha
-                </label>
+          <div className="mb-8 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-start gap-3">
+             <ShieldCheck size={20} className="text-emerald-500 mt-0.5" />
+             <p className="text-gray-400 text-xs leading-relaxed">
+               Você está alterando as credenciais de acesso do colaborador. Certifique-se de comunicar a nova senha ao usuário.
+             </p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            
+            <div className="space-y-3">
+              <label htmlFor="senha" className="text-[10px] font-black text-gray-500 uppercase tracking-[2px] ml-1">
+                Nova Senha de Acesso
+              </label>
+              <div className="relative group">
+                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-emerald-500 transition-colors" size={22} />
                 <input
                   id="senha"
                   type="password"
                   {...register("senha")}
-                  className="w-full px-4 py-2 border rounded-md"
-                  placeholder="Digite a nova senha"
+                  className="w-full pl-14 pr-6 py-5 bg-[#0a0a0c] border border-white/10 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder:text-gray-700"
+                  placeholder="Defina o novo segredo"
                   required
                 />
-                {errors.senha && (
-                  <span className="text-red-500 text-sm">
-                    {errors.senha.message?.toString()}
-                  </span>
-                )}
               </div>
-              <div className="flex justify-end gap-2">
+              {errors.senha && (
+                <span className="text-red-500 text-[10px] font-bold uppercase ml-1 italic">
+                  {errors.senha.message?.toString()}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 pt-4">
+              <button
+                type="submit"
+                className="w-full py-5 bg-emerald-600 text-white font-black text-[10px] uppercase tracking-[3px] rounded-2xl hover:bg-emerald-500 shadow-lg shadow-emerald-900/30 transition-all active:scale-95"
+              >
+                Confirmar Nova Senha
+              </button>
+              <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md"
-                  onClick={() => setIsOpen(false)}
+                  className="w-full py-4 text-gray-500 font-bold text-[10px] uppercase tracking-[2px] hover:text-white transition-all"
                 >
-                  Fechar
+                  Cancelar Operação
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg"
-                >
-                  Resetar Senha
-                </button>
-              </div>
-            </form>
-          </Dialog.Content>
-        </div>
+              </Dialog.Close>
+            </div>
+
+          </form>
+        </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
   );
