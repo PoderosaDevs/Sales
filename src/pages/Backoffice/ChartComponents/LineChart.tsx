@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { GetInsightsVendasPeriodosTypes } from "../../../graphql/Usuario/Types";
@@ -12,24 +12,18 @@ type GastoPeriodo = NonNullable<
 >[number];
 
 interface ProcessedPoint {
-  label: string;       // o que aparece no eixo X
+  label: string;
   tratamentos: number;
   coloracoes: number;
 }
 
 type SeriesItem = { name: string; data: number[] };
 
-/**
- * Converte "DD/MM/YYYY" → Date
- */
 function parseDDMMYYYY(str: string): Date {
   const [dd, mm, yyyy] = str.split("/");
   return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
 }
 
-/**
- * Exibe "Mai/2025"
- */
 function formatMonthLabel(date: Date) {
   return date.toLocaleString("pt-BR", {
     month: "short",
@@ -37,9 +31,6 @@ function formatMonthLabel(date: Date) {
   });
 }
 
-/**
- * Agrupa por blocos fixos de dias
- */
 function groupByRange(
   raw: GastoPeriodo[],
   rangeDays: number
@@ -56,20 +47,20 @@ function groupByRange(
     const tratamentos = slice.reduce(
       (sum, d) =>
         sum +
-        (d.categories.find((c) => c.title === "tratamentos")?.value ?? 0),
+        (d.categories.find((c) => c.title.toLowerCase() === "tratamentos")?.value ?? 0),
       0
     );
 
     const coloracoes = slice.reduce(
       (sum, d) =>
         sum +
-        (d.categories.find((c) => c.title === "colorações")?.value ?? 0),
+        (d.categories.find((c) => c.title.toLowerCase() === "colorações")?.value ?? 0),
       0
     );
 
     grouped.push({
-      label: `${start.toLocaleDateString("pt-BR")} → ${end.toLocaleDateString(
-        "pt-BR"
+      label: `${start.toLocaleDateString("pt-BR", { day: '2-digit', month: '2-digit' })} → ${end.toLocaleDateString(
+        "pt-BR", { day: '2-digit', month: '2-digit' }
       )}`,
       tratamentos,
       coloracoes,
@@ -79,9 +70,6 @@ function groupByRange(
   return grouped;
 }
 
-/**
- * Agrupa por mês
- */
 function groupByMonth(raw: GastoPeriodo[]): ProcessedPoint[] {
   const map = new Map<
     string,
@@ -103,10 +91,10 @@ function groupByMonth(raw: GastoPeriodo[]): ProcessedPoint[] {
     const entry = map.get(key)!;
 
     entry.tratamentos +=
-      item.categories.find((c) => c.title === "tratamentos")?.value ?? 0;
+      item.categories.find((c) => c.title.toLowerCase() === "tratamentos")?.value ?? 0;
 
     entry.coloracoes +=
-      item.categories.find((c) => c.title === "colorações")?.value ?? 0;
+      item.categories.find((c) => c.title.toLowerCase() === "colorações")?.value ?? 0;
   });
 
   return [...map.values()].map((v) => ({
@@ -122,23 +110,26 @@ const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
 
   useEffect(() => {
     const raw = data?.GetInsightsGastosPeriodos;
-    if (!raw || raw.length === 0) return;
+    if (!raw || raw.length === 0) {
+        setProcessed([]);
+        setSeries([]);
+        return;
+    }
 
     const totalDias = raw.length;
     let result: ProcessedPoint[] = [];
 
-    // 🔥 Regras reais agora funcionando!
     if (totalDias > 90) {
       result = groupByMonth(raw);
     } else if (totalDias > 60) {
       result = groupByRange(raw, 21);
     } else {
       result = raw.map((item) => ({
-        label: item.data, // já está em DD/MM/YYYY
+        label: item.data,
         tratamentos:
-          item.categories.find((c) => c.title === "tratamentos")?.value ?? 0,
+          item.categories.find((c) => c.title.toLowerCase() === "tratamentos")?.value ?? 0,
         coloracoes:
-          item.categories.find((c) => c.title === "colorações")?.value ?? 0,
+          item.categories.find((c) => c.title.toLowerCase() === "colorações")?.value ?? 0,
       }));
     }
 
@@ -154,44 +145,78 @@ const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
 
   const options: ApexOptions = {
     chart: {
-      height: 250,
       type: "area",
       toolbar: { show: false },
+      background: "transparent",
+      fontFamily: "inherit",
     },
+    theme: { mode: "dark" },
     xaxis: {
       categories,
       tickAmount: 6,
       labels: {
         rotate: -45,
-        style: { colors: "#6b7280", fontSize: "12px" },
+        style: { colors: "#94a3b8", fontSize: "12px", fontWeight: 600 },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: "#94a3b8", fontSize: "12px" },
       },
     },
+    grid: {
+      borderColor: "rgba(255,255,255,0.05)",
+      strokeDashArray: 4,
+    },
     stroke: { curve: "smooth", width: 3 },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.45,
+        opacityTo: 0.05,
+        stops: [20, 100],
+      },
+    },
+    dataLabels: { enabled: false },
     tooltip: {
-      custom: ({ series, dataPointIndex }) => {
-        const label = categories[dataPointIndex];
+      theme: "dark",
+      shared: true,
+      intersect: false,
+      custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+        const label = w.globals.categoryLabels[dataPointIndex];
         const t = series[0][dataPointIndex];
         const c = series[1][dataPointIndex];
 
         return `
-          <div class="p-3 text-sm">
-            <strong>${label}</strong><br/>
-            🧴 Tratamentos: <b>${t}</b><br/>
-            🎨 Colorações: <b>${c}</b>
+          <div style="background: #0d0d10; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px;">${label}</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 13px; color: #fff;">🧴 Tratamentos: <b style="color: #8b5cf6;">${t}</b></div>
+                <div style="font-size: 13px; color: #fff;">🎨 Colorações: <b style="color: #10b981;">${c}</b></div>
+            </div>
           </div>
         `;
       },
     },
-    colors: ["#8b5cf6", "#105fb9"],
+    colors: ["#8b5cf6", "#10b981"],
+    legend: {
+      show: true,
+      position: "top",
+      horizontalAlign: "right",
+      labels: { colors: "#94a3b8" },
+    },
   };
 
   return (
-    <div className="bg-white shadow-md rounded-2xl p-6 h-full">
+    <div className="w-full h-full min-h-[400px]">
       <ApexChart
         options={options}
         series={series}
         type="area"
-        height={250}
+        height="100%"
       />
     </div>
   );

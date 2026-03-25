@@ -46,42 +46,42 @@ export function Backoffice() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-4xl font-bold text-white tracking-tight">
               Painel de <span className="text-emerald-500 font-light">Gestão</span>
             </h1>
           </div>
-          <p className="text-gray-500 text-sm ml-4.5">Visão estratégica e análise de performance.</p>
+          <p className="text-gray-400 text-base ml-5">Visão estratégica e análise de performance.</p>
         </div>
 
         {/* CONTROLE DE DATA PREMIUM */}
-        <div className="relative flex items-center gap-3 self-start lg:self-center">
-          <div className="flex items-center gap-2 text-gray-500 text-[10px] font-bold uppercase tracking-[2px] mr-2">
-            <FaFilter className="text-emerald-500" /> Período:
+        <div className="relative flex items-center gap-4 self-start lg:self-center">
+          <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-[2px] mr-2">
+            <FaFilter className="text-emerald-500" size={14} /> Período:
           </div>
           
           <div className="relative">
             {isRangeComplete ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsPopupVisible(!isPopupVisible)}
-                  className="bg-[#0d0d10] border border-emerald-500/30 text-emerald-500 px-5 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-emerald-900/10 hover:bg-emerald-500/5 transition-all flex items-center gap-3"
+                  className="bg-[#0d0d10] border border-emerald-500/30 text-emerald-500 px-6 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-900/10 hover:bg-emerald-500/5 transition-all flex items-center gap-3"
                 >
-                  <FaCalendarDays />
+                  <FaCalendarDays size={16} />
                   {startDateFormatted} — {endDateFormatted}
                 </button>
                 <button
                   onClick={() => setRange(undefined)}
-                  className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
+                  className="p-4 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
                 >
-                  <FaXmark />
+                  <FaXmark size={18} />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setIsPopupVisible(!isPopupVisible)}
-                className="bg-[#0d0d10] border border-white/10 text-gray-300 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] hover:bg-white/5 transition-all flex items-center gap-3"
+                className="bg-[#0d0d10] border border-white/10 text-gray-300 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-[2px] hover:bg-white/5 transition-all flex items-center gap-3"
               >
-                <FaCalendarDays className="text-emerald-500" />
+                <FaCalendarDays className="text-emerald-500" size={16} />
                 Selecionar Intervalo
               </button>
             )}
@@ -90,15 +90,15 @@ export function Backoffice() {
             {isPopupVisible && (
               <div
                 ref={popupRef}
-                className="absolute right-0 top-full mt-4 z-50 bg-[#0d0d10] border border-white/10 p-4 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200"
+                className="absolute right-0 top-full mt-4 z-50 bg-[#0d0d10] border border-white/10 p-6 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200"
               >
                 <style>{`
                   .rdp { --rdp-accent-color: #10b981; --rdp-background-color: #1a1a1e; margin: 0; }
                   .rdp-day_selected { background-color: #10b981 !important; color: #000 !important; font-weight: bold; }
                   .rdp-button:hover:not([disabled]):not(.rdp-day_selected) { background-color: rgba(16,185,129,0.1); color: #10b981; }
-                  .rdp-caption_label { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
-                  .rdp-head_cell { font-size: 10px; font-weight: 800; color: #4b5563; text-transform: uppercase; }
-                  .rdp-day { color: #9ca3af; border-radius: 8px; }
+                  .rdp-caption_label { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+                  .rdp-head_cell { font-size: 12px; font-weight: 800; color: #4b5563; text-transform: uppercase; }
+                  .rdp-day { color: #9ca3af; border-radius: 8px; font-size: 14px; }
                 `}</style>
                 <DayPicker
                   mode="range"
@@ -114,14 +114,14 @@ export function Backoffice() {
       </div>
 
       {/* MÓDULOS DE GERENCIAMENTO (Card Principal) */}
-      <section className="bg-[#0d0d10] border border-white/5 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
+      <section className="bg-[#0d0d10] border border-white/5 p-10 rounded-[40px] shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] -mr-32 -mt-32 transition-all group-hover:bg-emerald-500/10" />
         <div className="relative z-10">
-            <header className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
-                    <FaFilter size={18} />
+            <header className="flex items-center gap-4 mb-10">
+                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
+                    <FaFilter size={20} />
                 </div>
-                <h2 className="text-sm font-black text-white uppercase tracking-[3px]">Módulos de Gerenciamento</h2>
+                <h2 className="text-base font-black text-white uppercase tracking-[3px]">Módulos de Gerenciamento</h2>
             </header>
             <ManagerModules />
         </div>
@@ -131,11 +131,11 @@ export function Backoffice() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         
         {/* RANKING FUNCIONÁRIOS */}
-        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl">
-          <header className="flex items-center justify-between mb-8">
-            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Ranking de Vendedores</h2>
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-10 shadow-xl">
+          <header className="flex items-center justify-between mb-10">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-[3px]">Ranking de Vendedores</h2>
             <div className="h-px flex-1 bg-white/5 mx-6" />
-            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Top Performers</span>
+            <span className="text-emerald-500 text-xs font-bold uppercase tracking-widest">Top Performers</span>
           </header>
           <RankingFuncionarios
             startDate={isRangeComplete ? startDateFormatted : ""}
@@ -144,11 +144,11 @@ export function Backoffice() {
         </div>
 
         {/* RANKING MARCAS */}
-        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl">
-          <header className="flex items-center justify-between mb-8">
-            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Vendas por Marcas</h2>
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-10 shadow-xl">
+          <header className="flex items-center justify-between mb-10">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-[3px]">Vendas por Marcas</h2>
             <div className="h-px flex-1 bg-white/5 mx-6" />
-            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Share de Mercado</span>
+            <span className="text-emerald-500 text-xs font-bold uppercase tracking-widest">Share de Mercado</span>
           </header>
           <RankingMarcas
             startDate={isRangeComplete ? startDateFormatted : ""}
@@ -156,12 +156,12 @@ export function Backoffice() {
           />
         </div>
 
-        {/* RANKING LOJAS (Full Width opcional ou metade) */}
-        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-8 shadow-xl xl:col-span-2">
-          <header className="flex items-center justify-between mb-8">
-            <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Performance por Unidade / Loja</h2>
+        {/* RANKING LOJAS */}
+        <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-10 shadow-xl xl:col-span-2">
+          <header className="flex items-center justify-between mb-10">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-[3px]">Performance por Unidade / Loja</h2>
             <div className="h-px flex-1 bg-white/5 mx-6" />
-            <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Visão Geográfica</span>
+            <span className="text-emerald-500 text-xs font-bold uppercase tracking-widest">Visão Geográfica</span>
           </header>
           <RankingLojas
             startDate={isRangeComplete ? startDateFormatted : ""}

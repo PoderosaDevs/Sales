@@ -43,3 +43,38 @@ export const SET_META = gql`
     }
   }
 `;
+
+
+export const GET_MARCA_INSIGHTS = gql`
+query GetMarcaInsights($filters: MarcaInsightsFiltroInput) {
+  GetMarcaInsights(filters: $filters) {
+    result {
+      id
+      nome
+      pontos_totais
+      pontos_totais_coloracao
+      pontos_totais_tratamento
+      lojas {
+        pontos_totais_tratamento
+        pontos_totais_coloracao
+        pontos_totais
+        nome_fantasia
+      }
+      vendedores {
+        nome
+        pontos_totais_coloracao
+        pontos_totais_tratamento
+        quantidade
+      }
+    }
+    pageInfo {
+      currentPage
+      totalPages
+      totalItems
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+`

@@ -24,6 +24,7 @@ import { StoreInsights } from "../pages/Backoffice/StoreInsights";
 
 
 import { Vendas } from "../pages/Vendas";
+import { BrandInsights } from "../pages/Backoffice/BrandInsights";
 
 export function PrivateRoutes() {
   const { usuarioData } = useAuth();
@@ -90,6 +91,15 @@ export function PrivateRoutes() {
           element={
             <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
               <EmployeeInsights />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/backoffice/brand/:id"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+              <BrandInsights />
             </ProtectedRoute>
           }
         />
