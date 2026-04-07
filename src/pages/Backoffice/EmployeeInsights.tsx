@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   QueryFuncionarioInsights,
@@ -32,9 +32,6 @@ type SalesStat = {
   total: number;
 };
 
-/**
- * Mapeia marcas e lojas, calcula total e ordena do maior para o menor
- */
 function mapEmployeeSales(items: any[]): SalesStat[] {
   if (!items) return [];
 
@@ -50,13 +47,17 @@ function mapEmployeeSales(items: any[]): SalesStat[] {
         total: tratamento + coloracao,
       };
     })
-    .sort((a, b) => b.total - a.total); // maior para menor
+    .sort((a, b) => b.total - a.total);
 }
 
 export function EmployeeInsights() {
   const { id } = useParams<{ id: string }>();
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
+  const [appliedFilters, setAppliedFilters] = useState<{ start: string | null; end: string | null }>({
+    start: null,
+    end: null,
+  });
 
   const { data, loading, refetch } = QueryFuncionarioInsights({
     variables: {
@@ -64,8 +65,8 @@ export function EmployeeInsights() {
         userId: parseInt(id!),
         pagina: 0,
         quantidade: 10,
-        startDate: null,
-        endDate: null,
+        startDate: appliedFilters.start ? formatDateString(appliedFilters.start) : null,
+        endDate: appliedFilters.end ? formatDateString(appliedFilters.end) : null,
       },
     },
   });
@@ -78,8 +79,8 @@ export function EmployeeInsights() {
     variables: {
       filters: {
         targetId: parseInt(id!),
-        startDate: null,
-        endDate: null,
+        startDate: appliedFilters.start ? formatDateString(appliedFilters.start) : null,
+        endDate: appliedFilters.end ? formatDateString(appliedFilters.end) : null,
         type: "USER",
       },
     },
@@ -94,49 +95,13 @@ export function EmployeeInsights() {
 
   const applyFilters = () => {
     if (!startDate || !endDate) return;
-
-    const fmt = (date: string) => formatDateString(date);
-
-    refetch({
-      filters: {
-        userId: parseInt(id!),
-        pagina: 0,
-        quantidade: 10,
-        startDate: fmt(startDate),
-        endDate: fmt(endDate),
-      },
-    });
-
-    refetchVendas({
-      filters: {
-        userId: parseInt(id!),
-        startDate: fmt(startDate),
-        endDate: fmt(endDate),
-      },
-    });
+    setAppliedFilters({ start: startDate, end: endDate });
   };
 
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);
-
-    refetch({
-      filters: {
-        userId: parseInt(id!),
-        pagina: 0,
-        quantidade: 10,
-        startDate: null,
-        endDate: null,
-      },
-    });
-
-    refetchVendas({
-      filters: {
-        userId: parseInt(id!),
-        startDate: null,
-        endDate: null,
-      },
-    });
+    setAppliedFilters({ start: null, end: null });
   };
 
   if (loading || loadingVendas) {
@@ -178,13 +143,12 @@ export function EmployeeInsights() {
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
   const period =
-    startDate && endDate
-      ? `${formatDateString(startDate)} - ${formatDateString(endDate)}`
+    appliedFilters.start && appliedFilters.end
+      ? `${formatDateString(appliedFilters.start)} - ${formatDateString(appliedFilters.end)}`
       : `${formatDateDisplay(firstDay)} - ${formatDateDisplay(lastDay)}`;
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-12">
-      {/* HEADER E FILTROS */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
         <div className="flex items-center gap-5">
           <div className="w-1.5 h-12 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
@@ -210,7 +174,6 @@ export function EmployeeInsights() {
         </div>
       </div>
 
-      {/* CARDS RESUMO (KPIs) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-[#0d0d10] border border-white/5 p-8 rounded-[32px] flex items-center justify-between shadow-xl">
           <div className="space-y-2">
@@ -255,13 +218,12 @@ export function EmployeeInsights() {
         </div>
       </div>
 
-      {/* GRÁFICOS BARRAS (LOJAS + MARCAS) */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {[
           { title: "Top Lojas por Performance", data: topStores },
           { title: "Share por Marca Parceira", data: topBrands },
         ].map((chart, i) => {
-          const maxValue = Math.max(...chart.data.map((d) => d.total));
+          const maxValue = Math.max(...chart.data.map((d) => d.total), 0);
           return (
             <div
               key={i}
@@ -305,7 +267,6 @@ export function EmployeeInsights() {
                     dataKey="coloracao"
                     stackId="a"
                     fill="#1e40af"
-                    radius={[0, 0, 0, 0]}
                     barSize={16}
                   >
                     <LabelList
@@ -338,7 +299,6 @@ export function EmployeeInsights() {
         })}
       </div>
 
-      {/* CARDS DE MÉDIAS DIÁRIAS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           {
@@ -367,7 +327,6 @@ export function EmployeeInsights() {
         ))}
       </div>
 
-      {/* GRÁFICO DE LINHA (EVOLUÇÃO) */}
       <div className="bg-[#0d0d10] border border-white/5 rounded-[40px] p-10 shadow-2xl">
         <div className="flex items-center gap-4 mb-12">
           <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-emerald-500 border border-white/5">
