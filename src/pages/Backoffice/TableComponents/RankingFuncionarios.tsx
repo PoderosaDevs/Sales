@@ -14,7 +14,7 @@ export function RankingFuncionarios({ startDate, endDate }: RankingProps) {
     variables: {
       filters: {
         pagina: 0,
-        quantidade: 20,
+        quantidade: 100,
         startDate: startDate ? startDate : null,
         endDate: endDate ? endDate : null,
       },
