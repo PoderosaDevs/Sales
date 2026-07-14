@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -12,29 +12,10 @@ import {
 import { MutationSetProduto } from "../../../graphql/Produto/Mutation";
 import { FormValues } from "../../../graphql/Produto/Validations";
 import { FiPlusSquare } from "react-icons/fi";
-import { QueryGetMarcas } from "../../../graphql/Marca/Query";
 import MarcasSelect from "./MarcasSelect";
 
-interface MarcaOption {
-  value: number;
-  label: string;
-}
-
 export function ProductModal() {
-  const { data } = QueryGetMarcas();
   const [isOpen, setIsOpen] = useState(false);
-  const [marcaOptions, setMarcaOptions] = useState<MarcaOption[]>([]);
-
-  useEffect(() => {
-    if (data?.GetMarcas) {
-      setMarcaOptions(
-        data.GetMarcas.map((marca) => ({
-          value: marca.id,
-          label: marca.nome,
-        }))
-      );
-    }
-  }, [data]);
 
   const {
     FormProduto,
@@ -43,7 +24,7 @@ export function ProductModal() {
     isSubmitting,
     register,
     reset,
-    setValue
+    setValue,
   } = MutationSetProduto();
 
   const handleProductSubmit = async (data: FormValues) => {
@@ -84,7 +65,7 @@ export function ProductModal() {
           <FiPlusSquare size={20} /> Novo Produto
         </button>
       </Dialog.Trigger>
-      
+
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-300" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0d0d10] border border-white/10 rounded-[40px] p-10 w-full max-w-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] outline-none max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -168,7 +149,7 @@ export function ProductModal() {
             {/* Marca */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-[2px] ml-1">Fabricante / Marca</label>
-              <MarcasSelect onChange={(id) => setValue("id_marca", id)} />
+              <MarcasSelect onChange={(id) => setValue("id_marca", Number(id), { shouldValidate: true })} />
               {errors.id_marca && <p className="text-red-500 text-[9px] font-bold uppercase ml-1 italic">{errors.id_marca.message}</p>}
             </div>
 

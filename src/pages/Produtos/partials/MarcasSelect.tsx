@@ -19,7 +19,7 @@ export default function MarcasSelect({ onChange }: MarcasSelectProps) {
     if (data?.GetMarcas) {
       setMarcaOptions(
         data.GetMarcas.map((marca) => ({
-          value: marca.id,
+          value: Number(marca.id), // garante number mesmo se a API mandar string (GraphQL ID)
           label: marca.nome,
         }))
       );
@@ -28,7 +28,7 @@ export default function MarcasSelect({ onChange }: MarcasSelectProps) {
 
   const handleChange = (selectedOption: MarcaOption | null) => {
     if (selectedOption) {
-      onChange(selectedOption.value);
+      onChange(Number(selectedOption.value)); // dupla garantia, sem custo
     }
   };
 
@@ -55,10 +55,10 @@ export default function MarcasSelect({ onChange }: MarcasSelectProps) {
     }),
     option: (base, state) => ({
       ...base,
-      backgroundColor: state.isSelected 
-        ? "#10b981" 
-        : state.isFocused 
-        ? "rgba(16, 185, 129, 0.1)" 
+      backgroundColor: state.isSelected
+        ? "#10b981"
+        : state.isFocused
+        ? "rgba(16, 185, 129, 0.1)"
         : "transparent",
       color: state.isSelected ? "#000" : "#94a3b8",
       borderRadius: "0.5rem",
