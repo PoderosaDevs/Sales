@@ -4,7 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X, Calendar, DownloadSimple, Funnel } from "phosphor-react";
 import { TbReportAnalytics } from "react-icons/tb";
 import DatePicker, { registerLocale } from "react-datepicker";
-import ptBR_locale from "date-fns/locale/pt-BR";
+import { ptBR as ptBR_locale } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   subDays,

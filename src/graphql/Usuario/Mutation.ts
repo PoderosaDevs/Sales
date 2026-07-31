@@ -41,7 +41,7 @@ export function MutationLogin() {
           usuario: { ...data },
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro na requisição:", e.message);
       return e.message;
     }
@@ -74,14 +74,14 @@ export function MutationSetUsuario() {
   const [MutationBody, { error, loading, data: DataSetUsuario }] =
     useMutation<SetUsuarioFieldsTypes>(CREATE_USUARIO_SCHEMA);
 
-  async function FormSetUsuario(data) {
+  async function FormSetUsuario(data: any) {
     try {
       return await MutationBody({
         variables: {
           data,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e.name);
@@ -117,7 +117,7 @@ export function MutationSetUsuarioRecovery() {
   const [MutationBody, { error, loading, data: DataSetRecovery }] =
     useMutation<SetRecoveryPasswordFieldsTypes>(SET_RECOVERY_PASSWORD);
 
-  async function FormSetRecovery(data) {
+  async function FormSetRecovery(data: any) {
     try {
       return await MutationBody({
         variables: {
@@ -125,7 +125,7 @@ export function MutationSetUsuarioRecovery() {
           senha: data.senha,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e.name);

@@ -11,7 +11,7 @@ function Register() {
 
   const onSubmit = async (data: any) => {
     try {
-      const result = await FormSetUsuario(data);
+      const result: any = await FormSetUsuario(data);
 
       if (result?.networkError?.response?.status === 400 || (result?.errors && result.errors.length > 0)) {
         const errorMessage = result.errors?.[0]?.message === "Email já cadastrado no sistema!" 

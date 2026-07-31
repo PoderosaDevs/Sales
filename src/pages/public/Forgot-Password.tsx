@@ -33,7 +33,7 @@ function ForgotPasswordComponent() {
           window.location.reload();
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       let errorMessage = "Houve um erro ao salvar os dados do usuario.";
       if (error.response && error.response.data && error.response.data.message) {
         errorMessage = error.response.data.message;

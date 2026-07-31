@@ -17,7 +17,7 @@ export function MutationSetVenda() {
           data,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e);
       console.error("Erro na requisição:", e.name);
@@ -49,7 +49,7 @@ export function MutationDeleteVenda(usuarioId: number) {
         ],
         awaitRefetchQueries: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro na requisição:", e);
       return e;
     }

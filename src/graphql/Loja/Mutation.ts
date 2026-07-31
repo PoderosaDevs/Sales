@@ -22,7 +22,7 @@ export function MutationSetLoja() {
       refetchQueries: [GET_LOJAS],
     })
 
-  async function FormSetLoja(data) {
+  async function FormSetLoja(data: any) {
     try {
       return await MutationBody({
         variables: {
@@ -30,7 +30,7 @@ export function MutationSetLoja() {
         },
       });
 
-    } catch (e) {
+    } catch (e: any) {
       console.error('Erro na requisição:', e.message);
       return e.message
     }
@@ -51,7 +51,7 @@ export function MutationDeleteLoja() {
         refetchQueries: [GET_LOJAS],
       })
       return result
-    } catch (e) {
+    } catch (e: any) {
       if (e) {
         return false
       }

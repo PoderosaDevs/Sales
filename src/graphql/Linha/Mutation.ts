@@ -21,7 +21,7 @@ export function MutationSetMeta() {
     useMutation<TypesSetLinhaFields>(SET_LINHA)
 
 
-  async function FormSetMeta(data) {
+  async function FormSetMeta(data: any) {
     try {
       return await MutationBody({
         variables: {
@@ -31,7 +31,7 @@ export function MutationSetMeta() {
         },
       });
 
-    } catch (e) {
+    } catch (e: any) {
       console.error('Erro na requisição:', e.message);
       return e.message
     }
