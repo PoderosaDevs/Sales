@@ -12,12 +12,12 @@ export function Header({ title }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-[1600px] mx-auto py-5 px-6 lg:px-10 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto py-5 px-6 lg:px-10 pl-20 lg:pl-10 flex items-center justify-between">
         
         {/* Lado Esquerdo: Título Dinâmico */}
-        <div className="flex items-center gap-4">
-          <div className="h-6 w-1 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]" />
-          <h1 className="font-bold text-xl lg:text-2xl text-white tracking-tight">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="h-6 w-1 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981] flex-shrink-0" />
+          <h1 className="font-bold text-lg sm:text-xl lg:text-2xl text-white tracking-tight truncate">
             {title}
           </h1>
         </div>

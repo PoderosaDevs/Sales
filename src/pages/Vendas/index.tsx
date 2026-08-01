@@ -33,19 +33,19 @@ export function Vendas() {
       
       {/* HEADER DA PÁGINA */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-w-0">
           <div className="flex items-center gap-3">
-            <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
-            <h1 className="text-4xl font-bold text-white tracking-tight">
+            <div className="w-1.5 h-7 md:h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981] flex-shrink-0" />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight truncate">
               Gestão de Vendas
             </h1>
           </div>
-          <p className="text-gray-400 text-base ml-5">Consulte e gerencie seu histórico de performance.</p>
+          <p className="text-gray-400 text-sm md:text-base ml-5">Consulte e gerencie seu histórico de performance.</p>
         </div>
 
         <Link
           to="/catalog"
-          className="flex items-center justify-center gap-3 px-10 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
+          className="flex items-center justify-center gap-3 px-6 md:px-10 py-4 md:py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
         >
           Nova Venda <IoBagHandleSharp size={20} />
         </Link>
@@ -55,22 +55,22 @@ export function Vendas() {
       <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
         
         {/* Cabeçalho do Card */}
-        <div className="p-6 md:p-8 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
+        <div className="p-5 md:p-8 border-b border-white/5 bg-white/[0.01] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-500 flex-shrink-0">
               <FaCoins size={22} />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-xs font-black text-gray-500 uppercase tracking-[2px]">
                 Relatório Mensal
               </h2>
-              <p className="text-white text-base font-medium">Período: {currentMonth}/{today.getFullYear()}</p>
+              <p className="text-white text-base font-medium truncate">Período: {currentMonth}/{today.getFullYear()}</p>
             </div>
           </div>
 
           <button
             onClick={() => setShowCalendar(!showCalendar)}
-            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 transition-all"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 transition-all"
           >
             {showCalendar ? "Exibir em Lista" : "Exibir Calendário"}
           </button>
@@ -101,14 +101,14 @@ export function Vendas() {
                   {data?.GetVendaByUsuarioID.map((venda, index) => (
                     <div
                       key={index}
-                      className="group flex items-center justify-between p-6 bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-2xl transition-all duration-300"
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-2xl transition-all duration-300"
                     >
-                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 flex items-center justify-center bg-[#0a0a0c] border border-white/5 rounded-xl text-emerald-500 group-hover:border-emerald-500/30 transition-colors">
-                          <MdSell size={26} />
+                      <div className="flex items-center gap-4 md:gap-6 min-w-0">
+                        <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-[#0a0a0c] border border-white/5 rounded-xl text-emerald-500 group-hover:border-emerald-500/30 transition-colors">
+                          <MdSell size={24} />
                         </div>
-                        <div>
-                          <p className="text-white font-bold text-lg tracking-tight">
+                        <div className="min-w-0">
+                          <p className="text-white font-bold text-base md:text-lg tracking-tight truncate">
                             {DateToVim(venda.data_venda)}
                           </p>
                           <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mt-1">
@@ -117,13 +117,18 @@ export function Vendas() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 md:gap-6">
+                        <div className="flex sm:hidden flex-col">
+                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Status</span>
+                            <span className="text-emerald-500 text-sm font-bold">Confirmada</span>
+                        </div>
                         <div className="hidden sm:flex flex-col items-end mr-4">
                             <span className="text-xs text-gray-600 font-bold uppercase tracking-widest">Status</span>
                             <span className="text-emerald-500 text-sm font-bold">Confirmada</span>
                         </div>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-[#0a0a0c] border border-emerald-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all">
-                          Ver Detalhes
+                        <button className="flex-shrink-0 flex items-center gap-2 px-5 md:px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-[#0a0a0c] border border-emerald-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all">
+                          <span className="hidden sm:inline">Ver Detalhes</span>
+                          <span className="sm:hidden">Detalhes</span>
                           <IoChevronForwardOutline size={16} />
                         </button>
                       </div>

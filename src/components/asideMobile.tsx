@@ -1,63 +1,72 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IoBagHandleOutline , IoLogOutOutline } from "react-icons/io5";
-import { Tooltip } from "./Tooltip";
+import { IoBagHandleOutline, IoLogOutOutline, IoClose } from "react-icons/io5";
 import { RxDashboard } from "react-icons/rx";
-import { GrDatabase, GrUserFemale } from "react-icons/gr";
+import { GrDatabase } from "react-icons/gr";
+import { AiOutlineProduct } from "react-icons/ai";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigation } from "../utils/navigationUtils";
-import { AiOutlineProduct } from "react-icons/ai";
+
+interface MenuItemConfig {
+  id: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  path: string;
+}
 
 export function AsideMobile() {
-  const [isOpen, setIsOpen] = useState(false); // Controla a visibilidade do menu
-  const [activeIcon, setActiveIcon] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const { usuarioData } = useAuth();
   const location = useLocation();
   const navigateTo = useNavigation();
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const toggleMenu = () => {
-    console.log("Menu aberto:", !isOpen); // Verifica se o estado muda
-    setIsOpen(!isOpen);
-  };
+  const toggleMenu = () => setIsOpen((prev) => !prev);
+  const closeMenu = () => setIsOpen(false);
 
-  const closeMenu = () => {
-    console.log("Fechando menu");
-    setIsOpen(false);
-  };
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-      closeMenu();
-    }
-  };
-
+  // Fecha o menu ao trocar de rota
   useEffect(() => {
-    // Fechar o menu ao mudar de rota
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Fecha ao clicar fora do painel
   useEffect(() => {
-    if (isOpen) {
-      console.log("Menu está aberto");
-    } else {
-      document.removeEventListener("click", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        closeMenu();
+      }
     };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [isOpen]);
 
+  const menuItems: MenuItemConfig[] = [
+    { id: "home", icon: RxDashboard, label: "Dashboard", path: "/" },
+    { id: "catalog", icon: AiOutlineProduct, label: "Catálogo", path: "/catalog" },
+    { id: "vendas", icon: IoBagHandleOutline, label: "Vendas", path: "/vendas" },
+  ];
+
+  if (usuarioData?.tipo_usuario !== "EMPLOYEE") {
+    menuItems.push({ id: "backoffice", icon: GrDatabase, label: "Backoffice", path: "/backoffice" });
+  }
+
+  const isActive = (path: string) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
   return (
-    <div className="relative">
-      {/* Botão para abrir o menu */}
+    <>
+      {/* Botão hambúrguer — mesma linguagem visual do resto do app */}
       <button
         onClick={toggleMenu}
-        className="flex items-center p-2 text-white hover:text-gray-300 absolute top-2 left-4 z-50"
+        aria-label="Abrir menu"
+        className="fixed top-4 left-4 z-50 flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 text-white active:scale-95 transition-all"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-8 w-8"
+          className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -74,165 +83,67 @@ export function AsideMobile() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
           onClick={closeMenu}
-        ></div>
+        />
       )}
 
-      {/* Menu */}
+      {/* Painel do menu — dark theme igual ao resto do app, não mais branco */}
       <div
         ref={menuRef}
-        className={`fixed z-50 left-0 top-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`fixed z-50 left-0 top-0 h-full w-[280px] max-w-[80vw] bg-[#0d0d10] border-r border-white/5 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <ul className="flex flex-col justify-between items-start h-full">
-          <div className="w-full">
-            <div className="w-full border-b-2 p-4">
-              <h1 className="text-lg font-semibold">Menu</h1>
+        {/* Cabeçalho com logo, igual ao aside desktop */}
+        <div className="flex items-center justify-between p-6 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <span className="text-white font-bold text-lg">P</span>
             </div>
+            <span className="text-white font-bold text-lg tracking-tight">Menu</span>
+          </div>
+          <button
+            onClick={closeMenu}
+            aria-label="Fechar menu"
+            className="text-gray-500 hover:text-white transition-colors p-2"
+          >
+            <IoClose size={22} />
+          </button>
+        </div>
 
-            <li
-              className={
-                activeIcon === "home" ? "bg-[#f5f5f5] w-full" : "bg-transparent"
-              }
-            >
-              <Tooltip tooltipText="Home">
+        {/* Itens de navegação */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          <ul className="space-y-1">
+            {menuItems.map(({ id, icon: Icon, label, path }) => (
+              <li key={id}>
                 <button
-                  onClick={() => {
-                    navigateTo("/");
-                    setActiveIcon("home");
-                  }}
-                  className={`p-4 w-full rounded-lg transition-colors flex items-center space-x-2 text-gray-900 duration-300 ease-in-out ${
-                    activeIcon === "home" ? "bg-[#f5f5f5]" : "bg-transparent"
+                  onClick={() => navigateTo(path)}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
+                    isActive(path)
+                      ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <RxDashboard
-                    size={28}
-                    className={`mr-1 ${
-                      activeIcon === "home"
-                        ? "text-custom-bg-start"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span>Dashboard</span>
+                  <Icon size={22} />
+                  <span className="font-semibold text-sm">{label}</span>
                 </button>
-              </Tooltip>
-            </li>
-
-            <li
-              className={
-                activeIcon === "catalog"
-                  ? "bg-[#f5f5f5] w-full"
-                  : "bg-transparent"
-              }
-            >
-              <Tooltip tooltipText="Catálogo">
-                <button
-                  onClick={() => {
-                    navigateTo("/catalog");
-                    setActiveIcon("catalog");
-                  }}
-                  className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                    activeIcon === "catalog" ? "bg-[#f5f5f5]" : "bg-transparent"
-                  } flex items-center space-x-2`}
-                >
-                  <AiOutlineProduct
-                    size={28}
-                    className={`${
-                      activeIcon === "catalog"
-                        ? "text-custom-bg-start"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span>Catálogo</span>
-                </button>
-              </Tooltip>
-            </li>
-            <li
-              className={
-                activeIcon === "vendas"
-                  ? "bg-[#f5f5f5] w-full"
-                  : "bg-transparent"
-              }
-            >
-              <Tooltip tooltipText="Catálogo">
-                <button
-                  onClick={() => {
-                    navigateTo("/vendas");
-                    setActiveIcon("vendas");
-                  }}
-                  className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                    activeIcon === "vendas" ? "bg-[#f5f5f5]" : "bg-transparent"
-                  } flex items-center space-x-2`}
-                >
-                  <IoBagHandleOutline 
-                    size={28}
-                    className={`${
-                      activeIcon === "vendas"
-                        ? "text-custom-bg-start"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span>Vendas</span>
-                </button>
-              </Tooltip>
-            </li>
-
-            {usuarioData?.tipo_usuario !== "EMPLOYEE" && (
-              <li
-                className={
-                  activeIcon === "backoffice"
-                    ? "bg-[#f5f5f5] w-full"
-                    : "bg-transparent"
-                }
-              >
-                <Tooltip tooltipText="Backoffice">
-                  <button
-                    onClick={() => {
-                      navigateTo("/backoffice");
-                      setActiveIcon("backoffice");
-                    }}
-                    className={`p-4 rounded-lg transition-colors duration-300 ease-in-out ${
-                      activeIcon === "backoffice"
-                        ? "bg-[#f5f5f5]"
-                        : "bg-transparent"
-                    } flex items-center space-x-2`}
-                  >
-                    <GrDatabase
-                      size={28}
-                      className={`${
-                        activeIcon === "backoffice"
-                          ? "text-custom-bg-start"
-                          : "text-gray-600"
-                      }`}
-                    />
-                    <span>Backoffice</span>
-                  </button>
-                </Tooltip>
               </li>
-            )}
-          </div>
+            ))}
+          </ul>
+        </nav>
 
-          <div className="w-full">
-            <li className="border-t-2 w-full mt-2" />
-            <li className="w-full">
-              <Tooltip tooltipText="Sair">
-                <button
-                  onClick={() => navigateTo("/sair")}
-                  className="p-4 rounded-lg transition-colors duration-300 ease-in-out hover:bg-[#f5f5f5] flex items-center space-x-2"
-                >
-                  <IoLogOutOutline
-                    size={28}
-                    className="text-gray-600 hover:text-red-600 transition-colors duration-300 ease-in-out"
-                  />
-                  <span>Sair</span>
-                </button>
-              </Tooltip>
-            </li>
-          </div>
-        </ul>
+        {/* Sair — fixo no rodapé, cor de alerta consistente com o resto do app */}
+        <div className="p-3 border-t border-white/5">
+          <button
+            onClick={() => navigateTo("/sair")}
+            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
+          >
+            <IoLogOutOutline size={22} />
+            <span className="font-semibold text-sm">Sair</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
