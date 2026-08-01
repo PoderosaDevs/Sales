@@ -1,12 +1,15 @@
 import React, { useState } from "react"; // Adicionado useState
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MutationLogin } from "../../graphql/Usuario/Mutation";
 import { BounceLoader } from "react-spinners";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importação dos ícones
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 function LoginComponent() {
   const { FormLogin, handleSubmit, register, loading } = MutationLogin();
+  const { login } = useAuth();
+  const navigate = useNavigate();
   
   // Estado para controlar a visibilidade da senha
   const [showPassword, setShowPassword] = useState(false);
@@ -15,8 +18,9 @@ function LoginComponent() {
     try {
       const result = await FormLogin(data);
       if (result.data?.Login) {
-        localStorage.setItem("token", result.data.Login.token_api);
-        window.location.replace("/");
+        const ok = login(result.data.Login.token_api);
+        if (!ok) throw new Error("Token inválido recebido do servidor");
+        navigate("/");
       } else {
         throw new Error("Login inválido");
       }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaArrowLeft, FaFilter, FaShoppingBag } from "react-icons/fa";
+import Swal from "sweetalert2";
 import { QueryGetProdutos } from "../../graphql/Produto/Query";
 import { useShoppingCart } from "../../context/CartContext";
 import { Products } from "./Products";
@@ -50,7 +51,14 @@ export function Catalog() {
         <div className="flex items-center gap-3">
           {showSummary ? (
             <button
-              onClick={() => setShowSummary(false)}
+              onClick={() => {
+                // Garante que nenhum modal do SweetAlert2 esteja
+                // no meio de uma animação de fechamento quando o
+                // React troca de Summary pro Catálogo — evita a
+                // corrida que causa o erro "insertBefore" no Android.
+                Swal.close();
+                setShowSummary(false);
+              }}
               className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-gray-300 font-bold text-[10px] uppercase tracking-[2px] transition-all"
             >
               <FaArrowLeft className="text-emerald-500" />
@@ -165,7 +173,11 @@ export function Catalog() {
       </div>
 
       {/* CONTEÚDO PRINCIPAL */}
-      <div className="min-h-[400px]">
+      {/* A key força o React a desmontar/remontar por completo ao trocar
+          entre Catálogo e Resumo, em vez de tentar remendar a árvore —
+          isso protege contra qualquer nó de DOM que libs externas
+          (SweetAlert2) possam ter deixado para trás. */}
+      <div className="min-h-[400px]" key={showSummary ? "summary" : "products"}>
         {showSummary ? (
           <div className="animate-in slide-in-from-right-8 duration-500">
             <Summary />

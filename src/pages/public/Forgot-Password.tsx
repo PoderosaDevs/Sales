@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MutationLogin } from "../../graphql/Usuario/Mutation";
 import { BounceLoader } from "react-spinners";
+import { useAuth } from "../../context/AuthContext";
 
 function ForgotPasswordComponent() {
   const { FormLogin, errors, handleSubmit, register, loading, DataLogin } =
     MutationLogin();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 450);
 
@@ -29,8 +32,8 @@ function ForgotPasswordComponent() {
       const result = await FormLogin(data);
       if (result.data.Login) {
         if (DataLogin) {
-          localStorage.setItem("token", DataLogin.Login.token_api);
-          window.location.reload();
+          const ok = login(DataLogin.Login.token_api);
+          if (ok) navigate("/");
         }
       }
     } catch (error: any) {

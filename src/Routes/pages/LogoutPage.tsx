@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export function Logout() {
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
-    // Limpa o localStorage
-    localStorage.clear();
-    // Navega para a página inicial
-    navigate("/");
-  }, [navigate]); // Adicionando navigate como dependência
+    // logout() já limpa o token, atualiza o estado de autenticação
+    // e navega pra "/" — não usamos mais localStorage.clear(), que
+    // apagava também preferências não relacionadas a login (ex:
+    // quantidade de itens por página salva em outras telas).
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null; // Não precisa renderizar nada
 }
