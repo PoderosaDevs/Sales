@@ -51,6 +51,7 @@ export function Catalog() {
         <div className="flex items-center gap-3">
           {showSummary ? (
             <button
+              key="btn-voltar"
               onClick={() => {
                 // Garante que nenhum modal do SweetAlert2 esteja
                 // no meio de uma animação de fechamento quando o
@@ -65,7 +66,7 @@ export function Catalog() {
               Voltar ao Catálogo
             </button>
           ) : (
-            <>
+            <React.Fragment key="btns-catalogo">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] transition-all border ${
@@ -90,7 +91,7 @@ export function Catalog() {
                   </span>
                 </button>
               )}
-            </>
+            </React.Fragment>
           )}
         </div>
       </div>
