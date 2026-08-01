@@ -13,7 +13,6 @@ export function reportClientError(payload: ClientErrorPayload): void {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   }).catch(() => {
-    // se falhar o próprio report, só loga no console, não quebra nada
     console.error("Falha ao reportar erro pro backend");
   });
 }
