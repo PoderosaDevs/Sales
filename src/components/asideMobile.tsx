@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { IoBagHandleOutline, IoLogOutOutline, IoClose } from "react-icons/io5";
 import { RxDashboard } from "react-icons/rx";
 import { GrDatabase } from "react-icons/gr";
@@ -19,7 +19,6 @@ export function AsideMobile() {
   const { usuarioData } = useAuth();
   const location = useLocation();
   const navigateTo = useNavigation();
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
   const closeMenu = () => setIsOpen(false);
@@ -28,20 +27,6 @@ export function AsideMobile() {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
-
-  // Fecha ao clicar fora do painel
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        closeMenu();
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [isOpen]);
 
   const menuItems: MenuItemConfig[] = [
     { id: "home", icon: RxDashboard, label: "Dashboard", path: "/" },
@@ -90,7 +75,6 @@ export function AsideMobile() {
 
       {/* Painel do menu — dark theme igual ao resto do app, não mais branco */}
       <div
-        ref={menuRef}
         className={`fixed z-50 left-0 top-0 h-full w-[280px] max-w-[80vw] bg-[#0d0d10] border-r border-white/5 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}

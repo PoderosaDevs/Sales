@@ -8,9 +8,11 @@ import { IoBagHandleSharp, IoChevronForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import MyCalendar from "../../components/calendar";
 import { BounceLoader } from "react-spinners";
+import { VendaDetalhesModal } from "./VendaDetalhesModal";
 
 export function Vendas() {
   const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedVenda, setSelectedVenda] = useState<any>(null);
   const { usuarioData } = useAuth();
 
   const today = new Date();
@@ -126,7 +128,10 @@ export function Vendas() {
                             <span className="text-xs text-gray-600 font-bold uppercase tracking-widest">Status</span>
                             <span className="text-emerald-500 text-sm font-bold">Confirmada</span>
                         </div>
-                        <button className="flex-shrink-0 flex items-center gap-2 px-5 md:px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-[#0a0a0c] border border-emerald-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all">
+                        <button
+                          onClick={() => setSelectedVenda(venda)}
+                          className="flex-shrink-0 flex items-center gap-2 px-5 md:px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-[#0a0a0c] border border-emerald-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                        >
                           <span className="hidden sm:inline">Ver Detalhes</span>
                           <span className="sm:hidden">Detalhes</span>
                           <IoChevronForwardOutline size={16} />
@@ -140,6 +145,11 @@ export function Vendas() {
           )}
         </div>
       </div>
+
+      <VendaDetalhesModal
+        venda={selectedVenda}
+        onOpenChange={(open) => !open && setSelectedVenda(null)}
+      />
     </div>
   );
 }
