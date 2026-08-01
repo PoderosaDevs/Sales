@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { CSSTransition } from "react-transition-group";
 import { FaArrowLeft, FaFilter, FaShoppingBag } from "react-icons/fa";
 import { QueryGetProdutos } from "../../graphql/Produto/Query";
 import { useShoppingCart } from "../../context/CartContext";
@@ -33,6 +32,8 @@ export function Catalog() {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
+
+  const filtersOpen = showFilters && !showSummary;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -86,12 +87,20 @@ export function Catalog() {
         </div>
       </div>
 
-      {/* ÁREA DE FILTROS (GLASS CARD) */}
-      {!showSummary && (
-        <CSSTransition in={showFilters} timeout={400} classNames="fade-slide" unmountOnExit>
-          <div className="bg-[#0d0d10] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
+      {/* ÁREA DE FILTROS (GLASS CARD) — transição feita só com Tailwind, sem lib externa mexendo no DOM. */}
+      {/* O elemento fica sempre montado; só a altura/opacidade animam via classes condicionais. */}
+      <div
+        aria-hidden={!filtersOpen}
+        className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
+          filtersOpen
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="bg-[#0d0d10] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative">
             <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/30" />
-            <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {/* Nome */}
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
@@ -152,8 +161,8 @@ export function Catalog() {
               </div>
             </form>
           </div>
-        </CSSTransition>
-      )}
+        </div>
+      </div>
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className="min-h-[400px]">
