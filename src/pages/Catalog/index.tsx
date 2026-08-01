@@ -87,73 +87,71 @@ export function Catalog() {
       </div>
 
       {/* ÁREA DE FILTROS (GLASS CARD) */}
-      {!showSummary && (
-        <CSSTransition in={showFilters} timeout={400} classNames="fade-slide" unmountOnExit>
-          <div className="bg-[#0d0d10] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/30" />
-            <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Nome */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
-                  Buscar por Nome
-                </label>
+      <CSSTransition in={showFilters && !showSummary} timeout={400} classNames="fade-slide" unmountOnExit>
+        <div className="bg-[#0d0d10] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/30" />
+          <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Nome */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
+                Buscar por Nome
+              </label>
+              <input
+                name="nome"
+                type="text"
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all"
+                placeholder="Ex: Arroz, Feijão..."
+                value={filters.nome}
+                onChange={handleFilterChange}
+              />
+            </div>
+
+            {/* Pontos */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
+                Faixa de Pontuação
+              </label>
+              <div className="flex items-center gap-2">
                 <input
-                  name="nome"
-                  type="text"
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all"
-                  placeholder="Ex: Arroz, Feijão..."
-                  value={filters.nome}
+                  name="pontos_min"
+                  type="number"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-center focus:ring-2 focus:ring-emerald-500/40 outline-none"
+                  placeholder="Min"
+                  value={filters.pontos_min}
+                  onChange={handleFilterChange}
+                />
+                <div className="w-4 h-px bg-white/10" />
+                <input
+                  name="pontos_max"
+                  type="number"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-center focus:ring-2 focus:ring-emerald-500/40 outline-none"
+                  placeholder="Max"
+                  value={filters.pontos_max}
                   onChange={handleFilterChange}
                 />
               </div>
+            </div>
 
-              {/* Pontos */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
-                  Faixa de Pontuação
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    name="pontos_min"
-                    type="number"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-center focus:ring-2 focus:ring-emerald-500/40 outline-none"
-                    placeholder="Min"
-                    value={filters.pontos_min}
-                    onChange={handleFilterChange}
-                  />
-                  <div className="w-4 h-px bg-white/10" />
-                  <input
-                    name="pontos_max"
-                    type="number"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-center focus:ring-2 focus:ring-emerald-500/40 outline-none"
-                    placeholder="Max"
-                    value={filters.pontos_max}
-                    onChange={handleFilterChange}
-                  />
-                </div>
-              </div>
-
-              {/* Marca */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
-                  Marca / Fabricante
-                </label>
-                <select
-                  name="marca"
-                  className="w-full px-4 py-3 bg-[#0a0a0c] border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500/40 outline-none appearance-none cursor-pointer"
-                  value={filters.marca}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">Todas as Marcas</option>
-                  {DataMarca?.GetMarcas?.map((m: any) => (
-                    <option key={m.id} value={m.id}>{m.nome}</option>
-                  ))}
-                </select>
-              </div>
-            </form>
-          </div>
-        </CSSTransition>
-      )}
+            {/* Marca */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px] ml-1">
+                Marca / Fabricante
+              </label>
+              <select
+                name="marca"
+                className="w-full px-4 py-3 bg-[#0a0a0c] border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500/40 outline-none appearance-none cursor-pointer"
+                value={filters.marca}
+                onChange={handleFilterChange}
+              >
+                <option value="">Todas as Marcas</option>
+                {DataMarca?.GetMarcas?.map((m: any) => (
+                  <option key={m.id} value={m.id}>{m.nome}</option>
+                ))}
+              </select>
+            </div>
+          </form>
+        </div>
+      </CSSTransition>
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className="min-h-[400px]">
