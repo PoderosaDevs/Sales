@@ -30,12 +30,3 @@ export interface Produto {
 export interface CartItem extends Produto {
   quantidade: number;
 }
-
-// Tipagem para o contexto do carrinho
-export interface ShoppingCartContextType {
-  cartItems: CartItem[]; // Array de itens no carrinho
-  addProduct: (produto: Produto) => void; // Função para adicionar um produto
-  removeProduct: (produtoId: string) => void; // Função para remover um produto
-  updateItemQuantity: (id: string, newQuantity: number) => void; // Função para atualizar a quantidade de um produto
-  clearCart: () => void; // Função para limpar o carrinho
-}

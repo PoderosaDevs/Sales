@@ -13,7 +13,6 @@ import Metas from "../pages/Metas";
 import Linhas from "../pages/Linhas";
 import Lojas from "../pages/Lojas";
 import { useAuth } from '../context/AuthContext';
-import { CartProvider } from "../context/CartContext";
 import ErrorsPage from "../pages/public/ErrorsPage";
 import { ProtectedRoute } from "./partials/ProtectedRoute";
 import { routeTitles } from "./routeConfig";
@@ -42,27 +41,15 @@ export function PrivateRoutes() {
         <Route path="/perfil" element={<Perfil />} />
         <Route
           path="/catalog"
-          element={
-            <CartProvider>
-              <Catalog />
-            </CartProvider>
-          }
+          element={<Catalog />}
         />
         <Route
           path="/vendas"
-          element={
-            <CartProvider>
-              <Vendas />
-            </CartProvider>
-          }
+          element={<Vendas />}
         />
         <Route
           path="/ajuda"
-          element={
-            <CartProvider>
-              <Ajuda />
-            </CartProvider>
-          }
+          element={<Ajuda />}
         />
 
 

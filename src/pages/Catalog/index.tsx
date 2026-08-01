@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { FaArrowLeft, FaFilter, FaShoppingBag } from "react-icons/fa";
-import Swal from "sweetalert2";
+import { FaFilter, FaShoppingBag } from "react-icons/fa";
 import { QueryGetProdutos } from "../../graphql/Produto/Query";
-import { useShoppingCart } from "../../context/CartContext";
-import { Products } from "./Products";
-import { Summary } from "./Summary";
 import { QueryGetMarcas } from "../../graphql/Marca/Query";
+import { Products } from "./Products";
+import { CartModal } from "./CartModal";
+import { CartItem, Produto } from "../../context/types/CartContext";
 
 export function Catalog() {
   const [showFilters, setShowFilters] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 25 });
-  const [showSummary, setShowSummary] = useState(false);
   const [filters, setFilters] = useState({
     nome: "",
     pontos_min: 0,
@@ -18,7 +17,40 @@ export function Catalog() {
     marca: "",
   });
 
-  const { cartItems } = useShoppingCart();
+  // O carrinho agora vive como estado local desta tela, em vez de um
+  // Context compartilhado. Isso simplifica o fluxo (só quem realmente
+  // precisa — Products e CartModal — recebe os dados, via props) e
+  // remove uma camada inteira de re-renders em cascata que participava
+  // da instabilidade que investigamos no Android.
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const addProduct = (produto: Produto) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((item) => item.id === produto.id);
+      if (existingItem) {
+        return prevItems.map((item) =>
+          item.id === produto.id
+            ? { ...item, quantidade: item.quantidade + 1 }
+            : item
+        );
+      }
+      return [...prevItems, { ...produto, quantidade: 1 }];
+    });
+  };
+
+  const removeProduct = (produtoId: string) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== produtoId));
+  };
+
+  const updateItemQuantity = (id: string, newQuantity: number) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantidade: Math.max(newQuantity, 1) } : item
+      )
+    );
+  };
+
+  const clearCart = () => setCartItems([]);
 
   const { data, loading } = QueryGetProdutos({
     variables: {
@@ -34,74 +66,65 @@ export function Catalog() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const filtersOpen = showFilters && !showSummary;
-
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       
       {/* HEADER DA PÁGINA */}
+      {/* O cabeçalho agora tem uma estrutura ÚNICA e fixa — não troca mais
+          entre "Filtros + Ver Carrinho" e "Voltar ao Catálogo" dependendo
+          do estado. Essa troca de estrutura no mesmo lugar do DOM era
+          exatamente onde o erro "insertBefore" acontecia no Android. */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            {showSummary ? "Resumo da Venda" : "Catálogo de Produtos"}
+            Catálogo de Produtos
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
-          {showSummary ? (
-            <button
-              key="btn-voltar"
-              onClick={() => {
-                // Garante que nenhum modal do SweetAlert2 esteja
-                // no meio de uma animação de fechamento quando o
-                // React troca de Summary pro Catálogo — evita a
-                // corrida que causa o erro "insertBefore" no Android.
-                Swal.close();
-                setShowSummary(false);
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-gray-300 font-bold text-[10px] uppercase tracking-[2px] transition-all"
-            >
-              <FaArrowLeft className="text-emerald-500" />
-              Voltar ao Catálogo
-            </button>
-          ) : (
-            <React.Fragment key="btns-catalogo">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] transition-all border ${
-                  showFilters 
-                  ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500" 
-                  : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10"
-                }`}
-              >
-                <FaFilter size={12} />
-                Filtros
-              </button>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] transition-all border ${
+              showFilters 
+              ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500" 
+              : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10"
+            }`}
+          >
+            <FaFilter size={12} />
+            Filtros
+          </button>
 
-              {cartItems.length > 0 && (
-                <button
-                  onClick={() => setShowSummary(true)}
-                  className="relative flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold text-[10px] uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
-                >
-                  <FaShoppingBag size={14} />
-                  Ver Carrinho
-                  <span className="absolute -top-2 -right-2 w-6 h-6 bg-white text-emerald-600 rounded-full flex items-center justify-center text-[11px] font-black shadow-xl border-2 border-emerald-600">
-                    {cartItems.length}
-                  </span>
-                </button>
-              )}
-            </React.Fragment>
-          )}
+          {/* O botão do carrinho fica sempre montado (nunca aparece/some
+              do DOM) — só muda de aparência conforme o carrinho tem
+              itens ou não. Isso evita mais um ponto de inserção/remoção
+              condicional no header. */}
+          <button
+            onClick={() => cartItems.length > 0 && setIsCartOpen(true)}
+            disabled={cartItems.length === 0}
+            className={`relative flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] shadow-lg transition-all ${
+              cartItems.length > 0
+                ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20 active:scale-95 cursor-pointer"
+                : "bg-white/5 text-gray-600 shadow-none cursor-not-allowed"
+            }`}
+          >
+            <FaShoppingBag size={14} />
+            Ver Carrinho
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 w-6 h-6 bg-white text-emerald-600 rounded-full flex items-center justify-center text-[11px] font-black shadow-xl border-2 border-emerald-600">
+                {cartItems.length}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
       {/* ÁREA DE FILTROS (GLASS CARD) — transição feita só com Tailwind, sem lib externa mexendo no DOM. */}
       {/* O elemento fica sempre montado; só a altura/opacidade animam via classes condicionais. */}
       <div
-        aria-hidden={!filtersOpen}
+        aria-hidden={!showFilters}
         className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
-          filtersOpen
+          showFilters
             ? "grid-rows-[1fr] opacity-100"
             : "grid-rows-[0fr] opacity-0 pointer-events-none"
         }`}
@@ -173,26 +196,27 @@ export function Catalog() {
         </div>
       </div>
 
-      {/* CONTEÚDO PRINCIPAL */}
-      {/* A key força o React a desmontar/remontar por completo ao trocar
-          entre Catálogo e Resumo, em vez de tentar remendar a árvore —
-          isso protege contra qualquer nó de DOM que libs externas
-          (SweetAlert2) possam ter deixado para trás. */}
-      <div className="min-h-[400px]" key={showSummary ? "summary" : "products"}>
-        {showSummary ? (
-          <div className="animate-in slide-in-from-right-8 duration-500">
-            <Summary />
-          </div>
-        ) : (
-          <div className="animate-in slide-in-from-left-8 duration-500">
-            <Products
-              data={data}
-              loading={loading}
-              onAddProduct={() => {}} // Lógica interna do seu BarNavigation
-            />
-          </div>
-        )}
+      {/* CONTEÚDO PRINCIPAL — o catálogo fica sempre montado agora.
+          O carrinho não é mais uma tela alternativa que substitui este
+          conteúdo; é um modal que abre por cima, sem desmontar nada aqui. */}
+      <div className="min-h-[400px]">
+        <Products
+          data={data}
+          loading={loading}
+          cartItems={cartItems}
+          onAddProduct={addProduct}
+          onRemoveProduct={removeProduct}
+        />
       </div>
+
+      <CartModal
+        open={isCartOpen}
+        onOpenChange={setIsCartOpen}
+        cartItems={cartItems}
+        updateItemQuantity={updateItemQuantity}
+        removeProduct={removeProduct}
+        clearCart={clearCart}
+      />
     </div>
   );
 }

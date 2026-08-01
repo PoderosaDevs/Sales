@@ -1,23 +1,23 @@
 import React from "react";
 import { FaPlus, FaMinus, FaAward } from "react-icons/fa";
-import { Produto } from "../../context/types/CartContext";
-import { useShoppingCart } from "../../context/CartContext";
+import { CartItem, Produto } from "../../context/types/CartContext";
 import { BounceLoader } from "react-spinners";
 
 interface ProductsProps {
   data?: any;
   loading?: boolean;
-  onAddProduct: () => void;
+  cartItems: CartItem[];
+  onAddProduct: (produto: Produto) => void;
+  onRemoveProduct: (produtoId: string) => void;
 }
 
-export function Products({ data, loading, onAddProduct }: ProductsProps) {
-  const { addProduct, removeProduct, cartItems } = useShoppingCart();
-
-  const handleAddProduct = (produto: Produto) => {
-    addProduct(produto);
-    onAddProduct();
-  };
-
+export function Products({
+  data,
+  loading,
+  cartItems,
+  onAddProduct,
+  onRemoveProduct,
+}: ProductsProps) {
   const isProductInCart = (produtoId: string) =>
     cartItems.some((item) => item.id === produtoId);
 
@@ -74,7 +74,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
               {isProductInCart(produto.id) ? (
                 <button
                   className="w-full flex justify-center items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300"
-                  onClick={() => removeProduct(produto.id)}
+                  onClick={() => onRemoveProduct(produto.id)}
                 >
                   <span>Remover</span>
                   <FaMinus size={10} />
@@ -82,7 +82,7 @@ export function Products({ data, loading, onAddProduct }: ProductsProps) {
               ) : (
                 <button
                   className="w-full flex justify-center items-center gap-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-[2px] py-3 rounded-xl shadow-lg shadow-emerald-900/20 hover:bg-emerald-500 active:scale-95 transition-all duration-300"
-                  onClick={() => handleAddProduct(produto)}
+                  onClick={() => onAddProduct(produto)}
                 >
                   <span>Adicionar</span>
                   <FaPlus size={10} />
