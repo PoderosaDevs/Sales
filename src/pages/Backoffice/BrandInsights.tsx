@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft, FaPalette, FaStore, FaUserTie } from "react-icons/fa";
 import { useMarcaInsights } from "../../hooks/useMarcas";
@@ -6,6 +7,8 @@ import { StatCard } from "./StatCard";
 import { RankingTable } from "./RankingTable";
 import { TimelineChart } from "./TimelineChart";
 import { Loader } from "../../components/Loader";
+import { DateRangeFilter } from "./DateRangeFilter";
+import { toApiDateParam } from "../../lib/date";
 
 interface MarcaInsight {
   id: number;
@@ -20,14 +23,30 @@ interface MarcaInsight {
 export function BrandInsights() {
   const { id } = useParams<{ id: string }>();
   const marcaId = Number(id);
-  const { data, isLoading }: { data?: MarcaInsight; isLoading: boolean } = useMarcaInsights(marcaId);
-  const { data: timeline, isLoading: timelineLoading } = useTimeline(marcaId, "BRAND");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const startDate = toApiDateParam(dataInicio);
+  const endDate = toApiDateParam(dataFim);
+  const { data, isLoading }: { data?: MarcaInsight; isLoading: boolean } = useMarcaInsights(marcaId, startDate, endDate);
+  const { data: timeline, isLoading: timelineLoading } = useTimeline(marcaId, "BRAND", startDate, endDate);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <Link to="/backoffice" className="inline-flex items-center gap-2 text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">
-        <FaArrowLeft size={12} /> Voltar ao painel
-      </Link>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <Link to="/backoffice" className="inline-flex items-center gap-2 text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">
+          <FaArrowLeft size={12} /> Voltar ao painel
+        </Link>
+        <DateRangeFilter
+          dataInicio={dataInicio}
+          dataFim={dataFim}
+          onChangeInicio={setDataInicio}
+          onChangeFim={setDataFim}
+          onClear={() => {
+            setDataInicio("");
+            setDataFim("");
+          }}
+        />
+      </div>
 
       {isLoading ? (
         <Loader label="Carregando desempenho..." />

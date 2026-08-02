@@ -31,7 +31,7 @@ export function Home() {
             Olá, <span className="font-bold">{usuario.nome.split(" ")[0]}</span>
           </h1>
         </div>
-        <p className="text-gray-400 text-sm sm:text-base ml-4">Acompanhe o desempenho da sua operação hoje.</p>
+        <p className="text-gray-400 text-md sm:text-white ml-4">Acompanhe o desempenho da sua operação hoje.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -65,7 +65,7 @@ export function Home() {
                           <MdSell size={22} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm sm:text-base font-bold text-white truncate">{formatDate(venda.data_venda)}</p>
+                          <p className="text-sm font-bold text-[#fff] truncate">{formatDate(venda.data_venda)}</p>
                           <p className="text-xs text-gray-500 uppercase tracking-tight font-medium">Venda confirmada</p>
                         </div>
                       </div>

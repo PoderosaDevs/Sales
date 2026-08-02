@@ -6,6 +6,7 @@ import { IoBagHandleOutline, IoLogOutOutline, IoPersonOutline, IoSettingsOutline
 import { useAuth } from "../context/AuthContext";
 import { Tooltip } from "./Tooltip";
 import { TipoPessoa } from "../types";
+import { FaBagShopping } from "react-icons/fa6";
 
 const primaryItems = [
   { id: "home", icon: RxDashboard, label: "Dashboard", path: "/" },
@@ -50,7 +51,7 @@ export function Aside() {
     <aside className="fixed left-0 top-0 h-full w-24 bg-[#0d0d10] border-r border-white/5 flex flex-col items-center py-10 z-50">
       <div className="mb-12">
         <div className="w-12 h-12 bg-gradient-to-tr from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <span className="text-white font-bold text-xl">V</span>
+          <span className="text-white font-bold text-xl"><FaBagShopping /></span>
         </div>
       </div>
 

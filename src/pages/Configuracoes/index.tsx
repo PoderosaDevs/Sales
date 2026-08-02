@@ -26,7 +26,7 @@ export function Configuracoes() {
   if (!usuario) return null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 max-w-3xl">
+    <div className="space-y-8 animate-in fade-in duration-700 max-w-3xl mx-auto">
       <div className="flex items-center gap-3">
         <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">Configurações</h1>

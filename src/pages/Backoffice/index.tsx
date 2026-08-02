@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { FaCalendarDays, FaFilter, FaXmark, FaUserTie, FaPalette, FaStore } from "react-icons/fa6";
+import { FaFilter, FaUserTie, FaPalette, FaStore, FaTrophy } from "react-icons/fa6";
 import { useRankingUsuarios } from "../../hooks/useUsuarios";
 import { useMarcasRanking } from "../../hooks/useMarcas";
 import { useLojasRanking } from "../../hooks/useLojas";
 import { toApiDateParam } from "../../lib/date";
 import { ManagerModules } from "./ManagerModules";
 import { RankingTable } from "./RankingTable";
+import { DateRangeFilter } from "./DateRangeFilter";
+import { ApresentacaoMensal } from "./ApresentacaoMensal";
 
 export function Backoffice() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
+  const [apresentacaoAberta, setApresentacaoAberta] = useState(false);
 
   const startDate = toApiDateParam(dataInicio);
   const endDate = toApiDateParam(dataFim);
@@ -32,36 +35,22 @@ export function Backoffice() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap self-start lg:self-center">
-          <div className="flex items-center gap-2 text-gray-500 text-[10px] font-bold uppercase tracking-[2px]">
-            <FaFilter className="text-emerald-500" size={12} /> Período:
-          </div>
-          <div className="flex items-center gap-2 bg-[#0d0d10] border border-white/10 rounded-2xl px-4 py-3">
-            <FaCalendarDays className="text-emerald-500" size={14} />
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none [color-scheme:dark]"
-            />
-            <span className="text-gray-600">—</span>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none [color-scheme:dark]"
-            />
-          </div>
-          {(dataInicio || dataFim) && (
-            <button
-              onClick={() => {
-                setDataInicio("");
-                setDataFim("");
-              }}
-              className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
-            >
-              <FaXmark size={14} />
-            </button>
-          )}
+          <DateRangeFilter
+            dataInicio={dataInicio}
+            dataFim={dataFim}
+            onChangeInicio={setDataInicio}
+            onChangeFim={setDataFim}
+            onClear={() => {
+              setDataInicio("");
+              setDataFim("");
+            }}
+          />
+          <button
+            onClick={() => setApresentacaoAberta(true)}
+            className="flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-[2px] rounded-2xl transition-all shadow-lg shadow-emerald-900/20"
+          >
+            <FaTrophy size={14} /> Apresentação Mensal
+          </button>
         </div>
       </div>
 
@@ -124,6 +113,8 @@ export function Backoffice() {
           />
         </div>
       </div>
+
+      {apresentacaoAberta && <ApresentacaoMensal onClose={() => setApresentacaoAberta(false)} />}
     </div>
   );
 }
