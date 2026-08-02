@@ -1,188 +1,261 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import { QueryGetFuncionarios } from "../../graphql/Usuario/Query";
-import { FaPencilAlt, FaTrashAlt, FaUsers, FaUserTie, FaIdCard, FaEnvelope } from "react-icons/fa";
-import { RelatorioModal } from "./Reports";
-import { VendasUsuarioModal } from "./Sells";
-import { formatPhoneNumber } from "../../utils/phoneUtils";
-import { formatCPF } from "../../utils/documentUtils";
-import { RecoveryModal } from "./partials/modalRecovery";
-import { BounceLoader } from "react-spinners";
-import PaginationComponent from "../../components/Pagination";
+import { FaPlus, FaPencilAlt, FaTrashAlt, FaUserTie, FaKey, FaChartLine, FaIdCard, FaEnvelope } from "react-icons/fa";
+import { useUsuarios, useCreateUsuario, useUpdateUsuario, useDeleteUsuario, useRecoverySenha } from "../../hooks/useUsuarios";
+import { Button } from "../../components/ui/button";
+import { Input, Label, Select, FieldError } from "../../components/ui/input";
+import { Dialog } from "../../components/ui/dialog";
+import { Loader, EmptyState } from "../../components/Loader";
+import { extractErrorMessage } from "../../lib/api";
+import { TipoPessoa, Usuario } from "../../types";
 
-export default function Funcionarios() {
-  const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 10 });
+const tipoPessoaLabel: Record<TipoPessoa, string> = {
+  [TipoPessoa.ADMIN]: "Administrador",
+  [TipoPessoa.MANAGER]: "Gerente",
+  [TipoPessoa.EMPLOYEE]: "Vendedora",
+  [TipoPessoa.USER]: "Usuário",
+  [TipoPessoa.GUEST]: "Convidado",
+};
 
-  const { data, loading, error } = QueryGetFuncionarios({
-    variables: {
-      pagination: {
-        pagina: paginacao.pagina,
-        quantidade: paginacao.quantidade,
-      },
-    },
-  });
+const swalConfig = { background: "#0d0d10", color: "#fff", confirmButtonColor: "#10b981", cancelButtonColor: "#334155" };
 
-  // Configuração padrão do SweetAlert2 para o tema Dark
-  const swalConfig = {
-    background: "#0d0d10",
-    color: "#fff",
-    confirmButtonColor: "#10b981",
-    cancelButtonColor: "#1f1f23",
+const createSchema = z.object({
+  nome: z.string().min(1, "Informe o nome."),
+  email: z.string().email("E-mail inválido."),
+  senha: z.string().min(6, "A senha deve ter ao menos 6 caracteres."),
+  funcao: z.string().optional(),
+  cpf: z.string().optional(),
+  tipo_pessoa: z.nativeEnum(TipoPessoa),
+});
+const editSchema = createSchema.extend({ senha: z.string().min(6).optional().or(z.literal("")) });
+type FormData = z.infer<typeof createSchema>;
+
+export function Funcionarios() {
+  const [filtroTipo, setFiltroTipo] = useState<TipoPessoa | "">("");
+  const { data: usuarios, isLoading } = useUsuarios(filtroTipo || undefined);
+  const createUsuario = useCreateUsuario();
+  const updateUsuario = useUpdateUsuario();
+  const deleteUsuario = useDeleteUsuario();
+  const recoverySenha = useRecoverySenha();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [editing, setEditing] = useState<Usuario | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(editing ? editSchema : createSchema) });
+
+  const openCreate = () => {
+    setEditing(null);
+    reset({ nome: "", email: "", senha: "", funcao: "", cpf: "", tipo_pessoa: TipoPessoa.EMPLOYEE });
+    setIsOpen(true);
   };
 
-  function confirmDelete(id: number) {
+  const openEdit = (usuario: Usuario) => {
+    setEditing(usuario);
+    reset({
+      nome: usuario.nome,
+      email: usuario.email,
+      senha: "",
+      funcao: usuario.funcao ?? "",
+      cpf: usuario.cpf ?? "",
+      tipo_pessoa: usuario.tipo_pessoa,
+    });
+    setIsOpen(true);
+  };
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (editing) {
+        const { senha, ...rest } = data;
+        await updateUsuario.mutateAsync({ id: editing.id, ...rest, ...(senha ? { senha } : {}) });
+      } else {
+        await createUsuario.mutateAsync(data);
+      }
+      setIsOpen(false);
+      Swal.fire({ ...swalConfig, icon: "success", title: "Sucesso!", text: "Colaborador salvo." });
+    } catch (error) {
+      Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível salvar.") });
+    }
+  };
+
+  const confirmDelete = (usuario: Usuario) => {
     Swal.fire({
       ...swalConfig,
-      title: "Remover Colaborador?",
-      text: "O acesso deste usuário será revogado permanentemente.",
+      title: "Desativar colaborador?",
+      text: `O acesso de "${usuario.nome}" será revogado.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Confirmar Exclusão",
+      confirmButtonText: "Sim, desativar",
       cancelButtonText: "Cancelar",
-      showCloseButton: true,
     }).then(async (result) => {
-      if (result.isConfirmed) {
-        // Lógica de exclusão comentada conforme original
-        // const result = await HandleDeleteProduto({ variables: { deleteProdutoId: id } });
-        
-        // Simulação do feedback de sucesso baseado no seu código
-        Swal.fire({
-          ...swalConfig,
-          title: "Sucesso!",
-          text: "Funcionário removido com sucesso.",
-          icon: "success"
-        });
+      if (!result.isConfirmed) return;
+      try {
+        await deleteUsuario.mutateAsync(usuario.id);
+        Swal.fire({ ...swalConfig, icon: "success", title: "Desativado!" });
+      } catch (error) {
+        Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível desativar.") });
       }
     });
-  }
+  };
+
+  const resetSenha = (usuario: Usuario) => {
+    Swal.fire({
+      ...swalConfig,
+      title: `Redefinir senha de ${usuario.nome.split(" ")[0]}`,
+      input: "text",
+      inputPlaceholder: "Nova senha temporária (mín. 6 caracteres)",
+      showCancelButton: true,
+      confirmButtonText: "Redefinir",
+      cancelButtonText: "Cancelar",
+      inputValidator: (value) => (!value || value.length < 6 ? "A senha deve ter ao menos 6 caracteres." : undefined),
+    }).then(async (result) => {
+      if (!result.isConfirmed || !result.value) return;
+      try {
+        await recoverySenha.mutateAsync({ id: usuario.id, senha: result.value });
+        Swal.fire({ ...swalConfig, icon: "success", title: "Senha redefinida!" });
+      } catch (error) {
+        Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível redefinir.") });
+      }
+    });
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
-      
-      {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-1.5 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Gestão de Equipe</h1>
-            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[2px] mt-1">
-              {loading ? "Sincronizando colaboradores..." : `${data?.GetUsuarios.length} Usuários ativos no sistema`}
-            </p>
-          </div>
-        </div>
-
+    <div className="space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-            {/* O RelatorioModal assume o estilo do botão de ação principal aqui */}
-            <RelatorioModal />
+          <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Gestão de Equipe</h1>
         </div>
+        <Button onClick={openCreate} className="w-full sm:w-auto">
+          <FaPlus size={12} /> Novo Colaborador
+        </Button>
       </div>
 
-      {/* TABELA DE FUNCIONÁRIOS */}
+      <div className="flex gap-2 flex-wrap">
+        {(["", TipoPessoa.EMPLOYEE, TipoPessoa.MANAGER, TipoPessoa.ADMIN] as const).map((tipo) => (
+          <button
+            key={tipo || "todos"}
+            onClick={() => setFiltroTipo(tipo)}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+              filtroTipo === tipo ? "bg-emerald-500 text-[#0a0a0c] border-emerald-500" : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/10"
+            }`}
+          >
+            {tipo ? tipoPessoaLabel[tipo] : "Todos"}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black text-gray-500 uppercase tracking-[3px]">
-                <th className="px-8 py-5">Colaborador / Função</th>
-                <th className="px-8 py-5 text-center">Documento (CPF)</th>
-                <th className="px-8 py-5 text-center">Contato Principal</th>
-                <th className="px-8 py-5 text-right">Ações de Gestão</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.03]">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="py-20 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                        <BounceLoader color="#10b981" size={40} />
-                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Acessando base de dados</span>
+        {isLoading ? (
+          <Loader label="Sincronizando colaboradores..." />
+        ) : !usuarios?.length ? (
+          <EmptyState title="Nenhum colaborador encontrado" icon={<FaUserTie size={40} className="text-gray-600" />} />
+        ) : (
+          <div className="divide-y divide-white/[0.03]">
+            {usuarios.map((usuario) => (
+              <div key={usuario.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 hover:bg-white/[0.01] transition-colors">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-11 h-11 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-500/20 flex-shrink-0">
+                    <FaUserTie size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white font-bold truncate">{usuario.nome}</p>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">{tipoPessoaLabel[usuario.tipo_pessoa]}</span>
+                      <span className="text-gray-600 text-xs flex items-center gap-1 truncate">
+                        <FaEnvelope size={10} className="opacity-50" /> {usuario.email}
+                      </span>
+                      {usuario.cpf && (
+                        <span className="text-gray-600 text-xs flex items-center gap-1 font-mono">
+                          <FaIdCard size={10} className="opacity-50" /> {usuario.cpf}
+                        </span>
+                      )}
                     </div>
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={4} className="py-20 text-center text-red-500 text-xs font-bold uppercase tracking-widest">
-                    Erro ao carregar colaboradores: {error.message}
-                  </td>
-                </tr>
-              ) : (
-                data?.GetUsuarios.map((usuario: any) => (
-                  <tr key={usuario.id} className="group hover:bg-white/[0.01] transition-colors">
-                    {/* Nome e Função */}
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-500/20">
-                          <FaUserTie size={20} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-white font-bold text-base group-hover:text-emerald-400 transition-colors cursor-default">
-                            {usuario.nome}
-                          </span>
-                          <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mt-0.5">
-                            {usuario.funcao || "Colaborador"}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* CPF */}
-                    <td className="px-8 py-5 text-center">
-                      <div className="inline-flex items-center gap-2 text-gray-400 text-sm font-mono bg-white/5 px-3 py-1 rounded-lg border border-white/5">
-                        <FaIdCard size={12} className="opacity-30" />
-                        {usuario.cpf ? formatCPF(usuario.cpf) : "Não Informado"}
-                      </div>
-                    </td>
-
-                    {/* Email */}
-                    <td className="px-8 py-5 text-center">
-                       <div className="inline-flex items-center gap-2 text-gray-400 text-sm hover:text-emerald-400 transition-colors cursor-pointer">
-                        <FaEnvelope size={12} className="opacity-30" />
-                        {usuario.email}
-                      </div>
-                    </td>
-
-                    {/* Ações */}
-                    <td className="px-8 py-5 text-right">
-                      <div className="flex justify-end items-center gap-2">
-                        {/* Botões que disparam Modais Customizados */}
-                        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/5">
-                            <VendasUsuarioModal idUser={usuario.id} />
-                            <RecoveryModal id={usuario.id} />
-                        </div>
-                        
-                        {/* Botão de Excluir padrão */}
-                        <button
-                          onClick={() => confirmDelete(parseInt(usuario.id))}
-                          className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all duration-300"
-                          title="Remover Acesso"
-                        >
-                          <FaTrashAlt size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINAÇÃO PADRONIZADA */}
-        {data && (
-          <div className="p-6 bg-white/[0.01] border-t border-white/5">
-            <PaginationComponent
-              pagesInfo={{
-                  currentPage: paginacao.pagina,
-                  totalPages: Math.ceil(data.GetUsuarios.length / paginacao.quantidade), // Cálculo aproximado baseado no array se não houver pageInfo no query
-                  totalItems: data.GetUsuarios.length
-              }}
-              setPagesInfo={(pagina: number, quantidade: number) => {
-                setPaginacao({ pagina: pagina, quantidade: quantidade });
-              }}
-            />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+                  <Link
+                    to={`/backoffice/employee/${usuario.id}`}
+                    className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all"
+                    title="Ver performance"
+                  >
+                    <FaChartLine size={13} />
+                  </Link>
+                  <button onClick={() => resetSenha(usuario)} className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all" title="Redefinir senha">
+                    <FaKey size={13} />
+                  </button>
+                  <button onClick={() => openEdit(usuario)} className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all" title="Editar">
+                    <FaPencilAlt size={13} />
+                  </button>
+                  <button onClick={() => confirmDelete(usuario)} className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all" title="Desativar">
+                    <FaTrashAlt size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen} title={editing ? "Editar Colaborador" : "Novo Colaborador"} maxWidth="max-w-xl">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="nome">Nome completo</Label>
+            <Input id="nome" {...register("nome")} />
+            <FieldError>{errors.nome?.message}</FieldError>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input id="email" type="email" {...register("email")} />
+              <FieldError>{errors.email?.message}</FieldError>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="senha">{editing ? "Nova senha (opcional)" : "Senha inicial"}</Label>
+              <Input id="senha" type="password" placeholder={editing ? "Deixe em branco para manter" : ""} {...register("senha")} />
+              <FieldError>{errors.senha?.message}</FieldError>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="funcao">Função</Label>
+              <Input id="funcao" placeholder="Ex: Vendedora, Recepção..." {...register("funcao")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF</Label>
+              <Input id="cpf" placeholder="000.000.000-00" {...register("cpf")} />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tipo_pessoa">Perfil de acesso</Label>
+            <Select id="tipo_pessoa" {...register("tipo_pessoa")}>
+              <option value={TipoPessoa.EMPLOYEE}>Vendedora</option>
+              <option value={TipoPessoa.MANAGER}>Gerente</option>
+              <option value={TipoPessoa.ADMIN}>Administrador</option>
+            </Select>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="secondary" className="flex-1" onClick={() => setIsOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

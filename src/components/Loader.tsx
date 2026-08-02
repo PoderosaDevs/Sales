@@ -1,25 +1,17 @@
-import React from "react";
-import { BounceLoader } from "react-spinners";
-
-interface LoaderProps {
-  size: number;
-  color?: string;
-  hasText: boolean;
-  text?: string;
-  sizeDiv?: string; // Tornando opcional e aplicando valor padrão
+export function Loader({ label = "Carregando..." }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 gap-6">
+      <div className="w-14 h-14 rounded-full border-4 border-white/10 border-t-emerald-500 animate-spin" />
+      <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">{label}</span>
+    </div>
+  );
 }
 
-export function Loader({
-  size,
-  color = "#6366f1",
-  hasText,
-  text = "Carregando...",
-  sizeDiv = "h-[25vh]", // Valor padrão se sizeDiv não for passado
-}: LoaderProps) {
+export function EmptyState({ title, icon }: { title: string; icon?: React.ReactNode }) {
   return (
-    <div className={`flex justify-center items-center flex-col ${sizeDiv}`}>
-      {hasText && <h2 className="text-3xl text-gray-900 mb-4">{text}</h2>}
-      <BounceLoader color={color} size={size} />
+    <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
+      {icon}
+      <p className="text-sm uppercase tracking-widest font-bold text-gray-500">{title}</p>
     </div>
   );
 }

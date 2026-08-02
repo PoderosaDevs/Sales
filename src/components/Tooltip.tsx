@@ -1,36 +1,19 @@
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from "react";
 
-interface TooltipProps {
-  children: ReactNode;
-  tooltipText: string;
-}
-
-export const Tooltip: React.FC<TooltipProps> = ({ children, tooltipText }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  const handleMouseEnter = () => {
-    setIsVisible(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsVisible(false);
-  };
-
+export function Tooltip({ tooltipText, children }: { tooltipText: string; children: ReactNode }) {
+  const [show, setShow] = useState(false);
   return (
     <div
-      className="relative inline-block"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="relative flex items-center"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
     >
       {children}
-      {isVisible && (
-        <div
-          className="absolute top-1/2 left-full ml-2 p-2 bg-white text-black rounded-md text-sm font-semibold shadow-lg"
-          style={{ transform: 'translateY(-50%)', zIndex: 50 }}
-        >
+      {show && (
+        <span className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#181819] border border-white/10 text-white text-xs font-semibold whitespace-nowrap shadow-xl z-50 animate-in fade-in duration-150">
           {tooltipText}
-        </div>
+        </span>
       )}
     </div>
   );
-};
+}

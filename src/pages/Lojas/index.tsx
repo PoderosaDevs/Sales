@@ -1,141 +1,155 @@
-import React, { useState } from 'react'
-import PaginationComponent from '../../components/Pagination';
-import { FaPencilAlt, FaTrashAlt, FaStore } from 'react-icons/fa';
-import Swal from 'sweetalert2';
-import { QueryGetLojas } from '../../graphql/Loja/Query';
-import { LojaModal } from './partials/Modal';
-import { MutationDeleteLoja } from '../../graphql/Loja/Mutation';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Swal from "sweetalert2";
+import { FaPlus, FaPencilAlt, FaTrashAlt, FaStore } from "react-icons/fa";
+import { useLojas, useCreateLoja, useUpdateLoja, useDeleteLoja } from "../../hooks/useLojas";
+import { Button } from "../../components/ui/button";
+import { Input, Label, FieldError } from "../../components/ui/input";
+import { Dialog } from "../../components/ui/dialog";
+import { Loader, EmptyState } from "../../components/Loader";
+import { extractErrorMessage } from "../../lib/api";
+import { Loja } from "../../types";
 
-export default function Lojas() {
-  const [paginacao, setPaginacao] = useState({ pagina: 0, quantidade: 10 });
+const schema = z.object({
+  nome_fantasia: z.string().min(1, "Informe o nome fantasia."),
+  razao_social: z.string().min(1, "Informe a razão social."),
+});
+type FormData = z.infer<typeof schema>;
 
-  const { data, loading, error } = QueryGetLojas({
-    variables: {
-      pagination: {
-        pagina: paginacao.pagina,
-        quantidade: paginacao.quantidade,
-      }
-    },
-  });
+const swalConfig = { background: "#0d0d10", color: "#fff", confirmButtonColor: "#10b981", cancelButtonColor: "#334155" };
 
-  const { HandleDeleteLoja, loading: loadingDelete } = MutationDeleteLoja();
+export function Lojas() {
+  const { data: lojas, isLoading } = useLojas();
+  const createLoja = useCreateLoja();
+  const updateLoja = useUpdateLoja();
+  const deleteLoja = useDeleteLoja();
 
-  const swalConfig = {
-    background: "#0d0d10",
-    color: "#fff",
-    confirmButtonColor: "#10b981",
-    cancelButtonColor: "#1f1f23",
+  const [isOpen, setIsOpen] = useState(false);
+  const [editing, setEditing] = useState<Loja | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const openCreate = () => {
+    setEditing(null);
+    reset({ nome_fantasia: "", razao_social: "" });
+    setIsOpen(true);
   };
 
-  if (loadingDelete) {
-    Swal.fire({
-      title: "Processando...",
-      background: "#0d0d10",
-      color: "#fff",
-      didOpen: () => Swal.showLoading(),
-    });
-  }
+  const openEdit = (loja: Loja) => {
+    setEditing(loja);
+    reset({ nome_fantasia: loja.nome_fantasia, razao_social: loja.razao_social });
+    setIsOpen(true);
+  };
 
-  function confirmDelete(id: number) {
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (editing) {
+        await updateLoja.mutateAsync({ id: editing.id, ...data });
+      } else {
+        await createLoja.mutateAsync(data);
+      }
+      setIsOpen(false);
+      Swal.fire({ ...swalConfig, icon: "success", title: "Sucesso!", text: "Loja salva." });
+    } catch (error) {
+      Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível salvar.") });
+    }
+  };
+
+  const confirmDelete = (loja: Loja) => {
     Swal.fire({
       ...swalConfig,
-      title: "Excluir Unidade?",
-      text: "Esta ação removerá a loja permanentemente do sistema.",
+      title: "Remover loja?",
+      text: `"${loja.nome_fantasia}" será removida.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sim, excluir",
+      confirmButtonText: "Sim, remover",
       cancelButtonText: "Cancelar",
     }).then(async (result) => {
-      if (result.isConfirmed) {
-        const result = await HandleDeleteLoja(id);
-        if (!result) {
-          Swal.fire({ ...swalConfig, title: "Erro!", text: "Falha na execução.", icon: "error" });
-        } else {
-          Swal.fire({ ...swalConfig, title: "Sucesso!", text: "Unidade removida.", icon: "success" });
-        }
+      if (!result.isConfirmed) return;
+      try {
+        await deleteLoja.mutateAsync(loja.id);
+        Swal.fire({ ...swalConfig, icon: "success", title: "Removida!" });
+      } catch (error) {
+        Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível remover.") });
       }
     });
-  }
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
-      
-      {/* HEADER DA PÁGINA */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-1.5 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]" />
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Gestão de Unidades</h1>
-            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[2px] mt-1">
-              {loading ? "Sincronizando..." : `${data?.GetLojas.pageInfo.totalItems} Lojas registradas`}
-            </p>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981]" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Gestão de Lojas</h1>
         </div>
-        <LojaModal />
+        <Button onClick={openCreate} className="w-full sm:w-auto">
+          <FaPlus size={12} /> Nova Loja
+        </Button>
       </div>
 
-      {/* TABELA DE LOJAS */}
       <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white/[0.02] border-b border-white/5">
-                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Unidade / Nome</th>
-                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px] text-center">Razão Social</th>
-                <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-[3px] text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.03]">
-              {loading ? (
-                <tr><td colSpan={3} className="py-20 text-center text-gray-600 animate-pulse">Carregando ativos...</td></tr>
-              ) : error ? (
-                <tr><td colSpan={3} className="py-20 text-center text-red-500">Erro na conexão com o banco de dados.</td></tr>
-              ) : (
-                data?.GetLojas.result.map((loja) => (
-                  <tr key={loja.id} className="group hover:bg-white/[0.01] transition-colors">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-500/20">
-                          <FaStore size={18} />
-                        </div>
-                        <span className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">
-                          {loja.nome_fantasia}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5 text-center text-gray-500 font-medium italic">
-                      {loja.razao_social}
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all">
-                          <FaPencilAlt size={16} />
-                        </button>
-                        <button 
-                          onClick={() => confirmDelete(loja.id)}
-                          className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all"
-                        >
-                          <FaTrashAlt size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINAÇÃO DARK */}
-        {data && (
-          <div className="p-6 bg-white/[0.01] border-t border-white/5">
-            <PaginationComponent
-              pagesInfo={data.GetLojas.pageInfo}
-              setPagesInfo={(p: number, q: number) => setPaginacao({ pagina: p, quantidade: q })}
-            />
+        {isLoading ? (
+          <Loader label="Sincronizando..." />
+        ) : !lojas?.length ? (
+          <EmptyState title="Nenhuma loja cadastrada" icon={<FaStore size={40} className="text-gray-600" />} />
+        ) : (
+          <div className="divide-y divide-white/[0.03]">
+            {lojas.map((loja) => (
+              <div key={loja.id} className="flex items-center justify-between gap-4 p-5 md:p-6 hover:bg-white/[0.01] transition-colors">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500 flex-shrink-0">
+                    <FaStore size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white font-bold truncate">{loja.nome_fantasia}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 truncate">{loja.razao_social}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button onClick={() => openEdit(loja)} className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all">
+                    <FaPencilAlt size={13} />
+                  </button>
+                  <button onClick={() => confirmDelete(loja)} className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all">
+                    <FaTrashAlt size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen} title={editing ? "Editar Loja" : "Nova Loja"} maxWidth="max-w-md">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="nome_fantasia">Nome fantasia</Label>
+            <Input id="nome_fantasia" placeholder="Ex: Unidade Centro" {...register("nome_fantasia")} />
+            <FieldError>{errors.nome_fantasia?.message}</FieldError>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="razao_social">Razão social</Label>
+            <Input id="razao_social" placeholder="Razão social da unidade" {...register("razao_social")} />
+            <FieldError>{errors.razao_social?.message}</FieldError>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="secondary" className="flex-1" onClick={() => setIsOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

@@ -1,54 +1,35 @@
-import React, { useState, useEffect } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import {
-  FaMinus,
-  FaPlus,
-  FaTrashAlt,
-  FaTh,
-  FaListUl,
-  FaCalendarAlt,
-  FaStore,
-  FaArrowRight,
-} from "react-icons/fa";
-import { X } from "phosphor-react";
-import Swal from "sweetalert2";
-import { CartItem } from "../../context/types/CartContext";
-import { useAuth } from "../../context/AuthContext";
-import { MutationSetVenda } from "../../graphql/Venda/Mutation";
-import { QueryGetLojas } from "../../graphql/Loja/Query";
+import { useEffect, useState } from "react";
+import * as RadixDialog from "@radix-ui/react-dialog";
+import { FaMinus, FaPlus, FaTrashAlt, FaTh, FaListUl, FaCalendarAlt, FaStore, FaArrowRight, FaAward } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
 import { TbShoppingBagExclamation } from "react-icons/tb";
+import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
+import { useLojas } from "../../hooks/useLojas";
+import { useCreateVenda } from "../../hooks/useVendas";
+import { extractErrorMessage } from "../../lib/api";
+import { CartItem } from "../../types";
 
 interface CartModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cartItems: CartItem[];
-  updateItemQuantity: (id: string, newQuantity: number) => void;
-  removeProduct: (id: string) => void;
+  updateItemQuantity: (id: number, newQuantity: number) => void;
+  removeProduct: (id: number) => void;
   clearCart: () => void;
 }
 
-export function CartModal({
-  open,
-  onOpenChange,
-  cartItems,
-  updateItemQuantity,
-  removeProduct,
-  clearCart,
-}: CartModalProps) {
+export function CartModal({ open, onOpenChange, cartItems, updateItemQuantity, removeProduct, clearCart }: CartModalProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedLoja, setSelectedLoja] = useState<string>("");
-  const { usuarioData } = useAuth();
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedLoja, setSelectedLoja] = useState("");
+  const { usuario } = useAuth();
+  const { data: lojas } = useLojas();
+  const createVenda = useCreateVenda();
 
-  const { data: dataLojas } = QueryGetLojas({
-    variables: { pagination: { pagina: 0, quantidade: 100 } },
-  });
-
-  const totalPoints = cartItems.reduce((acc, item) => acc + item.pontos * item.quantidade, 0);
+  const totalPoints = cartItems.reduce((acc, item) => acc + (item.pontos ?? 0) * item.quantidade, 0);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantidade, 0);
 
-  // Reseta os campos de destino toda vez que o modal é reaberto,
-  // evitando manter loja/data de uma sessão de compra anterior.
   useEffect(() => {
     if (open) {
       setSelectedDate("");
@@ -56,11 +37,11 @@ export function CartModal({
     }
   }, [open]);
 
-  const handleQuantityChange = (id: string, newQuantity: number) => {
+  const handleQuantityChange = (id: number, newQuantity: number) => {
     if (newQuantity >= 1) updateItemQuantity(id, newQuantity);
   };
 
-  const handleRemoveItem = (id: string) => {
+  const handleRemoveItem = (id: number) => {
     Swal.fire({
       title: "Remover produto?",
       text: "Este item sairá do resumo da venda.",
@@ -77,8 +58,6 @@ export function CartModal({
     });
   };
 
-  const { FormSetVenda, loading } = MutationSetVenda();
-
   const handleFinalize = async () => {
     if (!selectedDate || !selectedLoja) {
       Swal.fire({
@@ -92,20 +71,13 @@ export function CartModal({
       return;
     }
 
-    const vendaData = {
-      funcionarioId: usuarioData?.id,
-      data_venda: selectedDate,
-      lojaId: parseInt(selectedLoja),
-      vendaDetalhes: cartItems.map((item: CartItem) => ({
-        produtoId: parseInt(item.id),
-        quantidade: item.quantidade,
-      })),
-    };
-
     try {
-      await FormSetVenda(vendaData);
-      // Fecha o modal antes do Swal, pra não ter duas camadas de
-      // overlay (Dialog + SweetAlert2) competindo pelo foco ao mesmo tempo.
+      await createVenda.mutateAsync({
+        funcionarioId: usuario!.id,
+        lojaId: parseInt(selectedLoja, 10),
+        data_venda: selectedDate,
+        vendaDetalhes: cartItems.map((item) => ({ produtoId: item.id, quantidade: item.quantidade })),
+      });
       onOpenChange(false);
       Swal.fire({
         icon: "success",
@@ -116,127 +88,132 @@ export function CartModal({
         confirmButtonColor: "#10b981",
       }).then(() => clearCart());
     } catch (error) {
-      Swal.fire({ icon: "error", title: "Erro", text: "Falha na comunicação.", background: "#0d0d10", color: "#fff" });
+      Swal.fire({
+        icon: "error",
+        title: "Erro",
+        text: extractErrorMessage(error, "Falha na comunicação."),
+        background: "#0d0d10",
+        color: "#fff",
+        confirmButtonColor: "#10b981",
+      });
     }
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-300" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0d0d10] border border-white/10 rounded-[32px] md:rounded-[40px] p-5 md:p-10 w-[95vw] max-w-5xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] outline-none max-h-[90vh] overflow-y-auto custom-scrollbar">
-          
-          {/* Header do Modal */}
+    <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
+      <RadixDialog.Portal>
+        <RadixDialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-300" />
+        <RadixDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0d0d10] border border-white/10 rounded-[32px] md:rounded-[40px] p-5 md:p-10 w-[95vw] max-w-5xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] outline-none max-h-[90vh] overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between mb-6 md:mb-8 sticky top-0 bg-[#0d0d10] z-10 pb-4 border-b border-white/5">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]" />
-              <Dialog.Title className="text-lg md:text-xl font-bold text-white uppercase tracking-wider">
+              <RadixDialog.Title className="text-lg md:text-xl font-bold text-white uppercase tracking-wider">
                 Resumo da Venda
-              </Dialog.Title>
+              </RadixDialog.Title>
             </div>
-            <Dialog.Close className="text-gray-500 hover:text-white transition-colors">
-              <X size={24} weight="bold" />
-            </Dialog.Close>
+            <RadixDialog.Close className="text-gray-500 hover:text-white transition-colors">
+              <IoClose size={24} />
+            </RadixDialog.Close>
           </div>
 
           <div className="space-y-8 pb-4">
-            {/* INDICADORES SUPERIORES */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="bg-white/[0.02] border border-white/5 p-5 md:p-6 rounded-3xl flex items-center justify-between shadow-xl">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[2px]">Volume Total</p>
-                  <p className="text-2xl md:text-3xl font-black text-white">{totalItems} <span className="text-xs text-gray-600 font-medium tracking-normal">itens</span></p>
+                  <p className="text-2xl md:text-3xl font-black text-white">
+                    {totalItems} <span className="text-xs text-gray-600 font-medium tracking-normal">itens</span>
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-emerald-500 border border-white/5">
-                  <TbShoppingBagExclamation size={24}/>
+                  <TbShoppingBagExclamation size={24} />
                 </div>
               </div>
 
               <div className="bg-white/[0.02] border border-emerald-500/20 p-5 md:p-6 rounded-3xl flex items-center justify-between shadow-2xl shadow-emerald-900/10">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-[2px]">Crédito de Pontos</p>
-                  <p className="text-2xl md:text-3xl font-black text-emerald-500">{totalPoints.toLocaleString()} <span className="text-xs font-medium tracking-normal">pts</span></p>
+                  <p className="text-2xl md:text-3xl font-black text-emerald-500">
+                    {totalPoints.toLocaleString()} <span className="text-xs font-medium tracking-normal">pts</span>
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 border border-emerald-500/20">
-                  <FaPlus size={18}/>
+                  <FaPlus size={18} />
                 </div>
               </div>
 
               <div className="bg-white/[0.02] border border-white/5 p-2 rounded-3xl flex items-center gap-2">
-                  <button 
-                      onClick={() => setViewMode("grid")}
-                      className={`flex-1 flex items-center justify-center gap-3 py-3 md:py-4 rounded-2xl transition-all duration-300 ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow-lg' : 'text-gray-500 hover:bg-white/5'}`}
-                  >
-                      <FaTh size={16}/> <span className="text-[11px] font-bold uppercase tracking-wider">Grade</span>
-                  </button>
-                  <button 
-                      onClick={() => setViewMode("list")}
-                      className={`flex-1 flex items-center justify-center gap-3 py-3 md:py-4 rounded-2xl transition-all duration-300 ${viewMode === 'list' ? 'bg-emerald-600 text-white shadow-lg' : 'text-gray-500 hover:bg-white/5'}`}
-                  >
-                      <FaListUl size={16}/> <span className="text-[11px] font-bold uppercase tracking-wider">Lista</span>
-                  </button>
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`flex-1 flex items-center justify-center gap-3 py-3 md:py-4 rounded-2xl transition-all duration-300 ${viewMode === "grid" ? "bg-emerald-600 text-white shadow-lg" : "text-gray-500 hover:bg-white/5"}`}
+                >
+                  <FaTh size={16} /> <span className="text-[11px] font-bold uppercase tracking-wider">Grade</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`flex-1 flex items-center justify-center gap-3 py-3 md:py-4 rounded-2xl transition-all duration-300 ${viewMode === "list" ? "bg-emerald-600 text-white shadow-lg" : "text-gray-500 hover:bg-white/5"}`}
+                >
+                  <FaListUl size={16} /> <span className="text-[11px] font-bold uppercase tracking-wider">Lista</span>
+                </button>
               </div>
             </div>
 
-            {/* LISTA DE ITENS */}
             <div className="min-h-[200px]">
               {cartItems.length > 0 ? (
-                <div className={viewMode === "grid" 
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" 
-                  : "space-y-3"
-                }>
-                  {cartItems.map((item: CartItem) => (
-                    <div 
-                      key={item.id} 
+                <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" : "space-y-3"}>
+                  {cartItems.map((item) => (
+                    <div
+                      key={item.id}
                       className={`group bg-white/[0.02] border border-white/5 rounded-3xl transition-all duration-300 hover:border-white/20 hover:bg-[#121216] ${
-                        viewMode === 'list' ? 'flex items-center p-4 gap-6' : 'flex flex-col p-4 space-y-4'
+                        viewMode === "list" ? "flex items-center p-4 gap-6" : "flex flex-col p-4 space-y-4"
                       }`}
                     >
-                      {/* Imagem do Produto */}
-                      <div className={`${viewMode === 'list' ? 'w-20 h-20' : 'w-full aspect-square'} relative flex-shrink-0`}>
-                        <img src={item.imagem} alt={item.nome} className="w-full h-full object-cover rounded-2xl border border-white/5" />
+                      <div className={`${viewMode === "list" ? "w-16 h-16" : "w-full aspect-square"} relative flex-shrink-0`}>
+                        {item.imagem ? (
+                          <img src={item.imagem} alt={item.nome} className="w-full h-full object-cover rounded-2xl border border-white/5" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-white/[0.02] rounded-2xl border border-white/5 text-gray-700">
+                            <FaAward size={20} />
+                          </div>
+                        )}
                       </div>
-                      
-                      {/* Infos do Produto */}
+
                       <div className="flex-1 min-w-0">
                         <h4 className="text-white font-bold text-base leading-tight truncate">{item.nome}</h4>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-emerald-500 font-mono text-sm font-bold">{item.pontos} pts</span>
+                          <span className="text-emerald-500 font-mono text-sm font-bold">{item.pontos ?? 0} pts</span>
                           <span className="text-gray-600 text-[10px] uppercase font-bold tracking-tighter">por unidade</span>
                         </div>
                       </div>
 
-                      {/* Controles de Quantidade e Delete */}
-                      <div className={`flex items-center gap-4 md:gap-6 ${viewMode === 'grid' ? 'justify-between pt-2 border-t border-white/5' : ''}`}>
-                        
-                        {/* Seletor de Quantidade Pill-style */}
+                      <div className={`flex items-center gap-4 md:gap-6 ${viewMode === "grid" ? "justify-between pt-2 border-t border-white/5" : ""}`}>
                         <div className="flex items-center bg-white/5 border border-white/10 rounded-full p-1 transition-colors hover:border-emerald-500/30">
-                          <button 
-                            onClick={() => handleQuantityChange(item.id, item.quantidade - 1)} 
+                          <button
+                            onClick={() => handleQuantityChange(item.id, item.quantidade - 1)}
                             className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                           >
-                            <FaMinus size={10}/>
+                            <FaMinus size={10} />
                           </button>
-                          <input 
-                            type="text" 
-                            value={item.quantidade} 
-                            readOnly 
-                            className="w-10 text-center bg-transparent text-sm font-black text-white outline-none" 
+                          <input
+                            type="text"
+                            value={item.quantidade}
+                            readOnly
+                            className="w-10 text-center bg-transparent text-sm font-black text-white outline-none"
                           />
-                          <button 
-                            onClick={() => handleQuantityChange(item.id, item.quantidade + 1)} 
+                          <button
+                            onClick={() => handleQuantityChange(item.id, item.quantidade + 1)}
                             className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                           >
-                            <FaPlus size={10}/>
+                            <FaPlus size={10} />
                           </button>
                         </div>
 
-                        <button 
-                          onClick={() => handleRemoveItem(item.id)} 
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
                           className="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300"
                           title="Remover item"
                         >
-                          <FaTrashAlt size={14}/>
+                          <FaTrashAlt size={14} />
                         </button>
                       </div>
                     </div>
@@ -255,14 +232,13 @@ export function CartModal({
               )}
             </div>
 
-            {/* CONFIGURAÇÕES DE DESTINO E FINALIZAÇÃO */}
             <div className="bg-white/[0.02] border border-white/5 rounded-[32px] md:rounded-[40px] p-6 md:p-10 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] -mr-32 -mt-32" />
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 relative z-10">
                 <div className="space-y-4">
                   <label className="flex items-center gap-3 text-[11px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
-                    <FaStore className="text-emerald-500"/> Selecionar Unidade
+                    <FaStore className="text-emerald-500" /> Selecionar Unidade
                   </label>
                   <div className="relative">
                     <select
@@ -271,19 +247,21 @@ export function CartModal({
                       className="w-full bg-[#0a0a0c] border border-white/10 text-white rounded-2xl px-6 py-4 md:py-5 outline-none focus:ring-2 focus:ring-emerald-500/40 appearance-none cursor-pointer transition-all"
                     >
                       <option value="">Escolha a loja de destino...</option>
-                      {dataLojas?.GetLojas.result.map((loja: any) => (
-                        <option key={loja.id} value={loja.id}>{loja.nome_fantasia}</option>
+                      {lojas?.map((loja) => (
+                        <option key={loja.id} value={loja.id}>
+                          {loja.nome_fantasia}
+                        </option>
                       ))}
                     </select>
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600">
-                      <FaArrowRight className="rotate-90" size={12}/>
+                      <FaArrowRight className="rotate-90" size={12} />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <label className="flex items-center gap-3 text-[11px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
-                    <FaCalendarAlt className="text-emerald-500"/> Data do Registro
+                    <FaCalendarAlt className="text-emerald-500" /> Data do Registro
                   </label>
                   <input
                     type="date"
@@ -301,14 +279,16 @@ export function CartModal({
                 </div>
                 <button
                   onClick={handleFinalize}
-                  disabled={loading || cartItems.length === 0}
+                  disabled={createVenda.isPending || cartItems.length === 0}
                   className={`flex-1 lg:flex-none lg:min-w-[400px] py-5 md:py-6 rounded-3xl font-black text-xs uppercase tracking-[4px] transition-all flex items-center justify-center gap-4 ${
-                    loading || cartItems.length === 0
-                    ? "bg-white/5 text-gray-600 cursor-not-allowed"
-                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-900/40 active:scale-95"
+                    createVenda.isPending || cartItems.length === 0
+                      ? "bg-white/5 text-gray-600 cursor-not-allowed"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-900/40 active:scale-95"
                   }`}
                 >
-                  {loading ? "Processando..." : (
+                  {createVenda.isPending ? (
+                    "Processando..."
+                  ) : (
                     <>
                       Processar Venda
                       <FaArrowRight size={14} />
@@ -318,8 +298,8 @@ export function CartModal({
               </div>
             </div>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </RadixDialog.Content>
+      </RadixDialog.Portal>
+    </RadixDialog.Root>
   );
 }

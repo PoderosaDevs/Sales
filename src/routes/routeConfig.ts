@@ -1,0 +1,15 @@
+export const routeTitles: Record<string, string> = {
+  "/": "Dashboard",
+  "/perfil": "Perfil",
+  "/configuracoes": "Configurações",
+  "/vendas": "Vendas",
+  "/catalog": "Catálogo",
+  "/ajuda": "Ajuda",
+  "/backoffice": "Backoffice",
+  "/marcas": "Marcas",
+  "/funcionarios": "Funcionários",
+  "/produtos": "Produtos",
+  "/metas": "Metas",
+  "/lojas": "Lojas",
+  "/linhas": "Linhas",
+};

@@ -1,71 +1,63 @@
-import React from "react";
 import { FaPlus, FaMinus, FaAward } from "react-icons/fa";
-import { CartItem, Produto } from "../../context/types/CartContext";
-import { BounceLoader } from "react-spinners";
+import { CartItem, Produto } from "../../types";
+import { Loader, EmptyState } from "../../components/Loader";
 
 interface ProductsProps {
-  data?: any;
-  loading?: boolean;
+  produtos?: Produto[];
+  isLoading?: boolean;
   cartItems: CartItem[];
   onAddProduct: (produto: Produto) => void;
-  onRemoveProduct: (produtoId: string) => void;
+  onRemoveProduct: (produtoId: number) => void;
 }
 
-export function Products({
-  data,
-  loading,
-  cartItems,
-  onAddProduct,
-  onRemoveProduct,
-}: ProductsProps) {
-  const isProductInCart = (produtoId: string) =>
-    cartItems.some((item) => item.id === produtoId);
+export function Products({ produtos, isLoading, cartItems, onAddProduct, onRemoveProduct }: ProductsProps) {
+  const isProductInCart = (produtoId: number) => cartItems.some((item) => item.id === produtoId);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[60vh] space-y-6">
-        <BounceLoader color="#10b981" size={70} />
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-white tracking-widest uppercase">Sincronizando</h2>
-          <p className="text-gray-500 text-sm">Preparando o melhor catálogo para você...</p>
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <Loader label="Sincronizando catálogo..." />;
+  }
+
+  if (!produtos?.length) {
+    return <EmptyState title="Nenhum produto encontrado" icon={<FaAward size={40} className="text-gray-600" />} />;
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-      {data?.GetProdutos.result.map((produto: any) => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+      {produtos.map((produto) => (
         <div
           key={produto.id}
           className="group relative bg-[#0d0d10] border border-white/5 rounded-3xl overflow-hidden flex flex-col transition-all duration-500 hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]"
         >
-          {/* Imagem e Badge de Marca */}
-          <div className="relative aspect-square overflow-hidden">
-            <img
-              src={produto.imagem}
-              alt={produto.nome}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
+          <div className="relative aspect-square overflow-hidden bg-white/[0.02]">
+            {produto.imagem ? (
+              <img
+                src={produto.imagem}
+                alt={produto.nome}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-700">
+                <FaAward size={32} />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d10] via-transparent to-transparent opacity-60" />
-            
-            {/* Tag da Marca - Estilo Glassmorphism */}
-            <div 
-              className="absolute top-3 left-3 backdrop-blur-md bg-black/40 border border-white/10 text-[10px] font-bold text-white px-2.5 py-1 rounded-lg uppercase tracking-wider"
-              style={{ borderLeft: `3px solid ${produto.marca.cor || '#10b981'}` }}
-            >
-              {produto.marca.nome || "Distribuição"}
-            </div>
 
-            {/* Pontuação do Produto */}
+            {produto.marca && (
+              <div
+                className="absolute top-3 left-3 backdrop-blur-md bg-black/40 border border-white/10 text-[10px] font-bold text-white px-2.5 py-1 rounded-lg uppercase tracking-wider max-w-[calc(100%-24px)] truncate"
+                style={{ borderLeft: `3px solid ${produto.marca.cor || "#10b981"}` }}
+              >
+                {produto.marca.nome}
+              </div>
+            )}
+
             <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-emerald-500 text-[#0d0d10] px-2 py-0.5 rounded-md font-black text-[10px] shadow-lg">
               <FaAward size={10} />
-              {produto.pontos} PTS
+              {produto.pontos ?? 0} PTS
             </div>
           </div>
 
-          {/* Informações do Produto */}
-          <div className="p-4 flex-1 flex flex-col">
+          <div className="p-3 md:p-4 flex-1 flex flex-col">
             <h2 className="text-white font-bold text-sm md:text-base leading-tight mb-4 line-clamp-2 h-10 group-hover:text-emerald-400 transition-colors">
               {produto.nome}
             </h2>

@@ -1,32 +1,60 @@
-# Poderosa Beleza - Sistema de Gerenciamento de Vendas
+# Front de Vendas (v2)
 
-![Logo Poderosa Beleza](https://media.graphassets.com/F7X5y2inQMQTYPGC0TWU)
+Reescrita do front antigo (React + Vite + TypeScript), consumindo a nova API
+REST em `../api`. Mesmo visual "glass" escuro do app anterior, mas com
+estrutura, tipagem e acessibilidade mobile refeitas do zero.
 
-## Descrição
+## Rodando localmente
 
-O sistema **Poderosa Beleza** foi desenvolvido para permitir que os vendedores externos possam cadastrar suas vendas diárias e gerar relatórios e estatísticas. O objetivo é proporcionar um controle eficaz e uma visão clara das vendas realizadas, facilitando a gestão e análise do desempenho de vendas.
+```bash
+npm install
+cp .env.example .env   # ja existe um .env com VITE_API_URL apontando pra API local
+npm run dev             # http://localhost:5173
+```
 
-## Funcionalidades
+A API (`../api`) precisa estar rodando em paralelo (`npm run dev` lá, porta 8888).
 
-1. **Cadastro de Vendas Diárias**:
-   - Os vendedores podem registrar suas vendas diárias, incluindo informações como produtos vendidos, quantidades e valores.
+Scripts: `npm run build` (typecheck + build de produção em `dist/`),
+`npm run preview`, `npm run typecheck`.
 
-2. **Geração de Relatórios**:
-   - Geração de relatórios detalhados sobre as vendas, permitindo uma análise aprofundada do desempenho em diferentes períodos.
+## Estrutura
 
-3. **Estatísticas e Análises**:
-   - Visualização de estatísticas como total de vendas, média diária, e outros dados relevantes para ajudar na tomada de decisões.
+- `src/lib/api.ts` — cliente axios com interceptor de JWT e tratamento
+  centralizado de erro/expiração de sessão.
+- `src/context/AuthContext.tsx` — login, logout e verificação periódica de
+  expiração do token (sem depender do usuário recarregar a página).
+- `src/hooks/*` — um hook React Query por recurso da API (produtos, vendas,
+  usuários, marcas, linhas, lojas, metas), cobrindo leitura e mutações.
+- `src/components/ui/*` — primitivos reaproveitáveis (Button, Input, Select,
+  Dialog, Card) usados em todas as telas para manter consistência visual.
+- `src/pages/*` — uma pasta por tela. `Home`, `Catalog` e `Vendas` são a
+  prioridade mobile (fluxo do dia a dia da vendedora); `Marcas`, `Produtos`,
+  `Linhas`, `Lojas`, `Metas`, `Funcionarios` e `Backoffice` são a área de
+  gestão (ADMIN/MANAGER), carregada sob demanda (ver abaixo).
+- `src/routes/PrivateRoutes.tsx` — as rotas de gestão usam `React.lazy`, então
+  esse código só é baixado pelo navegador quando alguém com permissão
+  realmente abre uma dessas telas. Uma vendedora nunca baixa esse bundle.
 
-## Requisitos
+## Diferenças/melhorias em relação ao front antigo
 
-- **Node.js** (v12 ou superior)
-- **npm** (v6 ou superior)
-- **React** (para a interface)
-- **Tailwind CSS** (para estilos)
+- Apollo/GraphQL → React Query + axios sobre a API REST nova.
+- Sessão expira de forma ativa (checagem a cada 60s) em vez de só falhar na
+  próxima chamada; ao expirar, mostra aviso e redireciona pro login.
+- Tela de Perfil funcional: a vendedora edita foto, data de nascimento e
+  senha de verdade (no front antigo o botão "Salvar" não fazia nada).
+- Catálogo, carrinho e histórico de vendas redesenhados mobile-first
+  (grid compacto, modais em tela cheia no celular, botões grandes o
+  suficiente para toque).
+- Telas de gestão (Produtos, Marcas, Linhas, Lojas, Metas, Funcionários,
+  Backoffice com gráficos) reconstruídas com formulários validados
+  (`react-hook-form` + `zod`) e mensagens de erro reais vindas da API.
+- Code-splitting: a área de gestão fica em chunks separados, carregados só
+  quando necessário — reduz o que uma vendedora baixa no celular.
 
-## Instalação
+## Papéis de acesso
 
-1. **Clone o Repositório**:
-   ```bash
-   git clone https://github.com/seu-usuario/poderosa-beleza.git
-   cd poderosa-beleza
+- **Vendedora (EMPLOYEE)**: Home, Catálogo, Vendas, Perfil, Configurações,
+  Ajuda.
+- **Gerente/Administrador (MANAGER/ADMIN)**: tudo acima + Backoffice
+  (rankings, gráficos por vendedora/marca/loja), Produtos, Categorias,
+  Marcas, Linhas, Lojas, Metas e Funcionários.

@@ -1,34 +1,41 @@
 export const faqData = [
   {
     question: "Efetuei uma venda na data errada ou com alguma irregularidade?",
-    answer: "Entre em contato com o gerente. A partir disso, ele irá substituir os dados errados pelos dados corretos, seja a data, itens da venda ou quantidade.",
+    answer:
+      "Entre em contato com o gerente. Ele poderá corrigir os dados da venda, seja a data, os itens ou a quantidade registrada.",
   },
   {
     question: "Esqueci minha senha, como recuperar minha conta?",
-    answer: "Entre em contato com o gerente e informe seu CPF. O gerente irá alterar sua senha e te passar. Quando você conseguir logar, poderá alterar sua senha na tela do seu perfil.",
+    answer:
+      "Entre em contato com o gerente e informe seu CPF. Ele poderá redefinir sua senha temporariamente. Depois de entrar, você pode trocar sua senha em Perfil > Alterar senha.",
   },
   {
-    question: "Como alterar meus dados?",
-    answer: "Você pode alterar dados como senha, data de nascimento, telefone, CEP, endereço, número, complemento. Outros dados como nome e CPF devem ser alterados informando ao gerente.",
+    question: "Como altero meus dados pessoais?",
+    answer:
+      "Em Perfil você pode alterar sua foto, data de nascimento e senha diretamente. Nome, CPF, e-mail e função só podem ser alterados por um gerente ou administrador, por questão de segurança.",
+  },
+  {
+    question: "Como registro uma nova venda?",
+    answer:
+      "Vá até Catálogo, adicione os produtos vendidos ao carrinho e toque em Ver Carrinho. Escolha a loja e a data da venda e confirme em Processar Venda.",
+  },
+  {
+    question: "Onde vejo meu histórico de vendas e pontos?",
+    answer:
+      "Na tela inicial (Home) você vê um resumo do mês. Em Vendas fica o histórico completo, com detalhes de cada venda registrada.",
+  },
+  {
+    question: "Como acompanho o progresso das minhas metas?",
+    answer:
+      "As metas ativas aparecem na tela inicial com uma barra de progresso. Cada meta pode ter etapas, exibidas com o quanto já foi atingido.",
   },
   {
     question: "Os meus dados estão seguros?",
-    answer: "Utilizamos criptografia avançada para garantir a segurança e privacidade de todos os dados.",
-  },
-  {
-    question: "Como faço para entrar em contato com o suporte?",
-    answer: "Você pode entrar em contato com o suporte clicando na seção 'Ajuda' do menu e escolhendo 'Contato'. Isso te levará ao contato com o gerente, onde ele te dará o suporte necessário.",
+    answer:
+      "Sim. O acesso ao sistema exige login, todas as senhas são armazenadas de forma criptografada e cada usuária só acessa o que é permitido pelo seu perfil.",
   },
   {
     question: "Posso compartilhar minha conta com outra pessoa?",
-    answer: "O compartilhamento de contas é contra nossos termos de uso, mas você pode usar o recurso de equipe.",
+    answer: "Não. Cada login é pessoal e as vendas registradas ficam associadas a quem está autenticado.",
   },
-  {
-    question: "Como posso excluir minha conta?",
-    answer: "Envie uma solicitação ao suporte na seção de 'Ajuda' e nossa equipe cuidará disso.",
-  },
-  {
-    question: "Como posso mudar minha senha?",
-    answer: "Vá até 'Perfil' e coloque a senha desejada, confirme. A senha só vai poder ser salva se a senha digitada cumprir os requisitos de segurança.",
-  }
 ];
