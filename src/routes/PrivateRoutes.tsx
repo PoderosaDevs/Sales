@@ -22,6 +22,7 @@ const Backoffice = lazy(() => import("../pages/Backoffice").then((m) => ({ defau
 const StoreInsights = lazy(() => import("../pages/Backoffice/StoreInsights").then((m) => ({ default: m.StoreInsights })));
 const EmployeeInsights = lazy(() => import("../pages/Backoffice/EmployeeInsights").then((m) => ({ default: m.EmployeeInsights })));
 const BrandInsights = lazy(() => import("../pages/Backoffice/BrandInsights").then((m) => ({ default: m.BrandInsights })));
+const GerenciarVendas = lazy(() => import("../pages/Backoffice/GerenciarVendas").then((m) => ({ default: m.GerenciarVendas })));
 
 const Marcas = lazy(() => import("../pages/Marcas").then((m) => ({ default: m.Marcas })));
 const Produtos = lazy(() => import("../pages/Produtos").then((m) => ({ default: m.Produtos })));
@@ -55,6 +56,7 @@ export function PrivateRoutes() {
         <Route path="/backoffice/store/:id" element={<Gestao><StoreInsights /></Gestao>} />
         <Route path="/backoffice/employee/:id" element={<Gestao><EmployeeInsights /></Gestao>} />
         <Route path="/backoffice/brand/:id" element={<Gestao><BrandInsights /></Gestao>} />
+        <Route path="/backoffice/vendas" element={<Gestao><GerenciarVendas /></Gestao>} />
 
         <Route path="/marcas" element={<Gestao><Marcas /></Gestao>} />
         <Route path="/produtos" element={<Gestao><Produtos /></Gestao>} />

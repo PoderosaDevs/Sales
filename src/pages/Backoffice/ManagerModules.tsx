@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaPalette, FaBoxOpen, FaStream, FaStore, FaBullseye, FaUserTie } from "react-icons/fa";
+import { FaPalette, FaBoxOpen, FaStream, FaStore, FaBullseye, FaUserTie, FaReceipt } from "react-icons/fa";
 
 const modules = [
   { to: "/produtos", icon: FaBoxOpen, label: "Produtos" },
@@ -8,6 +8,7 @@ const modules = [
   { to: "/lojas", icon: FaStore, label: "Lojas" },
   { to: "/metas", icon: FaBullseye, label: "Metas" },
   { to: "/funcionarios", icon: FaUserTie, label: "Equipe" },
+  { to: "/backoffice/vendas", icon: FaReceipt, label: "Vendas" },
 ];
 
 export function ManagerModules() {

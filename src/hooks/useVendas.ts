@@ -15,11 +15,11 @@ export function useVendasByUsuario(usuarioId?: number, dataMensal?: string) {
   });
 }
 
-export function useVendas(startDate?: string, endDate?: string) {
+export function useVendas(startDate?: string, endDate?: string, funcionarioId?: number, lojaId?: number) {
   return useQuery({
-    queryKey: ["vendas", startDate, endDate],
+    queryKey: ["vendas", startDate, endDate, funcionarioId, lojaId],
     queryFn: async () => {
-      const { data } = await api.get<Venda[]>("/vendas", { params: { startDate, endDate } });
+      const { data } = await api.get<Venda[]>("/vendas", { params: { startDate, endDate, funcionarioId, lojaId } });
       return data;
     },
   });
