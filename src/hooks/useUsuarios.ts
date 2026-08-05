@@ -54,11 +54,16 @@ export function useTimeline(targetId?: number, type: "USER" | "STORE" | "BRAND" 
   });
 }
 
+export interface UsuarioRankingItem extends RankingItem {
+  pontos_totais_tratamento: number;
+  pontos_totais_coloracao: number;
+}
+
 export function useRankingUsuarios(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ["ranking-usuarios", startDate, endDate],
     queryFn: async () => {
-      const { data } = await api.get<Paginated<RankingItem>>("/usuarios/ranking", {
+      const { data } = await api.get<Paginated<UsuarioRankingItem>>("/usuarios/ranking", {
         params: { startDate, endDate, quantidade: 100 },
       });
       return data.result;

@@ -16,8 +16,8 @@ interface MarcaInsight {
   pontos_totais: number;
   pontos_totais_tratamento: number;
   pontos_totais_coloracao: number;
-  lojas: { nome_fantasia: string; pontos_totais: number }[];
-  vendedores: { nome: string; quantidade: number }[];
+  lojas: { nome_fantasia: string; pontos_totais: number; pontos_totais_tratamento: number; pontos_totais_coloracao: number }[];
+  vendedores: { nome: string; quantidade: number; pontos_totais_tratamento: number; pontos_totais_coloracao: number }[];
 }
 
 export function BrandInsights() {
@@ -81,7 +81,13 @@ export function BrandInsights() {
                 emptyLabel="Sem vendas por loja"
                 emptyIcon={<FaStore size={40} className="text-gray-600" />}
                 valueLabel="pts"
-                rows={data.lojas.map((l, i) => ({ id: i, nome: l.nome_fantasia, valor: l.pontos_totais }))}
+                rows={data.lojas.map((l, i) => ({
+                  id: i,
+                  nome: l.nome_fantasia,
+                  valor: l.pontos_totais,
+                  tratamento: l.pontos_totais_tratamento,
+                  coloracao: l.pontos_totais_coloracao,
+                }))}
               />
             </div>
             <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] p-6 md:p-8 shadow-2xl">
@@ -91,7 +97,13 @@ export function BrandInsights() {
                 emptyLabel="Sem vendas registradas"
                 emptyIcon={<FaUserTie size={40} className="text-gray-600" />}
                 valueLabel="un."
-                rows={data.vendedores.map((v, i) => ({ id: i, nome: v.nome, valor: v.quantidade }))}
+                rows={data.vendedores.map((v, i) => ({
+                  id: i,
+                  nome: v.nome,
+                  valor: v.quantidade,
+                  tratamento: v.pontos_totais_tratamento,
+                  coloracao: v.pontos_totais_coloracao,
+                }))}
               />
             </div>
           </div>

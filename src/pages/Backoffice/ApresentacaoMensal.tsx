@@ -205,7 +205,12 @@ export function ApresentacaoMensal({ onClose }: { onClose: () => void }) {
                   subtitulo="Top performers"
                   icon={FaUserTie}
                   unidade="pts"
-                  rows={rankingUsuarios?.map((u) => ({ nome: u.nome, valor: u.pontos_totais }))}
+                  rows={rankingUsuarios?.map((u) => ({
+                    nome: u.nome,
+                    valor: u.pontos_totais,
+                    tratamento: u.pontos_totais_tratamento,
+                    coloracao: u.pontos_totais_coloracao,
+                  }))}
                 />
               )}
 
@@ -215,7 +220,12 @@ export function ApresentacaoMensal({ onClose }: { onClose: () => void }) {
                   subtitulo="Share de mercado"
                   icon={FaPalette}
                   unidade="un."
-                  rows={rankingMarcas?.map((m) => ({ nome: m.nome, valor: m.total_vendas }))}
+                  rows={rankingMarcas?.map((m) => ({
+                    nome: m.nome,
+                    valor: m.total_vendas,
+                    tratamento: m.total_tratamento,
+                    coloracao: m.total_coloracao,
+                  }))}
                 />
               )}
 
@@ -225,7 +235,12 @@ export function ApresentacaoMensal({ onClose }: { onClose: () => void }) {
                   subtitulo="Performance por unidade"
                   icon={FaStore}
                   unidade="un."
-                  rows={rankingLojas?.map((l) => ({ nome: l.nome_fantasia, valor: l.total_vendas }))}
+                  rows={rankingLojas?.map((l) => ({
+                    nome: l.nome_fantasia,
+                    valor: l.total_vendas,
+                    tratamento: l.total_tratamento,
+                    coloracao: l.total_coloracao,
+                  }))}
                 />
               )}
             </div>
@@ -305,10 +320,8 @@ function BigRanking({
   subtitulo: string;
   icon: typeof FaUserTie;
   unidade: string;
-  rows?: { nome: string; valor: number }[];
+  rows?: { nome: string; valor: number; tratamento?: number; coloracao?: number }[];
 }) {
-  const max = Math.max(...(rows?.map((r) => r.valor) ?? [1]), 1);
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-center gap-3">
@@ -339,9 +352,16 @@ function BigRanking({
                     {row.valor} <span className="text-gray-500 text-sm font-sans">{unidade}</span>
                   </span>
                 </div>
-                <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full" style={{ width: `${(row.valor / max) * 100}%` }} />
-                </div>
+                {(row.tratamento !== undefined || row.coloracao !== undefined) && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold whitespace-nowrap">
+                      Tratamento {row.tratamento ?? 0}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold whitespace-nowrap">
+                      Coloração {row.coloracao ?? 0}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           ))}

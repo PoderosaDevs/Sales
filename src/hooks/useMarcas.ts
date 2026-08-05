@@ -23,11 +23,17 @@ export function useMarca(id?: number) {
   });
 }
 
+export interface MarcaRankingItem extends RankingItem {
+  total_vendas: number;
+  total_tratamento: number;
+  total_coloracao: number;
+}
+
 export function useMarcasRanking(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ["marcas-ranking", startDate, endDate],
     queryFn: async () => {
-      const { data } = await api.get<Paginated<RankingItem & { total_vendas: number }>>("/marcas/ranking", {
+      const { data } = await api.get<Paginated<MarcaRankingItem>>("/marcas/ranking", {
         params: { startDate, endDate, quantidade: 100 },
       });
       return data.result;

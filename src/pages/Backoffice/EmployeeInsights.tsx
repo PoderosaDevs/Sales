@@ -70,7 +70,13 @@ export function EmployeeInsights() {
                 emptyLabel="Sem vendas por marca"
                 emptyIcon={<FaPalette size={40} className="text-gray-600" />}
                 valueLabel="un."
-                rows={data.marcas.map((m, i) => ({ id: i, nome: m.nome, valor: m.quantidade }))}
+                rows={data.marcas.map((m, i) => ({
+                  id: i,
+                  nome: m.nome,
+                  valor: m.quantidade,
+                  tratamento: m.pontos_tratamento,
+                  coloracao: m.pontos_coloracao,
+                }))}
               />
             </div>
             <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] p-6 md:p-8 shadow-2xl">
@@ -80,7 +86,13 @@ export function EmployeeInsights() {
                 emptyLabel="Sem vendas por loja"
                 emptyIcon={<FaStore size={40} className="text-gray-600" />}
                 valueLabel="un."
-                rows={data.lojas.map((l) => ({ id: l.id, nome: l.nome, valor: l.quantidade }))}
+                rows={data.lojas.map((l) => ({
+                  id: l.id,
+                  nome: l.nome,
+                  valor: l.quantidade,
+                  tratamento: l.pontos_tratamento,
+                  coloracao: l.pontos_coloracao,
+                }))}
               />
             </div>
           </div>

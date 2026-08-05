@@ -6,6 +6,8 @@ export interface LojaRankingItem {
   id: number;
   nome_fantasia: string;
   total_vendas: number;
+  total_tratamento: number;
+  total_coloracao: number;
 }
 
 export function useLojasRanking(startDate?: string, endDate?: string) {

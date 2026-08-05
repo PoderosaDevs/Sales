@@ -26,6 +26,7 @@ interface DateRangeFilterProps {
   label?: string;
 }
 
+const PANEL_WIDTH = 600;
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 const MONTH_LABELS = Array.from({ length: 12 }, (_, m) => capitalize(format(new Date(2024, m, 1), "MMM", { locale: ptBR })));
 
@@ -81,8 +82,10 @@ export function DateRangeFilter({ dataInicio, dataFim, onChangeInicio, onChangeF
   const [draftStart, setDraftStart] = useState<Date | undefined>(committedStart);
   const [draftEnd, setDraftEnd] = useState<Date | undefined>(committedEnd);
   const [hoverDay, setHoverDay] = useState<Date | undefined>();
+  const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -95,6 +98,27 @@ export function DateRangeFilter({ dataInicio, dataFim, onChangeInicio, onChangeF
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Posiciona o dropdown do desktop com position:fixed, calculado a partir do
+  // gatilho e "clampado" dentro da viewport - evita que o painel de 600px
+  // estoure a borda da tela e quebre o layout da página quando o gatilho
+  // esta perto da direita (o antigo `absolute left-0` fazia exatamente isso).
+  useEffect(() => {
+    if (!open) return;
+    function computePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const margin = 16;
+      const width = Math.min(PANEL_WIDTH, window.innerWidth - margin * 2);
+      const maxLeft = window.innerWidth - width - margin;
+      const left = Math.min(Math.max(rect.left, margin), Math.max(maxLeft, margin));
+      const top = rect.bottom + 8;
+      setPanelPos({ top, left });
+    }
+    computePosition();
+    window.addEventListener("resize", computePosition);
+    return () => window.removeEventListener("resize", computePosition);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -103,11 +127,19 @@ export function DateRangeFilter({ dataInicio, dataFim, onChangeInicio, onChangeF
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
+    // Fecha ao rolar a pagina em vez de reposicionar a cada scroll - evita
+    // que o painel fique "flutuando" desalinhado do gatilho.
+    function handleScroll(e: Event) {
+      if (containerRef.current && containerRef.current.contains(e.target as Node)) return;
+      setOpen(false);
+    }
     document.addEventListener("mousedown", handleClick);
     document.addEventListener("keydown", handleKey);
+    window.addEventListener("scroll", handleScroll, true);
     return () => {
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("keydown", handleKey);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, [open]);
 
@@ -164,6 +196,7 @@ export function DateRangeFilter({ dataInicio, dataFim, onChangeInicio, onChangeF
     <div className="relative" ref={containerRef}>
       <div className="flex items-center gap-2">
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setOpen((v) => !v)}
           className="flex items-center gap-3 bg-[#0d0d10] border border-white/10 hover:border-emerald-500/40 rounded-2xl pl-4 pr-4 py-3 transition-all"
@@ -224,8 +257,17 @@ export function DateRangeFilter({ dataInicio, dataFim, onChangeInicio, onChangeF
             </div>
           </div>
 
-          {/* Desktop: dropdown ancorado no gatilho */}
-          <div className="hidden sm:block absolute z-[300] mt-3 left-0 bg-[#0d0d10] border border-white/10 rounded-[32px] shadow-2xl p-6 w-[600px] max-w-[90vw]">
+          {/* Desktop: dropdown com posicao fixa calculada a partir do gatilho, clampada na viewport */}
+          <div
+            className="hidden sm:block fixed z-[300] bg-[#0d0d10] border border-white/10 rounded-[32px] shadow-2xl p-6"
+            style={{
+              top: panelPos?.top ?? 0,
+              left: panelPos?.left ?? 0,
+              width: PANEL_WIDTH,
+              maxWidth: `calc(100vw - 32px)`,
+              visibility: panelPos ? "visible" : "hidden",
+            }}
+          >
             <PickerTabs tab={tab} setTab={setTab} />
             {tab === "mes" ? (
               <MonthGrid

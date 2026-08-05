@@ -79,7 +79,14 @@ export function Backoffice() {
             emptyLabel="Sem vendas no período"
             emptyIcon={<FaUserTie size={40} className="text-gray-600" />}
             valueLabel="pts"
-            rows={rankingUsuarios?.map((u) => ({ id: u.id, nome: u.nome, valor: u.pontos_totais, href: `/backoffice/employee/${u.id}` }))}
+            rows={rankingUsuarios?.map((u) => ({
+              id: u.id,
+              nome: u.nome,
+              valor: u.pontos_totais,
+              tratamento: u.pontos_totais_tratamento,
+              coloracao: u.pontos_totais_coloracao,
+              href: `/backoffice/employee/${u.id}`,
+            }))}
           />
         </div>
 
@@ -94,7 +101,14 @@ export function Backoffice() {
             emptyLabel="Sem vendas no período"
             emptyIcon={<FaPalette size={40} className="text-gray-600" />}
             valueLabel="un."
-            rows={rankingMarcas?.map((m) => ({ id: m.id, nome: m.nome, valor: m.total_vendas, href: `/backoffice/brand/${m.id}` }))}
+            rows={rankingMarcas?.map((m) => ({
+              id: m.id,
+              nome: m.nome,
+              valor: m.total_vendas,
+              tratamento: m.total_tratamento,
+              coloracao: m.total_coloracao,
+              href: `/backoffice/brand/${m.id}`,
+            }))}
           />
         </div>
 
@@ -109,7 +123,14 @@ export function Backoffice() {
             emptyLabel="Sem vendas no período"
             emptyIcon={<FaStore size={40} className="text-gray-600" />}
             valueLabel="un."
-            rows={rankingLojas?.map((l) => ({ id: l.id, nome: l.nome_fantasia, valor: l.total_vendas, href: `/backoffice/store/${l.id}` }))}
+            rows={rankingLojas?.map((l) => ({
+              id: l.id,
+              nome: l.nome_fantasia,
+              valor: l.total_vendas,
+              tratamento: l.total_tratamento,
+              coloracao: l.total_coloracao,
+              href: `/backoffice/store/${l.id}`,
+            }))}
           />
         </div>
       </div>

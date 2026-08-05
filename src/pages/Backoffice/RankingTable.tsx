@@ -6,6 +6,8 @@ interface RankingRow {
   id: number;
   nome: string;
   valor: number;
+  tratamento?: number;
+  coloracao?: number;
   href?: string;
 }
 
@@ -25,10 +27,8 @@ export function RankingTable({
   if (isLoading) return <Loader label="Sincronizando..." />;
   if (!rows?.length) return <EmptyState title={emptyLabel} icon={emptyIcon} />;
 
-  const max = Math.max(...rows.map((r) => r.valor), 1);
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {rows.map((row, index) => {
         const content = (
           <>
@@ -38,9 +38,16 @@ export function RankingTable({
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-white font-bold text-sm truncate">{row.nome}</p>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-1.5">
-                  <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full" style={{ width: `${(row.valor / max) * 100}%` }} />
-                </div>
+                {(row.tratamento !== undefined || row.coloracao !== undefined) && (
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold whitespace-nowrap">
+                      Tratamento {row.tratamento ?? 0}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold whitespace-nowrap">
+                      Coloração {row.coloracao ?? 0}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 ml-4">
