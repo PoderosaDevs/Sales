@@ -5,12 +5,13 @@ import { z } from "zod";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaPlus, FaPencilAlt, FaTrashAlt, FaUserTie, FaKey, FaChartLine, FaIdCard, FaEnvelope } from "react-icons/fa";
+import { FaTriangleExclamation } from "react-icons/fa6";
 import { useUsuarios, useCreateUsuario, useUpdateUsuario, useDeleteUsuario, useRecoverySenha } from "../../hooks/useUsuarios";
 import { Button } from "../../components/ui/button";
 import { Input, Label, Select, FieldError } from "../../components/ui/input";
 import { Dialog } from "../../components/ui/dialog";
 import { Loader, EmptyState } from "../../components/Loader";
-import { extractErrorMessage } from "../../lib/api";
+import { api, extractErrorMessage } from "../../lib/api";
 import { TipoPessoa, Usuario } from "../../types";
 
 const tipoPessoaLabel: Record<TipoPessoa, string> = {
@@ -34,9 +35,16 @@ const createSchema = z.object({
 const editSchema = createSchema.extend({ senha: z.string().min(6).optional().or(z.literal("")) });
 type FormData = z.infer<typeof createSchema>;
 
+const statusLabel: Record<"ativos" | "inativos" | "todos", string> = {
+  ativos: "Ativos",
+  inativos: "Inativos",
+  todos: "Todos",
+};
+
 export function Funcionarios() {
   const [filtroTipo, setFiltroTipo] = useState<TipoPessoa | "">("");
-  const { data: usuarios, isLoading } = useUsuarios(filtroTipo || undefined);
+  const [filtroStatus, setFiltroStatus] = useState<"ativos" | "inativos" | "todos">("ativos");
+  const { data: usuarios, isLoading } = useUsuarios(filtroTipo || undefined, filtroStatus);
   const createUsuario = useCreateUsuario();
   const updateUsuario = useUpdateUsuario();
   const deleteUsuario = useDeleteUsuario();
@@ -86,22 +94,38 @@ export function Funcionarios() {
     }
   };
 
-  const confirmDelete = (usuario: Usuario) => {
+  const confirmDelete = async (usuario: Usuario) => {
+    Swal.fire({ ...swalConfig, title: "Verificando vendas...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    let vendasCount = 0;
+    try {
+      const { data } = await api.get<{ count: number }>(`/vendas/usuario/${usuario.id}/count`);
+      vendasCount = data.count;
+    } catch {
+      // se a contagem falhar, segue com o aviso genérico mesmo assim
+    }
+
     Swal.fire({
       ...swalConfig,
-      title: "Desativar colaborador?",
-      text: `O acesso de "${usuario.nome}" será revogado.`,
+      title: "Excluir permanentemente?",
+      html:
+        vendasCount > 0
+          ? `Isso vai apagar <strong>"${usuario.nome}"</strong> e as <strong>${vendasCount} venda${
+              vendasCount === 1 ? "" : "s"
+            }</strong> registradas por ele(a). Essa ação não pode ser desfeita.`
+          : `Isso vai apagar <strong>"${usuario.nome}"</strong> permanentemente. Não há vendas registradas por ele(a). Essa ação não pode ser desfeita.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sim, desativar",
+      confirmButtonText: "Sim, excluir tudo",
+      confirmButtonColor: "#dc2626",
       cancelButtonText: "Cancelar",
     }).then(async (result) => {
       if (!result.isConfirmed) return;
       try {
         await deleteUsuario.mutateAsync(usuario.id);
-        Swal.fire({ ...swalConfig, icon: "success", title: "Desativado!" });
+        Swal.fire({ ...swalConfig, icon: "success", title: "Excluído permanentemente!" });
       } catch (error) {
-        Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível desativar.") });
+        Swal.fire({ ...swalConfig, icon: "error", title: "Erro", text: extractErrorMessage(error, "Não foi possível excluir.") });
       }
     });
   };
@@ -139,18 +163,44 @@ export function Funcionarios() {
         </Button>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        {(["", TipoPessoa.EMPLOYEE, TipoPessoa.MANAGER, TipoPessoa.ADMIN] as const).map((tipo) => (
-          <button
-            key={tipo || "todos"}
-            onClick={() => setFiltroTipo(tipo)}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-              filtroTipo === tipo ? "bg-emerald-500 text-[#0a0a0c] border-emerald-500" : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/10"
-            }`}
-          >
-            {tipo ? tipoPessoaLabel[tipo] : "Todos"}
-          </button>
-        ))}
+      <div className="flex items-start gap-3 p-4 sm:p-5 bg-red-500/5 border border-red-500/20 rounded-2xl">
+        <FaTriangleExclamation className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
+        <p className="text-red-200/90 text-xs sm:text-sm leading-relaxed">
+          <span className="font-bold text-red-400">Atenção:</span> excluir um colaborador remove permanentemente ele e{" "}
+          <span className="font-bold">todas as vendas registradas por ele</span> do sistema. Não é possível desfazer essa ação.
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {(["", TipoPessoa.EMPLOYEE, TipoPessoa.MANAGER, TipoPessoa.ADMIN] as const).map((tipo) => (
+            <button
+              key={tipo || "todos"}
+              onClick={() => setFiltroTipo(tipo)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                filtroTipo === tipo ? "bg-emerald-500 text-[#0a0a0c] border-emerald-500" : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/10"
+              }`}
+            >
+              {tipo ? tipoPessoaLabel[tipo] : "Todos"}
+            </button>
+          ))}
+        </div>
+        <div className="h-5 w-px bg-white/10 hidden sm:block" />
+        <div className="flex gap-2 flex-wrap">
+          {(["ativos", "inativos", "todos"] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setFiltroStatus(status)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                filtroStatus === status
+                  ? "bg-white/10 text-white border-white/20"
+                  : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
+              }`}
+            >
+              {statusLabel[status]}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
@@ -170,6 +220,11 @@ export function Funcionarios() {
                     <p className="text-white font-bold truncate">{usuario.nome}</p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">{tipoPessoaLabel[usuario.tipo_pessoa]}</span>
+                      {usuario.situacao === false && (
+                        <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider">
+                          Inativo
+                        </span>
+                      )}
                       <span className="text-gray-600 text-xs flex items-center gap-1 truncate">
                         <FaEnvelope size={10} className="opacity-50" /> {usuario.email}
                       </span>
@@ -195,7 +250,11 @@ export function Funcionarios() {
                   <button onClick={() => openEdit(usuario)} className="p-3 bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-2xl transition-all" title="Editar">
                     <FaPencilAlt size={13} />
                   </button>
-                  <button onClick={() => confirmDelete(usuario)} className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all" title="Desativar">
+                  <button
+                    onClick={() => confirmDelete(usuario)}
+                    className="p-3 bg-white/5 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all"
+                    title="Excluir permanentemente (colaborador + vendas)"
+                  >
                     <FaTrashAlt size={13} />
                   </button>
                 </div>

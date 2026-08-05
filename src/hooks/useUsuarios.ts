@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Paginated, RankingItem, TipoPessoa, Usuario, UsuarioInsights } from "../types";
 
-export function useUsuarios(tipo_pessoa?: TipoPessoa) {
+export function useUsuarios(tipo_pessoa?: TipoPessoa, status?: "ativos" | "inativos" | "todos") {
   return useQuery({
-    queryKey: ["usuarios", tipo_pessoa],
+    queryKey: ["usuarios", tipo_pessoa, status],
     queryFn: async () => {
-      const { data } = await api.get<Usuario[]>("/usuarios", { params: { tipo_pessoa } });
+      const { data } = await api.get<Usuario[]>("/usuarios", { params: { tipo_pessoa, status } });
       return data;
     },
   });
