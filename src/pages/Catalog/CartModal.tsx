@@ -179,7 +179,7 @@ export function CartModal({ open, onOpenChange, cartItems, updateItemQuantity, r
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-white font-bold text-base leading-tight truncate">{item.nome}</h4>
+                        <h4 className="text-white font-bold text-white leading-tight truncate">{item.nome}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-emerald-500 font-mono text-sm font-bold">{item.pontos ?? 0} pts</span>
                           <span className="text-gray-600 text-[10px] uppercase font-bold tracking-tighter">por unidade</span>

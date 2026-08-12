@@ -27,7 +27,7 @@ export function Vendas() {
             <div className="w-1.5 h-7 md:h-8 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981] flex-shrink-0" />
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight truncate">Gestão de Vendas</h1>
           </div>
-          <p className="text-gray-400 text-sm md:text-base ml-5">Consulte seu histórico de performance.</p>
+          <p className="text-gray-400 text-sm md:text-white ml-5">Consulte seu histórico de performance.</p>
         </div>
 
         <Link
@@ -45,7 +45,7 @@ export function Vendas() {
           </div>
           <div className="min-w-0">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-[2px]">Relatório mensal</h2>
-            <p className="text-white text-base font-medium truncate">Período: {dataMensal}</p>
+            <p className="text-white text-white font-medium truncate">Período: {dataMensal}</p>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function Vendas() {
                       <MdSell size={22} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white font-bold text-base truncate">{formatDate(venda.data_venda)}</p>
+                      <p className="text-white font-bold text-white truncate">{formatDate(venda.data_venda)}</p>
                       <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mt-1">
                         {venda.loja?.nome_fantasia ?? `Registro #${index + 1}`}
                       </p>

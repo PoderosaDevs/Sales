@@ -58,7 +58,7 @@ export function Products({ produtos, isLoading, cartItems, onAddProduct, onRemov
           </div>
 
           <div className="p-3 md:p-4 flex-1 flex flex-col">
-            <h2 className="text-white font-bold text-sm md:text-base leading-tight mb-4 line-clamp-2 h-10 group-hover:text-emerald-400 transition-colors">
+            <h2 className="text-white font-bold text-sm md:text-white leading-tight mb-4 line-clamp-2 h-10 group-hover:text-emerald-400 transition-colors">
               {produto.nome}
             </h2>
 

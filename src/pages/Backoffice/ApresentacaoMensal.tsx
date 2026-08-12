@@ -92,7 +92,7 @@ export function ApresentacaoMensal({ onClose }: { onClose: () => void }) {
           <div className="max-w-3xl mx-auto px-6 md:px-10 py-10 md:py-16 space-y-10">
             <div>
               <h1 className="text-3xl md:text-4xl font-black text-white">Configurar apresentação</h1>
-              <p className="text-gray-400 text-base mt-2">Escolha o período e o que você quer mostrar.</p>
+              <p className="text-gray-400 text-white mt-2">Escolha o período e o que você quer mostrar.</p>
             </div>
 
             <div className="space-y-4">
@@ -180,15 +180,15 @@ export function ApresentacaoMensal({ onClose }: { onClose: () => void }) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div className="text-center p-8 rounded-3xl bg-white/[0.03] border border-white/10">
                       <p className="text-5xl md:text-6xl font-black text-emerald-500">{totalPontos}</p>
-                      <p className="text-gray-300 text-base font-bold uppercase tracking-widest mt-3">Pontos no período</p>
+                      <p className="text-gray-300 text-white font-bold uppercase tracking-widest mt-3">Pontos no período</p>
                     </div>
                     <div className="text-center p-8 rounded-3xl bg-white/[0.03] border border-white/10">
                       <p className="text-5xl md:text-6xl font-black text-white">{vendedorasAtivas}</p>
-                      <p className="text-gray-300 text-base font-bold uppercase tracking-widest mt-3">Vendedoras ativas</p>
+                      <p className="text-gray-300 text-white font-bold uppercase tracking-widest mt-3">Vendedoras ativas</p>
                     </div>
                     <div className="text-center p-8 rounded-3xl bg-white/[0.03] border border-white/10">
                       <p className="text-5xl md:text-6xl font-black text-white">{rankingLojas?.length ?? 0}</p>
-                      <p className="text-gray-300 text-base font-bold uppercase tracking-widest mt-3">Lojas no período</p>
+                      <p className="text-gray-300 text-white font-bold uppercase tracking-widest mt-3">Lojas no período</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -333,13 +333,13 @@ function BigRanking({
       </div>
 
       {!rows?.length ? (
-        <p className="text-center text-gray-500 text-base py-12">Sem dados no período selecionado.</p>
+        <p className="text-center text-gray-500 text-white py-12">Sem dados no período selecionado.</p>
       ) : (
         <div className="space-y-4">
           {rows.slice(0, 8).map((row, index) => (
             <div key={row.nome + index} className="flex items-center gap-5">
               <span
-                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl font-black text-base ${
+                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl font-black text-white ${
                   index === 0 ? "bg-emerald-500 text-[#0a0a0c]" : "bg-white/10 text-gray-300"
                 }`}
               >

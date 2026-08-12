@@ -31,7 +31,7 @@ export function Backoffice() {
               Painel de <span className="text-emerald-500 font-light">Gestão</span>
             </h1>
           </div>
-          <p className="text-gray-400 text-sm sm:text-base ml-5">Visão estratégica e análise de performance.</p>
+          <p className="text-gray-400 text-sm sm:text-white ml-5">Visão estratégica e análise de performance.</p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap self-start lg:self-center">
@@ -61,7 +61,7 @@ export function Backoffice() {
             <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
               <FaFilter size={20} />
             </div>
-            <h2 className="text-sm md:text-base font-black text-white uppercase tracking-[3px]">Módulos de Gerenciamento</h2>
+            <h2 className="text-sm font-black text-white uppercase tracking-[3px]">Módulos de Gerenciamento</h2>
           </header>
           <ManagerModules />
         </div>

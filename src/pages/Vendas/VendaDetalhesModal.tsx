@@ -22,7 +22,7 @@ export function VendaDetalhesModal({
         <p className="text-xs uppercase font-bold tracking-widest text-gray-500 mb-4">Produtos</p>
         <ul className="space-y-4">
           {venda.venda_detalhe.map((d) => (
-            <li key={d.id} className="flex justify-between items-center text-white text-sm sm:text-base gap-3">
+            <li key={d.id} className="flex justify-between items-center text-white text-sm sm:text-white gap-3">
               <span className="min-w-0 truncate">
                 {d.produto?.nome ?? `Produto #${d.produto_id}`}{" "}
                 <span className="text-gray-500 ml-2 text-sm font-medium">x{d.quantidade}</span>
