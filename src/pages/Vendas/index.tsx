@@ -2,18 +2,26 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaCoins } from "react-icons/fa";
 import { MdSell } from "react-icons/md";
-import { IoBagHandleSharp, IoChevronForwardOutline } from "react-icons/io5";
+import { IoBagHandleSharp, IoChevronBackOutline, IoChevronForwardOutline } from "react-icons/io5";
 import { useAuth } from "../../context/AuthContext";
 import { useVendasByUsuario } from "../../hooks/useVendas";
-import { currentDataMensal, formatDate } from "../../lib/date";
+import {
+  addMonthsToDataMensal,
+  currentDataMensal,
+  formatDataMensalLabel,
+  formatDate,
+  isCurrentOrFutureDataMensal,
+} from "../../lib/date";
 import { Loader, EmptyState } from "../../components/Loader";
 import { VendaDetalhesModal } from "./VendaDetalhesModal";
 import { Venda } from "../../types";
 
 export function Vendas() {
   const [selectedVenda, setSelectedVenda] = useState<Venda | null>(null);
+  const [dataMensal, setDataMensal] = useState(currentDataMensal());
   const { usuario } = useAuth();
-  const dataMensal = currentDataMensal();
+
+  const podeAvancarMes = !isCurrentOrFutureDataMensal(dataMensal);
 
   const { data: vendas, isLoading } = useVendasByUsuario(usuario?.id, dataMensal);
 
@@ -30,12 +38,37 @@ export function Vendas() {
           <p className="text-gray-400 text-sm md:text-white ml-5">Consulte seu histórico de performance.</p>
         </div>
 
-        <Link
-          to="/catalog"
-          className="flex items-center justify-center gap-3 px-6 md:px-10 py-4 md:py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
-        >
-          Nova Venda <IoBagHandleSharp size={20} />
-        </Link>
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+          <div className="flex items-center gap-1 bg-[#0d0d10] border border-white/5 rounded-2xl px-2 py-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setDataMensal((prev) => addMonthsToDataMensal(prev, -1))}
+              className="p-2 sm:p-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Mês anterior"
+            >
+              <IoChevronBackOutline size={18} />
+            </button>
+            <span className="min-w-[100px] sm:min-w-[150px] text-center text-xs sm:text-sm font-black text-white uppercase tracking-wider px-1">
+              {formatDataMensalLabel(dataMensal)}
+            </span>
+            <button
+              type="button"
+              onClick={() => podeAvancarMes && setDataMensal((prev) => addMonthsToDataMensal(prev, 1))}
+              disabled={!podeAvancarMes}
+              className="p-2 sm:p-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400"
+              aria-label="Próximo mês"
+            >
+              <IoChevronForwardOutline size={18} />
+            </button>
+          </div>
+
+          <Link
+            to="/catalog"
+            className="flex items-center justify-center gap-3 px-6 md:px-10 py-4 md:py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[2px] shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
+          >
+            Nova Venda <IoBagHandleSharp size={20} />
+          </Link>
+        </div>
       </div>
 
       <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
@@ -45,7 +78,7 @@ export function Vendas() {
           </div>
           <div className="min-w-0">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-[2px]">Relatório mensal</h2>
-            <p className="text-white text-white font-medium truncate">Período: {dataMensal}</p>
+            <p className="text-white text-white font-medium truncate">Período: {formatDataMensalLabel(dataMensal)}</p>
           </div>
         </div>
 
