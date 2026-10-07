@@ -59,7 +59,7 @@ export function EmployeeInsights() {
 
           <div className="bg-[#0d0d10] border border-white/5 rounded-[32px] p-6 md:p-8 shadow-2xl">
             <h2 className="text-xs font-black text-gray-500 uppercase tracking-[3px] mb-6">Evolução no período</h2>
-            <TimelineChart data={timeline} isLoading={timelineLoading} />
+            <TimelineChart data={timeline} isLoading={timelineLoading} showLojas />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
