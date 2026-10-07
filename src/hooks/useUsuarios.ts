@@ -38,6 +38,7 @@ export function useUsuarioInsights(id?: number, startDate?: string, endDate?: st
 
 export interface TimelinePonto {
   data: string;
+  lojas?: string[];
   categories: { title: string; value: number }[];
 }
 
