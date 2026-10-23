@@ -1,20 +1,27 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TimelinePonto } from "../../hooks/useUsuarios";
+import { TimelinePonto, TimelineParcial } from "../../hooks/useUsuarios";
 import { Loader, EmptyState } from "../../components/Loader";
-import { FaChartLine, FaStore } from "react-icons/fa";
+import { FaChartLine, FaStore, FaUserTie } from "react-icons/fa";
+
+type Detalhe = "lojas" | "vendedores";
 
 interface Props {
   data?: TimelinePonto[];
   isLoading: boolean;
-  showLojas?: boolean;
+  detalhe?: Detalhe;
 }
 
-export function TimelineChart({ data, isLoading, showLojas = false }: Props) {
+const detalheConfig: Record<Detalhe, { titulo: string; icon: JSX.Element }> = {
+  lojas: { titulo: "Lojas", icon: <FaStore size={10} /> },
+  vendedores: { titulo: "Vendedoras", icon: <FaUserTie size={10} /> },
+};
+
+export function TimelineChart({ data, isLoading, detalhe }: Props) {
   if (isLoading) return <Loader label="Carregando série histórica..." />;
   if (!data?.length) return <EmptyState title="Sem dados no período" icon={<FaChartLine size={40} className="text-gray-600" />} />;
 
   const chartData = data.map((ponto) => {
-    const row: Record<string, string | number> = { data: ponto.data, lojas: (ponto.lojas ?? []).join(", ") };
+    const row: Record<string, unknown> = { data: ponto.data, detalhe: detalhe ? ponto[detalhe] ?? [] : [] };
     ponto.categories.forEach((c) => (row[c.title] = c.value));
     return row;
   });
@@ -28,20 +35,32 @@ export function TimelineChart({ data, isLoading, showLojas = false }: Props) {
         <Tooltip
           content={({ active, payload, label }) => {
             if (!active || !payload?.length) return null;
-            const lojas = String(payload[0].payload.lojas ?? "");
+            const itens = (payload[0].payload.detalhe ?? []) as TimelineParcial[];
             return (
-              <div style={{ background: "#0d0d10", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12, padding: "10px 12px" }}>
+              <div style={{ background: "#0d0d10", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12, padding: "10px 12px", maxWidth: 280 }}>
                 <p className="text-white font-bold mb-1">{label}</p>
-                {showLojas && lojas && (
-                  <p className="flex items-center gap-1.5 text-gray-400 mb-2">
-                    <FaStore size={10} /> {lojas}
-                  </p>
-                )}
                 {payload.map((p) => (
                   <p key={String(p.dataKey)} style={{ color: p.color }}>
                     {p.name}: {p.value}
                   </p>
                 ))}
+                {detalhe && itens.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
+                    <p className="flex items-center gap-1.5 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                      {detalheConfig[detalhe].icon} {detalheConfig[detalhe].titulo}
+                    </p>
+                    {itens.map((item) => (
+                      <p key={item.id} className="flex items-center justify-between gap-4 text-gray-300">
+                        <span className="truncate">{item.nome}</span>
+                        <span className="flex-shrink-0">
+                          <span style={{ color: "#10b981" }}>{item.tratamentos}</span>
+                          <span className="text-gray-600"> / </span>
+                          <span style={{ color: "#f59e0b" }}>{item.coloracoes}</span>
+                        </span>
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           }}

@@ -36,9 +36,17 @@ export function useUsuarioInsights(id?: number, startDate?: string, endDate?: st
   });
 }
 
+export interface TimelineParcial {
+  id: number;
+  nome: string;
+  tratamentos: number;
+  coloracoes: number;
+}
+
 export interface TimelinePonto {
   data: string;
-  lojas?: string[];
+  lojas?: TimelineParcial[];
+  vendedores?: TimelineParcial[];
   categories: { title: string; value: number }[];
 }
 
